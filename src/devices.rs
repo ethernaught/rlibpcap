@@ -2,7 +2,7 @@ use std::{fs, io};
 use std::net::{IpAddr, Ipv4Addr};
 use crate::packet::inter::interfaces::Interfaces;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Device {
     name: String,
     description: Option<String>,
