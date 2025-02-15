@@ -6,6 +6,7 @@ PCAP is a rust based library that uses no dependancies or libraries to read and 
 OS Support
 -----
 | OS | Supported |
+| --- | --- |
 | Linux | COMPLETE |
 | MacOS | Partial |
 | Windows | Partial |
