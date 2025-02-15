@@ -1,6 +1,3 @@
-extern crate core;
-
-pub mod capture;
 pub mod devices;
 pub mod packet;
 
@@ -29,29 +26,6 @@ pub mod packet;
     }
 ]
 */
-
-#[cfg(test)]
-mod tests {
-    use core::asserting::Capture;
-    use crate::devices::Device;
-
-    #[test]
-    fn it_works() {
-        let devices = Device::list().unwrap();
-        println!("{:?}", devices);
-
-        let device = devices.into_iter().find(|d| d.get_name().contains("Ethernet adapter Ethernet:")).unwrap();
-        println!("{:?}", device);
-
-        let mut cap = Capture::from_device(device).unwrap();
-        cap.open().unwrap();
-
-
-        while let Ok(packet) = cap.next_packet() {
-            println!("{:x?}", packet);
-        }
-    }
-}
 
 #[cfg(target_os = "linux")]
 pub mod capture {
@@ -155,6 +129,29 @@ pub mod capture {
             let ret: i64;
             core::arch::asm!("syscall", in("rax") num, in("rdi") a1, in("rsi") a2, in("rdx") a3, in("r10") a4, in("r8") a5, lateout("rax") ret);
             ret
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::capture::Capture;
+    use crate::devices::Device;
+
+    #[test]
+    fn it_works() {
+        let devices = Device::list().unwrap();
+        println!("{:?}", devices);
+
+        let device = devices.into_iter().find(|d| d.get_name().contains("Ethernet adapter Ethernet:")).unwrap();
+        println!("{:?}", device);
+
+        let mut cap = Capture::from_device(device).unwrap();
+        cap.open().unwrap();
+
+
+        while let Ok(packet) = cap.next_packet() {
+            println!("{:x?}", packet);
         }
     }
 }
