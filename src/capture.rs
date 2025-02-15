@@ -1,5 +1,6 @@
 use std::io;
 use std::os::fd::RawFd;
+use crate::devices::Device;
 
 const AF_PACKET: i64 = 17;
 const SOCK_RAW: i64 = 3;
@@ -10,13 +11,13 @@ const SO_BINDTODEVICE: i64 = 25;
 #[derive(Debug)]
 pub struct Capture {
     fd: RawFd,
-    if_name: String,
+    device: Device
 }
 
 #[cfg(target_os = "linux")]
 impl Capture {
 
-    pub fn from_device(if_name: &str) -> io::Result<Self> {
+    pub fn from_device(device: Device) -> io::Result<Self> {
         let fd = unsafe {
             Self::syscall(41, AF_PACKET, SOCK_RAW, ETH_P_ALL.to_be() as i64, 0, 0)
         };
@@ -27,7 +28,7 @@ impl Capture {
 
         Ok(Self {
             fd: fd as RawFd,
-            if_name: if_name.to_string()
+            device
         })
     }
 
@@ -37,15 +38,13 @@ impl Capture {
         }
 
         let mut if_name_bytes = [0u8; 16];
-        let bytes = self.if_name.as_bytes();
-        if bytes.len() >= if_name_bytes.len() {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "Interface name too long",
-            ));
-        }
+        if let bytes = self.device.get_name().as_bytes() {
+            if bytes.len() >= if_name_bytes.len() {
+                return Err(io::Error::new(io::ErrorKind::InvalidInput, "Interface name too long"));
+            }
 
-        if_name_bytes[..bytes.len()].copy_from_slice(bytes);
+            if_name_bytes[..bytes.len()].copy_from_slice(bytes);
+        }
 
         let res = unsafe {
             Self::syscall(
@@ -66,12 +65,12 @@ impl Capture {
     }
 
     pub fn set_immediate_mode(&self) -> io::Result<()> {
-        println!("Setting immediate mode for interface {}", self.if_name);
+        println!("Setting immediate mode for interface {}", self.device.get_name());
         Ok(())
     }
 
     pub fn set_promiscuous_mode(&self) -> io::Result<()> {
-        println!("Setting promiscuous mode for interface {}", self.if_name);
+        println!("Setting promiscuous mode for interface {}", self.device.get_name());
         Ok(())
     }
 
@@ -103,8 +102,6 @@ impl Capture {
         ret
     }
 }
-
-#[cfg(target_os = "linux")]
 
 #[derive(Debug)]
 pub struct Packet {
