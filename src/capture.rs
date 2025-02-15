@@ -75,14 +75,12 @@ impl Capture {
         Ok(())
     }
 
-    pub fn set_immediate_mode(&self, immediate: bool) -> io::Result<()> {
+    pub fn set_immediate_mode(&self, immediate: bool) {
         println!("Setting immediate mode for interface {}", self.device.get_name());
-        Ok(())
     }
 
-    pub fn set_promiscuous_mode(&self, promiscuous: bool) -> io::Result<()> {
+    pub fn set_promiscuous_mode(&self, promiscuous: bool) {
         println!("Setting promiscuous mode for interface {}", self.device.get_name());
-        Ok(())
     }
 
     pub fn next_packet(&mut self) -> io::Result<Packet> {
@@ -198,23 +196,3 @@ fn decode_packet(interface: Interfaces, data: &[u8], len: u32) -> Packet {
 
     frame
 }
-
-/*
-#[derive(Debug)]
-pub struct Packet {
-    pub data: Vec<u8>
-}
-
-impl Packet {
-
-    pub fn new(data: Vec<u8>) -> Self {
-        Self {
-            data
-        }
-    }
-
-    pub fn get_data(&self) -> &Vec<u8> {
-        &self.data
-    }
-}
-*/
