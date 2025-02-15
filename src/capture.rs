@@ -64,12 +64,12 @@ impl Capture {
         Ok(())
     }
 
-    pub fn set_immediate_mode(&self) -> io::Result<()> {
+    pub fn set_immediate_mode(&self, immediate: bool) -> io::Result<()> {
         println!("Setting immediate mode for interface {}", self.device.get_name());
         Ok(())
     }
 
-    pub fn set_promiscuous_mode(&self) -> io::Result<()> {
+    pub fn set_promiscuous_mode(&self, promiscuous: bool) -> io::Result<()> {
         println!("Setting promiscuous mode for interface {}", self.device.get_name());
         Ok(())
     }
