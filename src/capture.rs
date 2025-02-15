@@ -1,5 +1,4 @@
 use std::io;
-use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
 use crate::packet::inter::interfaces::Interfaces;
@@ -19,11 +18,16 @@ const ETH_P_ALL: u16 = 0x0003;
 const SOL_SOCKET: i64 = 1;
 const SO_BINDTODEVICE: i64 = 25;
 
+
+#[cfg(target_os = "linux")]
 #[derive(Debug)]
 pub struct Capture {
     fd: RawFd,
     device: Device
 }
+
+#[cfg(target_os = "linux")]
+use std::os::fd::RawFd;
 
 #[cfg(target_os = "linux")]
 impl Capture {

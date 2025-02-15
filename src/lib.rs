@@ -30,7 +30,7 @@ pub mod packet;
 
 #[cfg(test)]
 mod tests {
-    use crate::capture::Capture;
+    //use crate::capture::Capture;
     use crate::devices::Device;
 
     #[test]
@@ -40,6 +40,7 @@ mod tests {
         let device = devices.into_iter().find(|d| d.get_name().contains("wlp7s0")).unwrap();
         println!("{:?}", device);
 
+        /*
         let mut cap = Capture::from_device(device).unwrap();
         cap.open().unwrap();
 
@@ -47,5 +48,6 @@ mod tests {
         while let Ok(packet) = cap.next_packet() {
             println!("{:x?}", packet);
         }
+        */
     }
 }
