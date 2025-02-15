@@ -1,10 +1,12 @@
 use std::{fs, io};
 use std::net::{IpAddr, Ipv4Addr};
+use crate::packet::inter::interfaces::Interfaces;
 
 #[derive(Debug)]
 pub struct Device {
     name: String,
     description: Option<String>,
+    interface: Interfaces
     //addresses: Vec<Address>,
     //flags: DeviceFlags
 }
@@ -71,6 +73,7 @@ impl Device {
             devices.push(Self {
                 name: interface_name,
                 description: Some(mac_address),
+                interface: Interfaces::Ethernet,
                 //addresses,
                 //flags,
             });
@@ -119,6 +122,7 @@ impl Device {
             devices.push(Device {
                 name: iface.to_string(),
                 description: None,
+                interface: Interfaces::Ethernet,
                 /*
                 addresses,
                 flags: DeviceFlags {
@@ -165,6 +169,7 @@ impl Device {
                 devices.push(Device {
                     name: iface_name.to_string(),
                     description: None,
+                    interface: Interfaces::Ethernet,
                     /*
                     addresses,
                     flags: DeviceFlags {
@@ -185,5 +190,9 @@ impl Device {
 
     pub fn get_description(&self) -> Option<String> {
         self.description.clone()
+    }
+
+    pub fn get_interface(&self) -> Interfaces {
+        self.interface
     }
 }

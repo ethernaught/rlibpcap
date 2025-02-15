@@ -1,5 +1,6 @@
 pub mod capture;
 pub mod devices;
+pub mod packet;
 
 /*
 [
@@ -44,8 +45,7 @@ mod tests {
 
 
         while let Ok(packet) = cap.next_packet() {
-            println!("Received packet: {} bytes", packet.data().len());
-            println!("{:x?}", packet.data());
+            println!("{:x?}", packet);
         }
     }
 }
