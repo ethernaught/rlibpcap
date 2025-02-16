@@ -53,10 +53,13 @@ impl Packet {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();//vec![0u8; self.length as usize];
+        let mut buf = vec![0u8; self.length as usize];
+        let mut off = 0;
 
         for layer in &self.layers {
-            buf.extend_from_slice(&layer.to_bytes());
+            let encoded_layer = layer.to_bytes();
+            buf.splice(off..off + layer.len(), encoded_layer);
+            off += layer.len();
         }
 
         buf
