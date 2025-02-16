@@ -11,3 +11,10 @@ pub trait Layer: Send + Debug {
 
     fn dyn_clone(&self) -> Box<dyn Layer>;
 }
+
+impl Clone for Box<dyn Layer> {
+
+    fn clone(&self) -> Box<dyn Layer> {
+        self.dyn_clone()
+    }
+}

@@ -9,7 +9,7 @@ use crate::packet::layers::layer_2::ethernet::ipv6_layer::IPv6Layer;
 use crate::packet::layers::layer_3::ip::tcp_layer::TcpLayer;
 use crate::packet::layers::layer_3::ip::udp_layer::UdpLayer;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Packet {
     interface: Interfaces,
     layers: Vec<Box<dyn Layer>>,
