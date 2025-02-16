@@ -98,7 +98,19 @@ impl IPv4Layer {
 impl Layer for IPv4Layer {
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; 20];
+        let mut buf = vec![0; self.len()];
+
+        buf[0] = (self.version << 4) | (self.ihl & 0x0F);
+        buf[1] = self.tos;
+        buf.splice(2..4, self.total_length.to_be_bytes());
+        buf.splice(4..6, self.identification.to_be_bytes());
+        buf[6] = (self.flags << 5) | ((self.fragment_offset >> 8) as u8 & 0x1F);
+        buf[7] = (self.fragment_offset & 0xFF) as u8;
+        buf[8] = self.ttl;
+        buf[9] = self.protocol.get_code();
+        buf.splice(10..12, self.checksum.to_be_bytes());
+        buf.splice(12..16, self.source_ip.octets());
+        buf.splice(16..20, self.destination_ip.octets());
 
         buf
     }

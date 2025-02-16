@@ -74,7 +74,18 @@ impl TcpLayer {
 impl Layer for TcpLayer {
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; 20];
+        let mut buf = vec![0; self.len()];
+
+        buf.splice(0..2, self.source_port.to_be_bytes());
+        buf.splice(2..4, self.destination_port.to_be_bytes());
+        buf.splice(4..8, self.sequence_number.to_be_bytes());
+        buf.splice(8..12, self.acknowledgment_number.to_be_bytes());
+        buf[12] = ((self.data_offset / 4) << 4) | ((self.flags >> 8) as u8 & 0x0F);
+
+        buf[13] = (self.flags & 0xFF) as u8;
+        buf.splice(14..16, self.window_size.to_be_bytes());
+        buf.splice(16..18, self.checksum.to_be_bytes());
+        buf.splice(18..20, self.urgent_pointer.to_be_bytes());
 
         buf
     }

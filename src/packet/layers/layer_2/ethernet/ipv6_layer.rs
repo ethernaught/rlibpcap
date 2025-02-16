@@ -70,7 +70,17 @@ impl IPv6Layer {
 impl Layer for IPv6Layer {
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; 40];
+        let mut buf = vec![0; self.len()];
+
+        buf[0] = (self.version << 4) | ((self.traffic_class >> 4) & 0x0F);
+        buf[1] = ((self.traffic_class & 0x0F) << 4) | ((self.flow_label >> 16) as u8 & 0x0F);
+        buf[2] = ((self.flow_label >> 8) & 0xFF) as u8;
+        buf[3] = (self.flow_label & 0xFF) as u8;
+        buf.splice(4..6, self.payload_length.to_be_bytes());
+        buf[6] = self.next_header.get_code();
+        buf[7] = self.hop_limit;
+        buf.splice(8..24, self.source_ip.octets());
+        buf.splice(24..40, self.destination_ip.octets());
 
         buf
     }

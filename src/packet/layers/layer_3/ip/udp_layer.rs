@@ -44,7 +44,12 @@ impl UdpLayer {
 impl Layer for UdpLayer {
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; 14];
+        let mut buf = vec![0; self.len()];
+
+        buf.splice(0..2, self.source_port.to_be_bytes());
+        buf.splice(2..4, self.destination_port.to_be_bytes());
+        buf.splice(4..6, self.length.to_be_bytes());
+        buf.splice(6..8, self.checksum.to_be_bytes());
 
         buf
     }
