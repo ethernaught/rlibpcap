@@ -52,6 +52,16 @@ impl Packet {
         self.frame_time
     }
 
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = Vec::new();//vec![0u8; self.length as usize];
+
+        for layer in &self.layers {
+            buf.extend_from_slice(&layer.to_bytes());
+        }
+
+        buf
+    }
+
     pub fn len(&self) -> u32 {
         self.length
     }

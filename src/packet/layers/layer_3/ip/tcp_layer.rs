@@ -73,6 +73,12 @@ impl TcpLayer {
 
 impl Layer for TcpLayer {
 
+    fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = vec![0; 20];
+
+        buf
+    }
+
     fn len(&self) -> usize {
         20
     }

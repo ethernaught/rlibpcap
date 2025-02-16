@@ -43,6 +43,12 @@ impl UdpLayer {
 
 impl Layer for UdpLayer {
 
+    fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = vec![0; 14];
+
+        buf
+    }
+
     fn len(&self) -> usize {
         14
     }

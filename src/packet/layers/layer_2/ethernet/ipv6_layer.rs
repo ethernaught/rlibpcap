@@ -69,6 +69,12 @@ impl IPv6Layer {
 
 impl Layer for IPv6Layer {
 
+    fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = vec![0; 40];
+
+        buf
+    }
+
     fn len(&self) -> usize {
         40
     }

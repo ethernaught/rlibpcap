@@ -11,7 +11,7 @@ impl EthernetAddress {
         }
     }
 
-    pub fn as_bytes(&self) -> [u8; 6] {
+    pub fn to_bytes(&self) -> [u8; 6] {
         self.address
     }
 

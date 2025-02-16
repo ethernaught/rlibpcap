@@ -3,6 +3,8 @@ use std::fmt::Debug;
 
 pub trait Layer: Send + Debug {
 
+    fn to_bytes(&self) -> Vec<u8>;
+
     fn len(&self) -> usize;
 
     fn as_any(&self) -> &dyn Any;

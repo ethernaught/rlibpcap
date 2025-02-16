@@ -139,7 +139,7 @@ mod tests {
     use crate::devices::Device;
 
     #[test]
-    fn it_works() {
+    fn test() {
         let devices = Device::list().unwrap();
         println!("{:?}", devices);
 

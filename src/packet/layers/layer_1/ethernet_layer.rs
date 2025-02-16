@@ -54,6 +54,15 @@ impl EthernetLayer {
 
 impl Layer for EthernetLayer {
 
+    fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = vec![0; 14];
+        buf.splice(0..6, self.destination.to_bytes());
+        buf.splice(6..12, self.source.to_bytes());
+        buf.splice(12..14, self._type.get_code().to_be_bytes());
+
+        buf
+    }
+
     fn len(&self) -> usize {
         14
     }

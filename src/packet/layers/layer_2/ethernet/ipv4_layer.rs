@@ -97,6 +97,12 @@ impl IPv4Layer {
 
 impl Layer for IPv4Layer {
 
+    fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = vec![0; 20];
+
+        buf
+    }
+
     fn len(&self) -> usize {
         20
     }
