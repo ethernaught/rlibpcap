@@ -70,13 +70,13 @@ impl Packet {
     }
 }
 
-pub fn decode_packet(interface: Interfaces, data: &[u8], len: u32) -> Packet {
+pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .expect("Time went backwards")
         .as_millis();
 
-    let mut frame = Packet::new(interface, now, len);
+    let mut frame = Packet::new(interface, now, data.len() as u32);
 
     match frame.get_interface() {
         Interfaces::Ethernet => {

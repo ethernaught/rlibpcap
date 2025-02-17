@@ -1,5 +1,4 @@
 use std::{fs, io};
-use std::net::{IpAddr, Ipv4Addr};
 use crate::packet::inter::interfaces::Interfaces;
 
 #[derive(Clone, Debug)]
