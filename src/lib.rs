@@ -118,7 +118,7 @@ pub mod capture {
             } as u32;
 
             if len > 0 {
-                Ok(decode_packet(self.device.get_interface(), &buffer[..len as usize], len))
+                Ok(decode_packet(self.device.get_interface(), &buffer[..len as usize]))
 
             } else {
                 Err(io::Error::last_os_error())
