@@ -48,7 +48,7 @@ pub mod capture {
 
     impl Capture {
 
-        pub fn from_device(device: Device) -> io::Result<Self> {
+        pub fn from_device(device: &Device) -> io::Result<Self> {
             let fd = unsafe {
                 Self::syscall(41, AF_PACKET, SOCK_RAW, ETH_P_ALL.to_be() as i64, 0, 0)
             };
@@ -59,7 +59,7 @@ pub mod capture {
 
             Ok(Self {
                 fd: fd as RawFd,
-                device
+                device: device.clone()
             })
         }
 
