@@ -146,7 +146,7 @@ mod tests {
         let device = devices.into_iter().find(|d| d.get_name().contains("Ethernet adapter Ethernet:")).unwrap();
         println!("{:?}", device);
 
-        let mut cap = Capture::from_device(device).unwrap();
+        let mut cap = Capture::from_device(&device).unwrap();
         cap.open().unwrap();
 
 
