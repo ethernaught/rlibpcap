@@ -91,6 +91,7 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
                     off += ipv4_layer.len();
 
                     match ipv4_layer.get_protocol() {
+                        Protocols::HopByHop => {}
                         Protocols::Icmp => {}
                         Protocols::Igmp => {}
                         Protocols::Tcp => {
@@ -121,6 +122,7 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
                     off += ipv6_layer.len();
 
                     match ipv6_layer.get_next_header() {
+                        Protocols::HopByHop => {}
                         Protocols::Icmp => {}
                         Protocols::Igmp => {}
                         Protocols::Tcp => {
