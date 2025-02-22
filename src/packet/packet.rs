@@ -3,6 +3,7 @@ use crate::packet::inter::interfaces::Interfaces;
 use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::layer_1::ethernet_layer::EthernetLayer;
 use crate::packet::layers::layer_1::inter::types::Types;
+use crate::packet::layers::layer_1_5::ethernet::arp_extension::ArpLayer;
 use crate::packet::layers::layer_2::ethernet::inter::protocols::Protocols;
 use crate::packet::layers::layer_2::ethernet::ipv4_layer::Ipv4Layer;
 use crate::packet::layers::layer_2::ethernet::ipv6_layer::Ipv6Layer;
@@ -116,7 +117,7 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
 
                 }
                 Types::Arp => {
-                    let arp_layer = Ipv6Layer::from_bytes(&data[off..]).expect("Failed to parse ARP frame");
+                    let arp_layer = ArpLayer::from_bytes(&data[off..]).expect("Failed to parse ARP frame");
                     frame.add_layer(arp_layer.dyn_clone());
                     off += arp_layer.len();
                 }
