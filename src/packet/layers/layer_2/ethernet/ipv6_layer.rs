@@ -4,7 +4,7 @@ use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::layer_2::ethernet::inter::protocols::Protocols;
 
 #[derive(Clone, Debug)]
-pub struct IPv6Layer {
+pub struct Ipv6Layer {
     version: u8,
     traffic_class: u8,
     flow_label: u32,
@@ -15,7 +15,7 @@ pub struct IPv6Layer {
     destination_ip: Ipv6Addr
 }
 
-impl IPv6Layer {
+impl Ipv6Layer {
 
     pub fn from_bytes(buf: &[u8]) -> Option<Self> {
         if buf.len() < 40 {
@@ -67,7 +67,7 @@ impl IPv6Layer {
     }
 }
 
-impl Layer for IPv6Layer {
+impl Layer for Ipv6Layer {
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];

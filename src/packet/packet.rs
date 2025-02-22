@@ -4,8 +4,8 @@ use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::layer_1::ethernet_layer::EthernetLayer;
 use crate::packet::layers::layer_1::inter::types::Types;
 use crate::packet::layers::layer_2::ethernet::inter::protocols::Protocols;
-use crate::packet::layers::layer_2::ethernet::ipv4_layer::IPv4Layer;
-use crate::packet::layers::layer_2::ethernet::ipv6_layer::IPv6Layer;
+use crate::packet::layers::layer_2::ethernet::ipv4_layer::Ipv4Layer;
+use crate::packet::layers::layer_2::ethernet::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::layer_3::ip::tcp_layer::TcpLayer;
 use crate::packet::layers::layer_3::ip::udp_layer::UdpLayer;
 
@@ -86,7 +86,7 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
 
             match ethernet_layer.get_type() {
                 Types::IPv4 => {
-                    let ipv4_layer = IPv4Layer::from_bytes(&data[off..]).expect("Failed to parse IPv4 frame");
+                    let ipv4_layer = Ipv4Layer::from_bytes(&data[off..]).expect("Failed to parse IPv4 frame");
                     frame.add_layer(ipv4_layer.dyn_clone());
                     off += ipv4_layer.len();
 
@@ -115,9 +115,13 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
 
 
                 }
-                Types::Arp => {}
+                Types::Arp => {
+                    let arp_layer = Ipv6Layer::from_bytes(&data[off..]).expect("Failed to parse ARP frame");
+                    frame.add_layer(arp_layer.dyn_clone());
+                    off += arp_layer.len();
+                }
                 Types::IPv6 => {
-                    let ipv6_layer = IPv6Layer::from_bytes(&data[off..]).expect("Failed to parse IPv6 frame");
+                    let ipv6_layer = Ipv6Layer::from_bytes(&data[off..]).expect("Failed to parse IPv6 frame");
                     frame.add_layer(ipv6_layer.dyn_clone());
                     off += ipv6_layer.len();
 

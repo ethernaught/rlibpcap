@@ -18,33 +18,19 @@ impl EthernetLayer {
             return None;
         }
 
-        //let _type = Types::get_type_from_code(u16::from_be_bytes([buf[12], buf[13]])).unwrap();
-
-        /*
-        let data = match _type {
-            Types::Arp => {
-                buf[14..].to_vec()
-            }
-            Types::Broadcast => {
-                buf[14..].to_vec()
-            }
-            _ => Vec::new()
-        };
-        */
-
         Some(Self {
-            destination: EthernetAddress::new([buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]]),
-            source: EthernetAddress::new([buf[6], buf[7], buf[8], buf[9], buf[10], buf[11]]),
+            destination: EthernetAddress::new(buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]),
+            source: EthernetAddress::new(buf[6], buf[7], buf[8], buf[9], buf[10], buf[11]),
             _type: Types::get_type_from_code(u16::from_be_bytes([buf[12], buf[13]])).unwrap()
         })
     }
 
-    pub fn get_destination(&self) -> &EthernetAddress {
-        &self.destination
+    pub fn get_destination(&self) -> EthernetAddress {
+        self.destination
     }
 
-    pub fn get_source(&self) -> &EthernetAddress {
-        &self.source
+    pub fn get_source(&self) -> EthernetAddress {
+        self.source
     }
 
     pub fn get_type(&self) -> Types {

@@ -4,7 +4,7 @@ use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::layer_2::ethernet::inter::protocols::Protocols;
 
 #[derive(Clone, Debug)]
-pub struct IPv4Layer {
+pub struct Ipv4Layer {
     version: u8,
     ihl: u8,
     tos: u8,
@@ -19,7 +19,7 @@ pub struct IPv4Layer {
     destination_ip: Ipv4Addr
 }
 
-impl IPv4Layer {
+impl Ipv4Layer {
 
     pub fn from_bytes(buf: &[u8]) -> Option<Self> {
         if buf.len() < 20 {
@@ -95,7 +95,7 @@ impl IPv4Layer {
     }
 }
 
-impl Layer for IPv4Layer {
+impl Layer for Ipv4Layer {
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];

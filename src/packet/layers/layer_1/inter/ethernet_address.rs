@@ -1,13 +1,13 @@
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct EthernetAddress {
     address: [u8; 6]
 }
 
 impl EthernetAddress {
 
-    pub fn new(address: [u8; 6]) -> EthernetAddress {
+    pub fn new(a: u8, b: u8, c: u8, d: u8, e: u8, f: u8) -> EthernetAddress {
         Self {
-            address
+            address: [a, b, c, d, e, f]
         }
     }
 
