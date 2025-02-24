@@ -5,11 +5,11 @@ use crate::packet::layers::layer_3::ethernet::inter::protocols::Protocols;
 
 #[derive(Clone, Debug)]
 pub struct Icmpv6Layer {
-    pub icmp_type: u8,
+    pub _type: u8,
     pub code: u8,
     pub checksum: u16,
     pub identifier: u16,
-    pub sequence: u16
+    pub sequence_number: u16
 }
 
 impl Icmpv6Layer {
@@ -20,16 +20,16 @@ impl Icmpv6Layer {
         }
 
         Some(Self {
-            icmp_type: buf[0],
+            _type: buf[0],
             code: buf[1],
             checksum: u16::from_be_bytes([buf[2], buf[3]]),
             identifier: u16::from_be_bytes([buf[4], buf[5]]),
-            sequence: u16::from_be_bytes([buf[6], buf[7]])
+            sequence_number: u16::from_be_bytes([buf[6], buf[7]])
         })
     }
 
-    pub fn get_icmp_type(&self) -> u8 {
-        self.icmp_type
+    pub fn get_type(&self) -> u8 {
+        self._type
     }
 
     pub fn get_code(&self) -> u8 {
@@ -44,8 +44,8 @@ impl Icmpv6Layer {
         self.identifier
     }
 
-    pub fn get_sequence(&self) -> u16 {
-        self.sequence
+    pub fn get_sequence_number(&self) -> u16 {
+        self.sequence_number
     }
 }
 
@@ -54,11 +54,11 @@ impl Layer for Icmpv6Layer {
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];
 
-        buf[0] = self.icmp_type;
+        buf[0] = self._type;
         buf[1] = self.code;
         buf.splice(2..4, self.checksum.to_be_bytes());
         buf.splice(4..6, self.identifier.to_be_bytes());
-        buf.splice(6..8, self.sequence.to_be_bytes());
+        buf.splice(6..8, self.sequence_number.to_be_bytes());
 
         buf
     }
