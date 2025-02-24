@@ -1,7 +1,7 @@
 use std::any::Any;
 use std::net::Ipv6Addr;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::layer_2::ethernet::inter::protocols::Protocols;
+use crate::packet::layers::layer_3::ethernet::inter::protocols::Protocols;
 
 #[derive(Clone, Debug)]
 pub struct Ipv6Layer {

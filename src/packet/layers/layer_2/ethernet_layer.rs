@@ -1,7 +1,7 @@
 use std::any::Any;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::layer_1::inter::ethernet_address::EthernetAddress;
-use crate::packet::layers::layer_1::inter::types::Types;
+use crate::packet::layers::layer_2::inter::ethernet_address::EthernetAddress;
+use crate::packet::layers::layer_2::inter::types::Types;
 
 #[derive(Clone, Debug)]
 pub struct EthernetLayer {

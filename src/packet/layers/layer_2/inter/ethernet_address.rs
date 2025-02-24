@@ -21,5 +21,8 @@ impl EthernetAddress {
             .collect::<Vec<String>>()
             .join(":")
     }
-}
 
+    pub fn equals(&self, other: &EthernetAddress) -> bool {
+        self.address == other.address
+    }
+}
