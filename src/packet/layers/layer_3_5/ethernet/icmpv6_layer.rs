@@ -27,6 +27,26 @@ impl Icmpv6Layer {
             sequence: u16::from_be_bytes([buf[6], buf[7]])
         })
     }
+
+    pub fn get_icmp_type(&self) -> u8 {
+        self.icmp_type
+    }
+
+    pub fn get_code(&self) -> u8 {
+        self.code
+    }
+
+    pub fn get_checksum(&self) -> u16 {
+        self.checksum
+    }
+
+    pub fn get_identifier(&self) -> u16 {
+        self.identifier
+    }
+
+    pub fn get_sequence(&self) -> u16 {
+        self.sequence
+    }
 }
 
 impl Layer for Icmpv6Layer {
