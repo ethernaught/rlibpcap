@@ -7,6 +7,8 @@ use crate::packet::layers::layer_2_5::ethernet::arp_extension::ArpLayer;
 use crate::packet::layers::layer_3::ethernet::inter::protocols::Protocols;
 use crate::packet::layers::layer_3::ethernet::ipv4_layer::Ipv4Layer;
 use crate::packet::layers::layer_3::ethernet::ipv6_layer::Ipv6Layer;
+use crate::packet::layers::layer_3_5::ethernet::icmp_layer::IcmpLayer;
+use crate::packet::layers::layer_3_5::ethernet::icmpv6_layer::Icmpv6Layer;
 use crate::packet::layers::layer_4::ip::tcp_layer::TcpLayer;
 use crate::packet::layers::layer_4::ip::udp_layer::UdpLayer;
 
@@ -93,7 +95,11 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
 
                     match ipv4_layer.get_protocol() {
                         Protocols::HopByHop => {}
-                        Protocols::Icmp => {}
+                        Protocols::Icmp => {
+                            let icmp_layer = IcmpLayer::from_bytes(&data[off..]).expect("Failed to parse ICMP frame");
+                            frame.add_layer(icmp_layer.dyn_clone());
+                            off += icmp_layer.len();
+                        }
                         Protocols::Igmp => {}
                         Protocols::Tcp => {
                             let tcp_layer = TcpLayer::from_bytes(&data[off..]).expect("Failed to parse TCP frame");
@@ -141,7 +147,11 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
                             off += udp_layer.len();
                         }
                         Protocols::Ipv6 => {}
-                        Protocols::Icmpv6 => {}
+                        Protocols::Icmpv6 => {
+                            let icmpv6_layer = Icmpv6Layer::from_bytes(&data[off..]).expect("Failed to parse ICMPv6 frame");
+                            frame.add_layer(icmpv6_layer.dyn_clone());
+                            off += icmpv6_layer.len();
+                        }
                         Protocols::Gre => {}
                         Protocols::Ospf => {}
                         Protocols::Sps => {}
