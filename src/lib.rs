@@ -40,6 +40,8 @@ pub mod capture {
     const ETH_P_ALL: u16 = 0x0003;
     const SOL_SOCKET: i64 = 1;
     const SO_BINDTODEVICE: i64 = 25;
+    pub const SYS_RECV_FROM: i32 = 45;
+    pub const SYS_SET_SOCK_OPT: i32 = 54;
 
     #[derive(Debug)]
     pub struct Capture {
@@ -80,7 +82,7 @@ pub mod capture {
 
             let res = unsafe {
                 Self::syscall(
-                    54,
+                    SYS_SET_SOCK_OPT,
                     self.fd as i64,
                     SOL_SOCKET,
                     SO_BINDTODEVICE,
@@ -109,7 +111,7 @@ pub mod capture {
 
             let len = unsafe {
                 Self::syscall(
-                    45,
+                    SYS_RECV_FROM,
                     self.fd as i64,
                     buffer.as_mut_ptr() as i64,
                     buffer.len() as i64,
@@ -126,9 +128,9 @@ pub mod capture {
             }
         }
 
-        unsafe fn syscall(num: i32, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {
+        unsafe fn syscall(number: i32, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {
             let ret: i64;
-            core::arch::asm!("syscall", in("rax") num, in("rdi") a1, in("rsi") a2, in("rdx") a3, in("r10") a4, in("r8") a5, lateout("rax") ret);
+            core::arch::asm!("syscall", in("rax") number, in("rdi") a1, in("rsi") a2, in("rdx") a3, in("r10") a4, in("r8") a5, lateout("rax") ret);
             ret
         }
     }
