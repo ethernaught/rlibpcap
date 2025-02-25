@@ -34,14 +34,14 @@ pub mod capture {
     use crate::devices::Device;
     use crate::packet::packet::{decode_packet, Packet};
 
-    pub const SYS_SOCKET: i32 = 41;
+    pub const SYS_SOCKET: i64 = 41;
     const AF_PACKET: i64 = 17;
     const SOCK_RAW: i64 = 3;
     const ETH_P_ALL: u16 = 0x0003;
     const SOL_SOCKET: i64 = 1;
     const SO_BINDTODEVICE: i64 = 25;
-    pub const SYS_RECV_FROM: i32 = 45;
-    pub const SYS_SET_SOCK_OPT: i32 = 54;
+    pub const SYS_RECV_FROM: i64 = 45;
+    pub const SYS_SET_SOCK_OPT: i64 = 54;
 
     #[derive(Debug)]
     pub struct Capture {
@@ -118,7 +118,7 @@ pub mod capture {
                     0,
                     0
                 )
-            } as u32;
+            };
 
             if len > 0 {
                 Ok(decode_packet(self.device.get_interface(), &buffer[..len as usize]))
@@ -128,7 +128,7 @@ pub mod capture {
             }
         }
 
-        unsafe fn syscall(number: i32, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {
+        unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {
             let ret: i64;
             core::arch::asm!("syscall", in("rax") number, in("rdi") a1, in("rsi") a2, in("rdx") a3, in("r10") a4, in("r8") a5, lateout("rax") ret);
             ret
