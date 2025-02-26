@@ -1,6 +1,6 @@
 use std::any::Any;
+use crate::packet::layers::ethernet_frame::ip::udp::dhcp::inter::dhcp_cookie::DHCPCookie;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::layer_5::udp::inter::dhcp_cookie::DHCPCookie;
 
 #[derive(Clone, Debug)]
 pub struct DhcpLayer {
@@ -68,8 +68,7 @@ impl DhcpLayer {
         offset += 128;
 
         // Read the DHCP cookie (magic cookie)
-        let mut cookie = [0u8; 4];
-        cookie.copy_from_slice(&buf[offset..offset + 4]);
+        let cookie = DHCPCookie::new(buf[offset], buf[offset+1], buf[offset+2], buf[offset+3]);
         offset += 4;
 
         // Read the DHCP options
@@ -94,7 +93,7 @@ impl DhcpLayer {
             chaddr,
             sname,
             file,
-            cookie: DHCPCookie { magic: cookie },
+            cookie,
             options,
             length: buf.len()
         })

@@ -5,9 +5,9 @@ pub struct DHCPCookie {
 
 impl DHCPCookie {
 
-    pub fn from_bytes(magic: [u8; 4]) -> Self {
+    pub fn new(a: u8, b: u8, c: u8, d: u8) -> Self {
         Self {
-            magic
+            magic: [a, b, c, d]
         }
     }
 }

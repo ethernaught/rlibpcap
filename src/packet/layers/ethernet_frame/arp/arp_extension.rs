@@ -1,8 +1,8 @@
 use std::any::Any;
 use std::fmt::Debug;
 use std::net::Ipv4Addr;
+use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::layer_2::inter::ethernet_address::EthernetAddress;
 
 #[derive(Clone, Debug)]
 pub struct ArpLayer {

@@ -1,4 +1,6 @@
 use std::any::Any;
+use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_payloads::UdpPayloads;
+use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes;
 use crate::packet::layers::inter::layer::Layer;
 
 #[derive(Clone, Debug)]
@@ -7,7 +9,7 @@ pub struct UdpLayer {
     destination_port: u16,
     length: u16,
     checksum: u16,
-    payload: Option<Vec<u8>>,
+    payload: UdpPayloads,
     payload_length: usize
 }
 
@@ -23,7 +25,7 @@ impl UdpLayer {
             destination_port: u16::from_be_bytes([buf[2], buf[3]]),
             length: u16::from_be_bytes([buf[4], buf[5]]),
             checksum: u16::from_be_bytes([buf[6], buf[7]]),
-            payload: None,
+            payload: UdpPayloads::get_type_from_buf(&buf),
             payload_length: 0
         })
     }
@@ -44,12 +46,21 @@ impl UdpLayer {
         self.checksum
     }
 
-    pub fn set_payload(&mut self, payload: &[u8]) {
-        self.payload = Some(payload.to_vec());
-        self.payload_length += payload.len();
+    //pub fn get_type(&self) -> UdpTypes {
+    //    self.payload.to_string()
+    //}
+    pub fn get_type(&self) -> UdpTypes {
+        match self.payload {
+            UdpPayloads::Known(_type, _) => {
+                _type
+            }
+            UdpPayloads::Unknown(_) => {
+                UdpTypes::Unknown
+            }
+        }
     }
 
-    pub fn get_payload(&self) -> &Option<Vec<u8>> {
+    pub fn get_payload(&self) -> &UdpPayloads {
         &self.payload
     }
 }
@@ -64,18 +75,11 @@ impl Layer for UdpLayer {
         buf.splice(4..6, self.length.to_be_bytes());
         buf.splice(6..8, self.checksum.to_be_bytes());
 
-        match &self.payload {
-            Some(payload) => {
-                buf.splice(8..8 + payload.len(), payload.to_vec());
-            }
-            None => {}
-        }
-
         buf
     }
 
     fn len(&self) -> usize {
-        self.payload_length + 8
+        8
     }
 
     fn as_any(&self) -> &dyn Any {

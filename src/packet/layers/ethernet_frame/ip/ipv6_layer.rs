@@ -1,7 +1,10 @@
 use std::any::Any;
 use std::net::Ipv6Addr;
+use crate::packet::layers::ethernet_frame::ip::icmpv6::icmpv6_layer::Icmpv6Layer;
+use crate::packet::layers::ethernet_frame::ip::inter::protocols::Protocols;
+use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
+use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::layer_3::ethernet::inter::protocols::Protocols;
 
 #[derive(Clone, Debug)]
 pub struct Ipv6Layer {
@@ -12,7 +15,8 @@ pub struct Ipv6Layer {
     next_header: Protocols,
     hop_limit: u8,
     source_ip: Ipv6Addr,
-    destination_ip: Ipv6Addr
+    destination_ip: Ipv6Addr,
+    data: Option<Box<dyn Layer>>
 }
 
 impl Ipv6Layer {
@@ -22,15 +26,51 @@ impl Ipv6Layer {
             return None;
         }
 
+        let next_header = Protocols::get_protocol_from_code(buf[6]).unwrap();
+
+        let data = match next_header {
+            Protocols::HopByHop => {
+                None
+            }
+            Protocols::Icmp => {
+                None
+            }
+            Protocols::Igmp => {
+                None
+            }
+            Protocols::Tcp => {
+                Some(TcpLayer::from_bytes(&buf[40..])?.dyn_clone())
+            }
+            Protocols::Udp => {
+                Some(UdpLayer::from_bytes(&buf[40..])?.dyn_clone())
+            }
+            Protocols::Ipv6 => {
+                None
+            }
+            Protocols::Gre => {
+                None
+            }
+            Protocols::Icmpv6 => {
+                Some(Icmpv6Layer::from_bytes(&buf[40..])?.dyn_clone())
+            }
+            Protocols::Ospf => {
+                None
+            }
+            Protocols::Sps => {
+                None
+            }
+        };
+
         Some(Self {
             version: (buf[0] >> 4) & 0x0F,
             traffic_class: ((buf[0] & 0x0F) << 4) | (buf[1] >> 4),
             flow_label: ((buf[1] as u32 & 0x0F) << 16) | ((buf[2] as u32) << 8) | (buf[3] as u32),
             payload_length: u16::from_be_bytes([buf[4], buf[5]]),
-            next_header: Protocols::get_protocol_from_code(buf[6]).unwrap(),
+            next_header,
             hop_limit: buf[7],
             source_ip: Ipv6Addr::from(<[u8; 16]>::try_from(&buf[8..24]).unwrap()),
-            destination_ip: Ipv6Addr::from(<[u8; 16]>::try_from(&buf[24..40]).unwrap())
+            destination_ip: Ipv6Addr::from(<[u8; 16]>::try_from(&buf[24..40]).unwrap()),
+            data
         })
     }
 
@@ -64,6 +104,10 @@ impl Ipv6Layer {
 
     pub fn get_destination_ip(&self) -> &Ipv6Addr {
         &self.destination_ip
+    }
+
+    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
+        self.data.as_ref()
     }
 }
 

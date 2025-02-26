@@ -1,7 +1,10 @@
 use std::any::Any;
 use std::net::Ipv4Addr;
+use crate::packet::layers::ethernet_frame::ip::icmp::icmp_layer::IcmpLayer;
+use crate::packet::layers::ethernet_frame::ip::inter::protocols::Protocols;
+use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
+use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::layer_3::ethernet::inter::protocols::Protocols;
 
 #[derive(Clone, Debug)]
 pub struct Ipv4Layer {
@@ -16,7 +19,8 @@ pub struct Ipv4Layer {
     protocol: Protocols,
     checksum: u16,
     source_ip: Ipv4Addr,
-    destination_ip: Ipv4Addr
+    destination_ip: Ipv4Addr,
+    data: Option<Box<dyn Layer>>
 }
 
 impl Ipv4Layer {
@@ -30,6 +34,41 @@ impl Ipv4Layer {
         let version = version_ihl >> 4;
         let ihl = version_ihl & 0x0F;
 
+        let protocol = Protocols::get_protocol_from_code(buf[9]).unwrap();
+
+        let data = match protocol {
+            Protocols::HopByHop => {
+                None
+            }
+            Protocols::Icmp => {
+                Some(IcmpLayer::from_bytes(&buf[20..])?.dyn_clone())
+            }
+            Protocols::Igmp => {
+                None
+            }
+            Protocols::Tcp => {
+                Some(TcpLayer::from_bytes(&buf[20..])?.dyn_clone())
+            }
+            Protocols::Udp => {
+                Some(UdpLayer::from_bytes(&buf[20..])?.dyn_clone())
+            }
+            Protocols::Ipv6 => {
+                None
+            }
+            Protocols::Gre => {
+                None
+            }
+            Protocols::Icmpv6 => {
+                None
+            }
+            Protocols::Ospf => {
+                None
+            }
+            Protocols::Sps => {
+                None
+            }
+        };
+
         Some(Self {
             version,
             ihl,
@@ -39,10 +78,11 @@ impl Ipv4Layer {
             flags: buf[6] >> 5,
             fragment_offset: u16::from_be_bytes([buf[6] & 0x1F, buf[7]]),
             ttl: buf[8],
-            protocol: Protocols::get_protocol_from_code(buf[9]).unwrap(),
+            protocol,
             checksum: u16::from_be_bytes([buf[10], buf[11]]),
             source_ip: Ipv4Addr::new(buf[12], buf[13], buf[14], buf[15]),
-            destination_ip: Ipv4Addr::new(buf[16], buf[17], buf[18], buf[19])
+            destination_ip: Ipv4Addr::new(buf[16], buf[17], buf[18], buf[19]),
+            data
         })
     }
 
@@ -92,6 +132,10 @@ impl Ipv4Layer {
 
     pub fn get_destination_ip(&self) -> &Ipv4Addr {
         &self.destination_ip
+    }
+
+    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
+        self.data.as_ref()
     }
 }
 
