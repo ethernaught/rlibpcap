@@ -1,5 +1,5 @@
 use std::any::Any;
-use crate::packet::layers2::inter::layer::Layer;
+use crate::packet::layers::inter::layer::Layer;
 
 #[derive(Clone, Debug)]
 pub struct Icmpv6Layer {

@@ -1,20 +1,8 @@
 use std::net::Ipv4Addr;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::packet::inter::interfaces::Interfaces;
-use crate::packet::layers2::ethernet_frame::ethernet_frame::EthernetFrame;
-use crate::packet::layers2::inter::layer::Layer;
-use crate::packet::layers::layer_2::ethernet_layer::EthernetLayer;
-use crate::packet::layers::layer_2::inter::ethernet_address::EthernetAddress;
-use crate::packet::layers::layer_2::inter::types::Types;
-use crate::packet::layers::layer_2_5::ethernet::arp_extension::ArpLayer;
-use crate::packet::layers::layer_3::ethernet::inter::protocols::Protocols;
-use crate::packet::layers::layer_3::ethernet::ipv4_layer::Ipv4Layer;
-use crate::packet::layers::layer_3::ethernet::ipv6_layer::Ipv6Layer;
-use crate::packet::layers::layer_3_5::ethernet::icmp_layer::IcmpLayer;
-use crate::packet::layers::layer_3_5::ethernet::icmpv6_layer::Icmpv6Layer;
-use crate::packet::layers::layer_4::ip::tcp_layer::TcpLayer;
-use crate::packet::layers::layer_4::ip::udp_layer::UdpLayer;
-use crate::packet::layers::layer_5::udp::dhcp_layer::DhcpLayer;
+use crate::packet::layers::ethernet_frame::ethernet_frame::EthernetFrame;
+use crate::packet::layers::inter::layer::Layer;
 
 #[derive(Debug, Clone)]
 pub struct Packet {

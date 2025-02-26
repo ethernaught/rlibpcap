@@ -1,27 +1,48 @@
 use std::any::Any;
+use crate::packet::layers::ethernet_frame::arp::arp_extension::ArpLayer;
+use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
+use crate::packet::layers::ethernet_frame::inter::types::Types;
+use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
+use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::layer_2::inter::ethernet_address::EthernetAddress;
-use crate::packet::layers::layer_2::inter::types::Types;
 
 #[derive(Clone, Debug)]
-pub struct EthernetLayer {
+pub struct EthernetFrame {
     destination: EthernetAddress,
     source: EthernetAddress,
     _type: Types,
-    //data: Vec<u8>
+    data: Option<Box<dyn Layer>>
 }
 
-impl EthernetLayer {
+impl EthernetFrame {
 
     pub fn from_bytes(buf: &[u8]) -> Option<Self> {
         if buf.len() < 14 {
             return None;
         }
 
+        let _type = Types::get_type_from_code(u16::from_be_bytes([buf[12], buf[13]])).unwrap();
+
+        let data = match _type {
+            Types::IPv4 => {
+                Some(Ipv4Layer::from_bytes(&buf[14..])?.dyn_clone())
+            }
+            Types::Arp => {
+                Some(ArpLayer::from_bytes(&buf[14..])?.dyn_clone())
+            }
+            Types::IPv6 => {
+                Some(Ipv6Layer::from_bytes(&buf[14..])?.dyn_clone())
+            }
+            Types::Broadcast => {
+                None
+            }
+        };
+
         Some(Self {
             destination: EthernetAddress::new(buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]),
             source: EthernetAddress::new(buf[6], buf[7], buf[8], buf[9], buf[10], buf[11]),
-            _type: Types::get_type_from_code(u16::from_be_bytes([buf[12], buf[13]])).unwrap()
+            _type,
+            data
         })
     }
 
@@ -38,7 +59,7 @@ impl EthernetLayer {
     }
 }
 
-impl Layer for EthernetLayer {
+impl Layer for EthernetFrame {
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];

@@ -1,6 +1,6 @@
-use crate::packet::layers2::ethernet_frame::ip::udp::dhcp::dhcp_layer::DhcpLayer;
-use crate::packet::layers2::ethernet_frame::ip::udp::inter::udp_types::UdpTypes::Unknown;
-use crate::packet::layers2::inter::layer::Layer;
+use crate::packet::layers::ethernet_frame::ip::udp::dhcp::dhcp_layer::DhcpLayer;
+use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes::Unknown;
+use crate::packet::layers::inter::layer::Layer;
 
 #[derive(Clone, Debug)]
 pub enum UdpTypes {
