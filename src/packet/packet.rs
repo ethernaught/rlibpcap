@@ -53,19 +53,7 @@ impl Packet {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0u8; self.length];
-        /*
-        let mut off = 0;
-
-        for layer in &self.layers {
-            let encoded_layer = layer.to_bytes();
-            let len = encoded_layer.len();
-            buf.splice(off..off + encoded_layer.len(), encoded_layer);
-            off += len;
-        }
-        */
-
-        buf
+        self.frame.to_bytes()
     }
 
     pub fn len(&self) -> usize {

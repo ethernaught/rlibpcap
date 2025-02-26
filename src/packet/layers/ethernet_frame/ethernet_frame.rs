@@ -71,6 +71,13 @@ impl Layer for EthernetFrame {
         buf.splice(6..12, self.source.to_bytes());
         buf.splice(12..14, self._type.get_code().to_be_bytes());
 
+        match &self.data {
+            Some(data) => {
+                buf.extend(data.to_bytes());
+            }
+            None => {}
+        }
+
         buf
     }
 

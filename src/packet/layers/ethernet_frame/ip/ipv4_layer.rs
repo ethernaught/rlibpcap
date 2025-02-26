@@ -156,6 +156,13 @@ impl Layer for Ipv4Layer {
         buf.splice(12..16, self.source_ip.octets());
         buf.splice(16..20, self.destination_ip.octets());
 
+        match &self.data {
+            Some(data) => {
+                buf.extend(data.to_bytes());
+            }
+            None => {}
+        }
+
         buf
     }
 

@@ -126,6 +126,13 @@ impl Layer for Ipv6Layer {
         buf.splice(8..24, self.source_ip.octets());
         buf.splice(24..40, self.destination_ip.octets());
 
+        match &self.data {
+            Some(data) => {
+                buf.extend(data.to_bytes());
+            }
+            None => {}
+        }
+
         buf
     }
 
