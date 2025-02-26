@@ -1,5 +1,5 @@
 use std::any::Any;
-use crate::packet::layers::ethernet_frame::ip::udp::dhcp::dhcp_layer::DhcpLayer;
+use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_payloads::UdpPayloads;
 use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes;
 use crate::packet::layers::inter::layer::Layer;
 
@@ -9,7 +9,7 @@ pub struct UdpLayer {
     destination_port: u16,
     length: u16,
     checksum: u16,
-    payload: UdpTypes,
+    payload: UdpPayloads,
     payload_length: usize
 }
 
@@ -25,7 +25,7 @@ impl UdpLayer {
             destination_port: u16::from_be_bytes([buf[2], buf[3]]),
             length: u16::from_be_bytes([buf[4], buf[5]]),
             checksum: u16::from_be_bytes([buf[6], buf[7]]),
-            payload: UdpTypes::get_type_from_buf(&buf),
+            payload: UdpPayloads::get_type_from_buf(&buf),
             payload_length: 0
         })
     }
@@ -49,6 +49,20 @@ impl UdpLayer {
     //pub fn get_type(&self) -> UdpTypes {
     //    self.payload.to_string()
     //}
+    pub fn get_type(&self) -> UdpTypes {
+        match self.payload {
+            UdpPayloads::Known(_type, _) => {
+                _type
+            }
+            UdpPayloads::Unknown(_) => {
+                UdpTypes::Unknown
+            }
+        }
+    }
+
+    pub fn get_payload(&self) -> &UdpPayloads {
+        &self.payload
+    }
 }
 
 impl Layer for UdpLayer {

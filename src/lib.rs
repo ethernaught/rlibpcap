@@ -1,6 +1,3 @@
-use std::net::Ipv4Addr;
-use crate::packet::layers::layer_2::inter::ethernet_address::EthernetAddress;
-
 pub mod devices;
 pub mod packet;
 
