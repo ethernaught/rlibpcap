@@ -1,7 +1,9 @@
+use std::net::Ipv4Addr;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::packet::inter::interfaces::Interfaces;
 use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::layer_2::ethernet_layer::EthernetLayer;
+use crate::packet::layers::layer_2::inter::ethernet_address::EthernetAddress;
 use crate::packet::layers::layer_2::inter::types::Types;
 use crate::packet::layers::layer_2_5::ethernet::arp_extension::ArpLayer;
 use crate::packet::layers::layer_3::ethernet::inter::protocols::Protocols;
@@ -11,6 +13,7 @@ use crate::packet::layers::layer_3_5::ethernet::icmp_layer::IcmpLayer;
 use crate::packet::layers::layer_3_5::ethernet::icmpv6_layer::Icmpv6Layer;
 use crate::packet::layers::layer_4::ip::tcp_layer::TcpLayer;
 use crate::packet::layers::layer_4::ip::udp_layer::UdpLayer;
+use crate::packet::layers::layer_5::udp::dhcp_layer::DhcpLayer;
 
 #[derive(Debug, Clone)]
 pub struct Packet {
@@ -112,7 +115,16 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
                         Protocols::Udp => {
                             let mut udp_layer = UdpLayer::from_bytes(&data[off..]).expect("Failed to parse UDP frame");
                             off += udp_layer.len();
-                            udp_layer.set_payload(&data[off..]);
+
+                            if ethernet_layer.get_destination().eq(&EthernetAddress::new(0xff, 0xff, 0xff, 0xff, 0xff, 0xff)) &&
+                                    ipv4_layer.get_destination_ip().eq(&Ipv4Addr::new(255, 255, 255, 255)) &&
+                                    udp_layer.get_destination_port() == 67 {
+                                let dhcp_layer = DhcpLayer::from_bytes(&data[off..]).expect("Failed to parse DHCP frame");
+                                frame.add_layer(dhcp_layer.dyn_clone());
+
+                            } else {
+                                udp_layer.set_payload(&data[off..]);
+                            }
 
                             frame.add_layer(udp_layer.dyn_clone());
                         }
