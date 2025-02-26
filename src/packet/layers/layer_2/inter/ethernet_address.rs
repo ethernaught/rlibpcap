@@ -1,4 +1,4 @@
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub struct EthernetAddress {
     address: [u8; 6]
 }
@@ -20,9 +20,5 @@ impl EthernetAddress {
             .map(|byte| format!("{:02x}", byte))
             .collect::<Vec<String>>()
             .join(":")
-    }
-
-    pub fn equals(&self, other: &EthernetAddress) -> bool {
-        self.address == other.address
     }
 }
