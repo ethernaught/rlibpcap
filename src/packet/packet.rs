@@ -61,8 +61,9 @@ impl Packet {
 
         for layer in &self.layers {
             let encoded_layer = layer.to_bytes();
-            buf.splice(off..off + layer.len(), encoded_layer);
-            off += layer.len();
+            let len = encoded_layer.len();
+            buf.splice(off..off + encoded_layer.len(), encoded_layer);
+            off += len;
         }
 
         buf
@@ -90,26 +91,30 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
             match ethernet_layer.get_type() {
                 Types::IPv4 => {
                     let ipv4_layer = Ipv4Layer::from_bytes(&data[off..]).expect("Failed to parse IPv4 frame");
-                    frame.add_layer(ipv4_layer.dyn_clone());
                     off += ipv4_layer.len();
+                    frame.add_layer(ipv4_layer.dyn_clone());
 
                     match ipv4_layer.get_protocol() {
                         Protocols::HopByHop => {}
                         Protocols::Icmp => {
                             let icmp_layer = IcmpLayer::from_bytes(&data[off..]).expect("Failed to parse ICMP frame");
-                            frame.add_layer(icmp_layer.dyn_clone());
                             off += icmp_layer.len();
+                            frame.add_layer(icmp_layer.dyn_clone());
                         }
                         Protocols::Igmp => {}
                         Protocols::Tcp => {
-                            let tcp_layer = TcpLayer::from_bytes(&data[off..]).expect("Failed to parse TCP frame");
-                            frame.add_layer(tcp_layer.dyn_clone());
+                            let mut tcp_layer = TcpLayer::from_bytes(&data[off..]).expect("Failed to parse TCP frame");
                             off += tcp_layer.len();
+                            tcp_layer.set_payload(&data[off..]);
+
+                            frame.add_layer(tcp_layer.dyn_clone());
                         }
                         Protocols::Udp => {
-                            let udp_layer = UdpLayer::from_bytes(&data[off..]).expect("Failed to parse UDP frame");
-                            frame.add_layer(udp_layer.dyn_clone());
+                            let mut udp_layer = UdpLayer::from_bytes(&data[off..]).expect("Failed to parse UDP frame");
                             off += udp_layer.len();
+                            udp_layer.set_payload(&data[off..]);
+
+                            frame.add_layer(udp_layer.dyn_clone());
                         }
                         Protocols::Ipv6 => {}
                         Protocols::Icmpv6 => {}
@@ -124,33 +129,37 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
                 }
                 Types::Arp => {
                     let arp_layer = ArpLayer::from_bytes(&data[off..]).expect("Failed to parse ARP frame");
-                    frame.add_layer(arp_layer.dyn_clone());
                     off += arp_layer.len();
+                    frame.add_layer(arp_layer.dyn_clone());
                 }
                 Types::IPv6 => {
                     let ipv6_layer = Ipv6Layer::from_bytes(&data[off..]).expect("Failed to parse IPv6 frame");
-                    frame.add_layer(ipv6_layer.dyn_clone());
                     off += ipv6_layer.len();
+                    frame.add_layer(ipv6_layer.dyn_clone());
 
                     match ipv6_layer.get_next_header() {
                         Protocols::HopByHop => {}
                         Protocols::Icmp => {}
                         Protocols::Igmp => {}
                         Protocols::Tcp => {
-                            let tcp_layer = TcpLayer::from_bytes(&data[off..]).expect("Failed to parse TCP frame");
-                            frame.add_layer(tcp_layer.dyn_clone());
+                            let mut tcp_layer = TcpLayer::from_bytes(&data[off..]).expect("Failed to parse TCP frame");
                             off += tcp_layer.len();
+                            tcp_layer.set_payload(&data[off..]);
+
+                            frame.add_layer(tcp_layer.dyn_clone());
                         }
                         Protocols::Udp => {
-                            let udp_layer = UdpLayer::from_bytes(&data[off..]).expect("Failed to parse UDP frame");
-                            frame.add_layer(udp_layer.dyn_clone());
+                            let mut udp_layer = UdpLayer::from_bytes(&data[off..]).expect("Failed to parse UDP frame");
                             off += udp_layer.len();
+                            udp_layer.set_payload(&data[off..]);
+
+                            frame.add_layer(udp_layer.dyn_clone());
                         }
                         Protocols::Ipv6 => {}
                         Protocols::Icmpv6 => {
                             let icmpv6_layer = Icmpv6Layer::from_bytes(&data[off..]).expect("Failed to parse ICMPv6 frame");
-                            frame.add_layer(icmpv6_layer.dyn_clone());
                             off += icmpv6_layer.len();
+                            frame.add_layer(icmpv6_layer.dyn_clone());
                         }
                         Protocols::Gre => {}
                         Protocols::Ospf => {}

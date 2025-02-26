@@ -6,7 +6,8 @@ pub struct UdpLayer {
     source_port: u16,
     destination_port: u16,
     length: u16,
-    checksum: u16
+    checksum: u16,
+    payload: Option<Vec<u8>>
 }
 
 impl UdpLayer {
@@ -20,7 +21,8 @@ impl UdpLayer {
             source_port: u16::from_be_bytes([buf[0], buf[1]]),
             destination_port: u16::from_be_bytes([buf[2], buf[3]]),
             length: u16::from_be_bytes([buf[4], buf[5]]),
-            checksum: u16::from_be_bytes([buf[6], buf[7]])
+            checksum: u16::from_be_bytes([buf[6], buf[7]]),
+            payload: None
         })
     }
 
@@ -39,6 +41,15 @@ impl UdpLayer {
     pub fn get_checksum(&self) -> u16 {
         self.checksum
     }
+
+    pub fn set_payload(&mut self, payload: &[u8]) {
+        println!("EXTENDED {}", payload.len());
+        self.payload = Some(payload.to_vec());
+    }
+
+    pub fn get_payload(&self) -> &Option<Vec<u8>> {
+        &self.payload
+    }
 }
 
 impl Layer for UdpLayer {
@@ -51,11 +62,25 @@ impl Layer for UdpLayer {
         buf.splice(4..6, self.length.to_be_bytes());
         buf.splice(6..8, self.checksum.to_be_bytes());
 
+        match &self.payload {
+            Some(payload) => {
+                buf.splice(8..8 + payload.len(), payload.to_vec());
+            }
+            None => {}
+        }
+
         buf
     }
 
     fn len(&self) -> usize {
-        14
+        match &self.payload {
+            Some(payload) => {
+                payload.len()+8
+            }
+            None => {
+                8
+            }
+        }
     }
 
     fn as_any(&self) -> &dyn Any {
