@@ -1,7 +1,8 @@
 use std::net::Ipv4Addr;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::packet::inter::interfaces::Interfaces;
-use crate::packet::layers::inter::layer::Layer;
+use crate::packet::layers2::ethernet_frame::ethernet_frame::EthernetFrame;
+use crate::packet::layers2::inter::layer::Layer;
 use crate::packet::layers::layer_2::ethernet_layer::EthernetLayer;
 use crate::packet::layers::layer_2::inter::ethernet_address::EthernetAddress;
 use crate::packet::layers::layer_2::inter::types::Types;
@@ -18,19 +19,33 @@ use crate::packet::layers::layer_5::udp::dhcp_layer::DhcpLayer;
 #[derive(Debug, Clone)]
 pub struct Packet {
     interface: Interfaces,
-    layers: Vec<Box<dyn Layer>>,
+    frame: Box<dyn Layer>,
+    //layers: Vec<Box<dyn Layer>>,
     frame_time: u128,
-    length: u32
+    length: usize
 }
 
 impl Packet {
 
-    pub fn new(interface: Interfaces, frame_time: u128, length: u32) -> Self {
+    pub fn new(interface: Interfaces, frame_time: u128, data: &[u8]) -> Self {
+        let frame = match interface {
+            Interfaces::Ethernet => {
+                EthernetFrame::from_bytes(data).unwrap().dyn_clone()
+            }
+            Interfaces::WiFi => {
+                todo!()
+            }
+            Interfaces::Bluetooth => {
+                todo!()
+            }
+        };
+
         Self {
             interface,
-            layers: Vec::new(),
+            frame,
+            //layers: Vec::new(),
             frame_time,
-            length
+            length: data.len()
         }
     }
 
@@ -38,20 +53,8 @@ impl Packet {
         &self.interface
     }
 
-    pub fn add_layer(&mut self, layer: Box<dyn Layer>) {
-        self.layers.push(layer);
-    }
-
-    pub fn get_layer(&self, index: usize) -> Option<&Box<dyn Layer>> {
-        self.layers.get(index)
-    }
-
-    pub fn get_layers(&self) -> &Vec<Box<dyn Layer>> {
-        &self.layers
-    }
-
-    pub fn get_total_layers(&self) -> usize {
-        self.layers.len()
+    pub fn get_frame(&self) -> &Box<dyn Layer> {
+        &self.frame
     }
 
     pub fn get_frame_time(&self) -> u128 {
@@ -59,7 +62,8 @@ impl Packet {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0u8; self.length as usize];
+        let mut buf = vec![0u8; self.length];
+        /*
         let mut off = 0;
 
         for layer in &self.layers {
@@ -68,11 +72,12 @@ impl Packet {
             buf.splice(off..off + encoded_layer.len(), encoded_layer);
             off += len;
         }
+        */
 
         buf
     }
 
-    pub fn len(&self) -> u32 {
+    pub fn len(&self) -> usize {
         self.length
     }
 }
@@ -83,8 +88,9 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
         .expect("Time went backwards")
         .as_millis();
 
-    let mut frame = Packet::new(interface, now, data.len() as u32);
+    let mut frame = Packet::new(interface, now, data);
 
+    /*
     match frame.get_interface() {
         Interfaces::Ethernet => {
             let ethernet_layer = EthernetLayer::from_bytes(&data).expect("Failed to parse Ethernet frame");
@@ -189,6 +195,7 @@ pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
         Interfaces::WiFi => {}
         Interfaces::Bluetooth => {}
     }
+    */
 
     frame
 }
