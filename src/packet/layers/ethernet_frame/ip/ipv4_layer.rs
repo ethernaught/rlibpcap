@@ -133,6 +133,10 @@ impl Ipv4Layer {
     pub fn get_destination_ip(&self) -> &Ipv4Addr {
         &self.destination_ip
     }
+
+    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
+        self.data.as_ref()
+    }
 }
 
 impl Layer for Ipv4Layer {

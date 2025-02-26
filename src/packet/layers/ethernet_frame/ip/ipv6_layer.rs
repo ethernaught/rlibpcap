@@ -105,6 +105,10 @@ impl Ipv6Layer {
     pub fn get_destination_ip(&self) -> &Ipv6Addr {
         &self.destination_ip
     }
+
+    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
+        self.data.as_ref()
+    }
 }
 
 impl Layer for Ipv6Layer {

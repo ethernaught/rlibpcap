@@ -57,6 +57,10 @@ impl EthernetFrame {
     pub fn get_type(&self) -> Types {
         self._type
     }
+
+    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
+        self.data.as_ref()
+    }
 }
 
 impl Layer for EthernetFrame {
