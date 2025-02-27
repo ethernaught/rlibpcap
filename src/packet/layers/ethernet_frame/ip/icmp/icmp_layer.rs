@@ -63,6 +63,14 @@ impl Layer for IcmpLayer {
         buf
     }
 
+    fn len(&self) -> usize {
+        ICMP_PAYLOAD_SIZE
+    }
+
+    fn compute_length(&mut self) -> usize {
+        ICMP_PAYLOAD_SIZE
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }

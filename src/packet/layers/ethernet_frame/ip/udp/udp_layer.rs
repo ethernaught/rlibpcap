@@ -11,8 +11,7 @@ pub struct UdpLayer {
     destination_port: u16,
     length: u16,
     checksum: u16,
-    payload: UdpPayloads,
-    payload_length: usize
+    payload: UdpPayloads
 }
 
 impl UdpLayer {
@@ -65,8 +64,7 @@ impl Layer for UdpLayer {
             destination_port: u16::from_be_bytes([buf[2], buf[3]]),
             length: u16::from_be_bytes([buf[4], buf[5]]),
             checksum: u16::from_be_bytes([buf[6], buf[7]]),
-            payload: UdpPayloads::get_type_from_buf(&buf[8..]),
-            payload_length: 0
+            payload: UdpPayloads::get_type_from_buf(&buf[8..])
         })
     }
 
@@ -95,12 +93,12 @@ impl Layer for UdpLayer {
     }
 
     fn compute_length(&mut self) -> usize {
-        let length = match &self.payload {
-            Some(mut layer) => {
-                layer.compute_length() + UDP_HEADER_SIZE
+        let length = match &mut self.payload {
+            UdpPayloads::Known(_, payload) => {
+                payload.compute_length() + UDP_HEADER_SIZE
             }
-            None => {
-                UDP_HEADER_SIZE
+            UdpPayloads::Unknown(payload) => {
+                payload.len() + UDP_HEADER_SIZE
             }
         };
 

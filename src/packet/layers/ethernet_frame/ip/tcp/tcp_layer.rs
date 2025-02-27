@@ -15,7 +15,7 @@ pub struct TcpLayer {
     checksum: u16,
     urgent_pointer: u16,
     payload: Option<Vec<u8>>,
-    payload_length: usize
+    length: usize
 }
 
 impl TcpLayer {
@@ -56,11 +56,6 @@ impl TcpLayer {
         self.urgent_pointer
     }
 
-    pub fn set_payload(&mut self, payload: &[u8]) {
-        self.payload = Some(payload.to_vec());
-        self.payload_length += payload.len();
-    }
-
     pub fn get_payload(&self) -> &Option<Vec<u8>> {
         &self.payload
     }
@@ -84,12 +79,12 @@ impl Layer for TcpLayer {
             checksum: u16::from_be_bytes([buf[16], buf[17]]),
             urgent_pointer: u16::from_be_bytes([buf[18], buf[19]]),
             payload: None,
-            payload_length: 0
+            length: 0
         })
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; TCP_HEADER_SIZE+self.payload_length];
+        let mut buf = vec![0; TCP_HEADER_SIZE];
 
         buf.splice(0..2, self.source_port.to_be_bytes());
         buf.splice(2..4, self.destination_port.to_be_bytes());
@@ -104,12 +99,30 @@ impl Layer for TcpLayer {
 
         match &self.payload {
             Some(payload) => {
-                buf.splice(20..20 + payload.len(), payload.to_vec());
+                buf.extend(payload);
             }
             None => {}
         }
 
         buf
+    }
+
+    fn len(&self) -> usize {
+        self.length
+    }
+
+    fn compute_length(&mut self) -> usize {
+        let length = match &self.payload {
+            Some(payload) => {
+                payload.len() + TCP_HEADER_SIZE
+            }
+            None => {
+                TCP_HEADER_SIZE
+            }
+        };
+
+        self.length = length;
+        length
     }
 
     fn as_any(&self) -> &dyn Any {

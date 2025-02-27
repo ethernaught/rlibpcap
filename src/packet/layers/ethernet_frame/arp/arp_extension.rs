@@ -94,6 +94,14 @@ impl Layer for ArpLayer {
         buf
     }
 
+    fn len(&self) -> usize {
+        ARP_HEADER_LEN
+    }
+
+    fn compute_length(&mut self) -> usize {
+        ARP_HEADER_LEN
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }

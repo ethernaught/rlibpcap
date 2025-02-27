@@ -63,6 +63,14 @@ impl Layer for Icmpv6Layer {
         buf
     }
 
+    fn len(&self) -> usize {
+        ICMPV6_HEADER_SIZE
+    }
+
+    fn compute_length(&mut self) -> usize {
+        ICMPV6_HEADER_SIZE
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }

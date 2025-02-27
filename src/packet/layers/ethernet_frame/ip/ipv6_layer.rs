@@ -138,6 +138,24 @@ impl Layer for Ipv6Layer {
         buf
     }
 
+    fn len(&self) -> usize {
+        self.payload_length as usize + IPV6_HEADER_SIZE
+    }
+
+    fn compute_length(&mut self) -> usize {
+        let payload_length = match &mut self.data {
+            Some(layer) => {
+                layer.compute_length()
+            }
+            None => {
+                0
+            }
+        };
+
+        self.payload_length = payload_length as u16;
+        payload_length + IPV6_HEADER_SIZE
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }
