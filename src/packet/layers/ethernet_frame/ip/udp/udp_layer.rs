@@ -25,7 +25,7 @@ impl UdpLayer {
             destination_port: u16::from_be_bytes([buf[2], buf[3]]),
             length: u16::from_be_bytes([buf[4], buf[5]]),
             checksum: u16::from_be_bytes([buf[6], buf[7]]),
-            payload: UdpPayloads::get_type_from_buf(&buf),
+            payload: UdpPayloads::get_type_from_buf(&buf[8..]),
             payload_length: 0
         })
     }
