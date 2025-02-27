@@ -14,7 +14,7 @@ pub struct ArpLayer {
     sender_mac: EthernetAddress,
     sender_ip: Ipv4Addr,
     target_mac: EthernetAddress,
-    target_ip: Ipv4Addr,
+    target_ip: Ipv4Addr
 }
 
 impl ArpLayer {
@@ -33,7 +33,7 @@ impl ArpLayer {
             sender_mac: EthernetAddress::new(buf[8], buf[9], buf[10], buf[11], buf[12], buf[13]),
             sender_ip: Ipv4Addr::new(buf[14], buf[15], buf[16], buf[17]),
             target_mac: EthernetAddress::new(buf[18], buf[19], buf[20], buf[21], buf[22], buf[23]),
-            target_ip: Ipv4Addr::new(buf[24], buf[25], buf[26], buf[27]),
+            target_ip: Ipv4Addr::new(buf[24], buf[25], buf[26], buf[27])
         })
     }
 
