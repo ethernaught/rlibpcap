@@ -7,8 +7,6 @@ pub trait Layer: Send + Debug {
 
     fn to_bytes(&self) -> Vec<u8>;
 
-    fn len(&self) -> usize;
-
     fn as_any(&self) -> &dyn Any;
 
     fn as_any_mut(&mut self) -> &mut dyn Any;

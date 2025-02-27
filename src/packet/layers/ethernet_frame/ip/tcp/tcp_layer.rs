@@ -1,6 +1,8 @@
 use std::any::Any;
 use crate::packet::layers::inter::layer::Layer;
 
+const TCP_HEADER_SIZE: usize = 20;
+
 #[derive(Clone, Debug)]
 pub struct TcpLayer {
     source_port: u16,
@@ -67,7 +69,7 @@ impl TcpLayer {
 impl Layer for TcpLayer {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < 20 {
+        if buf.len() < TCP_HEADER_SIZE {
             return None;
         }
 
@@ -87,7 +89,7 @@ impl Layer for TcpLayer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; self.len()];
+        let mut buf = vec![0; TCP_HEADER_SIZE+self.payload_length];
 
         buf.splice(0..2, self.source_port.to_be_bytes());
         buf.splice(2..4, self.destination_port.to_be_bytes());
@@ -108,10 +110,6 @@ impl Layer for TcpLayer {
         }
 
         buf
-    }
-
-    fn len(&self) -> usize {
-        self.payload_length + 20
     }
 
     fn as_any(&self) -> &dyn Any {

@@ -7,8 +7,7 @@ use crate::packet::layers::inter::layer::Layer;
 pub struct Packet {
     interface: Interfaces,
     frame: Box<dyn Layer>,
-    frame_time: u128,
-    length: usize
+    frame_time: u128
 }
 
 impl Packet {
@@ -29,8 +28,7 @@ impl Packet {
         Self {
             interface,
             frame,
-            frame_time,
-            length: data.len()
+            frame_time
         }
     }
 
@@ -50,9 +48,11 @@ impl Packet {
         self.frame.to_bytes()
     }
 
+    /*
     pub fn len(&self) -> usize {
-        self.length
+        self.frame.len()
     }
+    */
 }
 
 pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {

@@ -3,6 +3,8 @@ use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_payloads::UdpPayl
 use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes;
 use crate::packet::layers::inter::layer::Layer;
 
+const UDP_HEADER_SIZE: usize = 14;
+
 #[derive(Clone, Debug)]
 pub struct UdpLayer {
     source_port: u16,
@@ -50,7 +52,7 @@ impl UdpLayer {
 impl Layer for UdpLayer {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < 8 {
+        if buf.len() < UDP_HEADER_SIZE {
             return None;
         }
 
@@ -65,7 +67,7 @@ impl Layer for UdpLayer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; self.len()];
+        let mut buf = vec![0; UDP_HEADER_SIZE];
 
         buf.splice(0..2, self.source_port.to_be_bytes());
         buf.splice(2..4, self.destination_port.to_be_bytes());
@@ -82,10 +84,6 @@ impl Layer for UdpLayer {
         }
 
         buf
-    }
-
-    fn len(&self) -> usize {
-        8
     }
 
     fn as_any(&self) -> &dyn Any {

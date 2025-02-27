@@ -120,10 +120,6 @@ impl Layer for DhcpLayer {
         buf
     }
 
-    fn len(&self) -> usize {
-        self.length
-    }
-
     fn as_any(&self) -> &dyn Any {
         self
     }

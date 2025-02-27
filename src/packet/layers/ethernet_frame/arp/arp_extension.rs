@@ -4,6 +4,8 @@ use std::net::Ipv4Addr;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 use crate::packet::layers::inter::layer::Layer;
 
+const ARP_HEADER_LEN: usize = 28;
+
 #[derive(Clone, Debug)]
 pub struct ArpLayer {
     hardware_type: u16,
@@ -59,7 +61,7 @@ impl ArpLayer {
 impl Layer for ArpLayer {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < 28 {
+        if buf.len() < ARP_HEADER_LEN {
             return None;
         }
 
@@ -77,7 +79,7 @@ impl Layer for ArpLayer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; self.len()];
+        let mut buf = vec![0; ARP_HEADER_LEN];
 
         buf.splice(0..2, self.hardware_type.to_be_bytes());
         buf.splice(2..4, self.protocol_type.to_be_bytes());
@@ -90,10 +92,6 @@ impl Layer for ArpLayer {
         buf.splice(24..28, self.target_ip.octets());
 
         buf
-    }
-
-    fn len(&self) -> usize {
-        28
     }
 
     fn as_any(&self) -> &dyn Any {
