@@ -16,16 +16,41 @@ pub struct EthernetFrame {
 
 impl EthernetFrame {
 
+    pub fn new(destination: EthernetAddress, source: EthernetAddress, _type: Types) -> Self {
+        Self {
+            destination,
+            source,
+            _type,
+            data: None
+        }
+    }
+
+    pub fn set_destination(&mut self, destination: EthernetAddress) {
+        self.destination = destination;
+    }
+
     pub fn get_destination(&self) -> EthernetAddress {
         self.destination
+    }
+
+    pub fn set_source(&mut self, source: EthernetAddress) {
+        self.source = source;
     }
 
     pub fn get_source(&self) -> EthernetAddress {
         self.source
     }
 
+    pub fn set_type(&mut self, _type: Types) {
+        self._type = _type;
+    }
+
     pub fn get_type(&self) -> Types {
         self._type
+    }
+
+    pub fn set_data(&mut self, data: Box<dyn Layer>) {
+        self.data = Some(data);
     }
 
     pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
