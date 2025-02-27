@@ -29,7 +29,8 @@ pub mod packet;
 
 #[cfg(target_os = "linux")]
 pub mod capture {
-    use std::io;
+    use std::{io, mem, ptr};
+    use std::ffi::CString;
     use std::os::fd::RawFd;
     use crate::devices::Device;
     use crate::packet::packet::{decode_packet, Packet};
@@ -40,13 +41,37 @@ pub mod capture {
     const ETH_P_ALL: u16 = 0x0003;
     const SOL_SOCKET: i64 = 1;
     const SO_BINDTODEVICE: i64 = 25;
+    const SYS_IOCTL: i64 = 16;
+    pub const SYS_BIND: i64 = 49;
     pub const SYS_RECV_FROM: i64 = 45;
     pub const SYS_SET_SOCK_OPT: i64 = 54;
+    pub const IFNAMSIZ: usize = 16;
+    pub const SIOCGIFINDEX: u64 = 0x8933;
+
+    #[repr(C)]
+    struct IfReq {
+        ifr_name: [u8; IFNAMSIZ],
+        ifr_ifindex: i32,
+    }
+
+    #[repr(C)]
+    struct SockAddrLl {
+        sll_family: u16,
+        sll_protocol: u16,
+        sll_ifindex: i32,
+        sll_hatype: u16,
+        sll_pkttype: u8,
+        sll_halen: u8,
+        sll_addr: [u8; 8],
+    }
+
+
 
     #[derive(Debug)]
     pub struct Capture {
         fd: RawFd,
-        device: Device
+        device: Device,
+        promiscuous: bool
     }
 
     impl Capture {
@@ -62,7 +87,8 @@ pub mod capture {
 
             Ok(Self {
                 fd: fd as RawFd,
-                device: device.clone()
+                device: device.clone(),
+                promiscuous: false
             })
         }
 
@@ -71,24 +97,50 @@ pub mod capture {
                 return Err(io::Error::last_os_error());
             }
 
-            let mut if_name_bytes = [0u8; 16];
-            if let bytes = self.device.get_name().as_bytes() {
-                if bytes.len() >= if_name_bytes.len() {
-                    return Err(io::Error::new(io::ErrorKind::InvalidInput, "Interface name too long"));
+            let mut ifreq = IfReq {
+                ifr_name: [0; IFNAMSIZ],
+                ifr_ifindex: 0,
+            };
+
+            let if_name_bytes = self.device.get_name().into_bytes();
+            if if_name_bytes.len() >= IFNAMSIZ {
+                return Err(io::Error::new(io::ErrorKind::InvalidInput, "Interface name too long"));
+            }
+
+            ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
+
+            if !self.promiscuous {
+                let res = unsafe {
+                    Self::syscall(SYS_IOCTL, self.fd as i64, SIOCGIFINDEX as i64, &mut ifreq as *mut _ as i64, 0, 0)
+                };
+
+                if res < 0 {
+                    return Err(io::Error::last_os_error());
                 }
 
-                if_name_bytes[..bytes.len()].copy_from_slice(bytes);
+                let if_index = ifreq.ifr_ifindex;
+
+                let sockaddr = SockAddrLl {
+                    sll_family: AF_PACKET as u16,
+                    sll_protocol: ETH_P_ALL.to_be(),
+                    sll_ifindex: if_index,
+                    sll_hatype: 0,
+                    sll_pkttype: 0,
+                    sll_halen: 0,
+                    sll_addr: [0; 8],
+                };
+
+                let res = unsafe {
+                    Self::syscall(SYS_BIND, self.fd as i64, &sockaddr as *const _ as i64, mem::size_of::<SockAddrLl>() as i64, 0, 0)
+                };
+
+                if res < 0 {
+                    return Err(io::Error::last_os_error());
+                }
             }
 
             let res = unsafe {
-                Self::syscall(
-                    SYS_SET_SOCK_OPT,
-                    self.fd as i64,
-                    SOL_SOCKET,
-                    SO_BINDTODEVICE,
-                    if_name_bytes.as_ptr() as i64,
-                    if_name_bytes.len() as i64
-                )
+                Self::syscall(SYS_SET_SOCK_OPT, self.fd as i64, SOL_SOCKET, SO_BINDTODEVICE, ifreq.ifr_name.as_ptr() as i64, IFNAMSIZ as i64)
             };
 
             if res < 0 {
@@ -102,8 +154,13 @@ pub mod capture {
             println!("Setting immediate mode for interface {}", self.device.get_name());
         }
 
-        pub fn set_promiscuous_mode(&self, promiscuous: bool) {
-            println!("Setting promiscuous mode for interface {}", self.device.get_name());
+        pub fn set_promiscuous_mode(&mut self, promiscuous: bool) -> io::Result<()> {
+            if self.fd > 0 {
+                return Err(io::Error::last_os_error());
+            }
+
+            self.promiscuous = promiscuous;
+            Ok(())
         }
 
         pub fn next_packet(&mut self) -> io::Result<Packet> {
