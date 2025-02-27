@@ -48,13 +48,13 @@ pub mod capture {
     pub const SIOCGIFINDEX: u64 = 0x8933;
 
     #[repr(C)]
-    struct IfReq {
+    pub struct IfReq {
         ifr_name: [u8; IFNAMSIZ],
         ifr_ifindex: i32,
     }
 
     #[repr(C)]
-    struct SockAddrLl {
+    pub struct SockAddrLl {
         sll_family: u16,
         sll_protocol: u16,
         sll_ifindex: i32,
@@ -63,8 +63,6 @@ pub mod capture {
         sll_halen: u8,
         sll_addr: [u8; 8],
     }
-
-
 
     #[derive(Debug)]
     pub struct Capture {
