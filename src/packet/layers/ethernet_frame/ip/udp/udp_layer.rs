@@ -46,9 +46,6 @@ impl UdpLayer {
         self.checksum
     }
 
-    //pub fn get_type(&self) -> UdpTypes {
-    //    self.payload.to_string()
-    //}
     pub fn get_type(&self) -> UdpTypes {
         match self.payload {
             UdpPayloads::Known(_type, _) => {

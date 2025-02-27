@@ -1,9 +1,9 @@
 #[derive(Clone, Copy, Debug)]
-pub struct DHCPCookie {
+pub struct DhcpCookie {
     magic: [u8; 4]
 }
 
-impl DHCPCookie {
+impl DhcpCookie {
 
     pub fn new(a: u8, b: u8, c: u8, d: u8) -> Self {
         Self {
