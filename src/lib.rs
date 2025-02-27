@@ -29,8 +29,7 @@ pub mod packet;
 
 #[cfg(target_os = "linux")]
 pub mod capture {
-    use std::{io, mem, ptr};
-    use std::ffi::CString;
+    use std::{io, mem};
     use std::os::fd::RawFd;
     use crate::devices::Device;
     use crate::packet::packet::{decode_packet, Packet};
@@ -97,50 +96,57 @@ pub mod capture {
                 return Err(io::Error::last_os_error());
             }
 
-            let mut ifreq = IfReq {
-                ifr_name: [0; IFNAMSIZ],
-                ifr_ifindex: 0,
-            };
+            let res = match !self.promiscuous {
+                true => {
+                    let mut ifreq = IfReq {
+                        ifr_name: [0; IFNAMSIZ],
+                        ifr_ifindex: 0,
+                    };
 
-            let if_name_bytes = self.device.get_name().into_bytes();
-            if if_name_bytes.len() >= IFNAMSIZ {
-                return Err(io::Error::new(io::ErrorKind::InvalidInput, "Interface name too long"));
-            }
+                    let if_name_bytes = self.device.get_name().into_bytes();
+                    if if_name_bytes.len() >= IFNAMSIZ {
+                        return Err(io::Error::new(io::ErrorKind::InvalidInput, "Interface name too long"));
+                    }
 
-            ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
+                    ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
 
-            if !self.promiscuous {
-                let res = unsafe {
-                    Self::syscall(SYS_IOCTL, self.fd as i64, SIOCGIFINDEX as i64, &mut ifreq as *mut _ as i64, 0, 0)
-                };
+                    let res = unsafe {
+                        Self::syscall(SYS_IOCTL, self.fd as i64, SIOCGIFINDEX as i64, &mut ifreq as *mut _ as i64, 0, 0)
+                    };
 
-                if res < 0 {
-                    return Err(io::Error::last_os_error());
+                    if res < 0 {
+                        return Err(io::Error::last_os_error());
+                    }
+
+                    let if_index = ifreq.ifr_ifindex;
+
+                    let sockaddr = SockAddrLl {
+                        sll_family: AF_PACKET as u16,
+                        sll_protocol: ETH_P_ALL.to_be(),
+                        sll_ifindex: if_index,
+                        sll_hatype: 0,
+                        sll_pkttype: 0,
+                        sll_halen: 0,
+                        sll_addr: [0; 8],
+                    };
+
+                    let res = unsafe {
+                        Self::syscall(SYS_BIND, self.fd as i64, &sockaddr as *const _ as i64, mem::size_of::<SockAddrLl>() as i64, 0, 0)
+                    };
+
+                    if res < 0 {
+                        return Err(io::Error::last_os_error());
+                    }
+
+                    unsafe {
+                        Self::syscall(SYS_SET_SOCK_OPT, self.fd as i64, SOL_SOCKET, SO_BINDTODEVICE, ifreq.ifr_name.as_ptr() as i64, IFNAMSIZ as i64)
+                    }
                 }
-
-                let if_index = ifreq.ifr_ifindex;
-
-                let sockaddr = SockAddrLl {
-                    sll_family: AF_PACKET as u16,
-                    sll_protocol: ETH_P_ALL.to_be(),
-                    sll_ifindex: if_index,
-                    sll_hatype: 0,
-                    sll_pkttype: 0,
-                    sll_halen: 0,
-                    sll_addr: [0; 8],
-                };
-
-                let res = unsafe {
-                    Self::syscall(SYS_BIND, self.fd as i64, &sockaddr as *const _ as i64, mem::size_of::<SockAddrLl>() as i64, 0, 0)
-                };
-
-                if res < 0 {
-                    return Err(io::Error::last_os_error());
+                false => {
+                    unsafe {
+                        Self::syscall(SYS_SET_SOCK_OPT, self.fd as i64, SOL_SOCKET, SO_BINDTODEVICE, 0, 0)
+                    }
                 }
-            }
-
-            let res = unsafe {
-                Self::syscall(SYS_SET_SOCK_OPT, self.fd as i64, SOL_SOCKET, SO_BINDTODEVICE, ifreq.ifr_name.as_ptr() as i64, IFNAMSIZ as i64)
             };
 
             if res < 0 {
@@ -155,7 +161,7 @@ pub mod capture {
         }
 
         pub fn set_promiscuous_mode(&mut self, promiscuous: bool) -> io::Result<()> {
-            if self.fd > 0 {
+            if self.fd < 0 {
                 return Err(io::Error::last_os_error());
             }
 
@@ -197,6 +203,12 @@ pub mod capture {
 mod tests {
     use crate::capture::Capture;
     use crate::devices::Device;
+
+    /*
+    update values of dhcp layer
+    try not to use vec::new
+    frame should calculate length on the spot...
+    */
 
     #[test]
     fn test() {
