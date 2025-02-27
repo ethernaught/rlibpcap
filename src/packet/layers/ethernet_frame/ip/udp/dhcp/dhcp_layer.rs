@@ -30,16 +30,12 @@ impl DhcpLayer {
             return None;
         }
 
-        let mut offset = 0;
+        let op = buf[0];
+        let htype = buf[1];
+        let hlen = buf[2];
+        let hops = buf[3];
+        let mut offset = 4;
 
-        let op = buf[offset];
-        offset += 1;
-        let htype = buf[offset];
-        offset += 1;
-        let hlen = buf[offset];
-        offset += 1;
-        let hops = buf[offset];
-        offset += 1;
         let xid = u32::from_be_bytes(buf[offset..offset + 4].try_into().ok()?);
         offset += 4;
         let secs = u16::from_be_bytes(buf[offset..offset + 2].try_into().ok()?);
@@ -101,9 +97,8 @@ impl DhcpLayer {
 impl Layer for DhcpLayer {
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();//vec![0; self.len()];
+        let mut buf = Vec::new();
 
-        /*
         buf.push(self.op);
         buf.push(self.htype);
         buf.push(self.hlen);
@@ -112,14 +107,15 @@ impl Layer for DhcpLayer {
         buf.extend_from_slice(&self.xid.to_be_bytes());
         buf.extend_from_slice(&self.secs.to_be_bytes());
         buf.extend_from_slice(&self.flags.to_be_bytes());
-        buf.extend_from_slice(&self.ciaddr);
-        buf.extend_from_slice(&self.yiaddr);
-        buf.extend_from_slice(&self.siaddr);
-        buf.extend_from_slice(&self.giaddr);
+        buf.extend_from_slice(&self.ciaddr.to_be_bytes());
+        buf.extend_from_slice(&self.yiaddr.to_be_bytes());
+        buf.extend_from_slice(&self.siaddr.to_be_bytes());
+        buf.extend_from_slice(&self.giaddr.to_be_bytes());
         buf.extend_from_slice(&self.chaddr);
         buf.extend_from_slice(&self.sname);
         buf.extend_from_slice(&self.file);
-        buf.extend_from_slice(&self.options);*/
+        buf.extend_from_slice(&self.cookie.to_bytes());
+        buf.extend_from_slice(&self.options);
 
         buf
     }

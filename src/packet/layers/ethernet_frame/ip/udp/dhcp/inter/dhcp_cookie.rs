@@ -10,4 +10,8 @@ impl DhcpCookie {
             magic: [a, b, c, d]
         }
     }
+
+    pub fn to_bytes(&self) -> [u8; 4] {
+        self.magic
+    }
 }
