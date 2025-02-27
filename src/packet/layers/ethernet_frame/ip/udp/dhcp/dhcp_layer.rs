@@ -97,7 +97,7 @@ impl Layer for DhcpLayer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
+        let mut buf = vec![0u8; self.length];
 
         buf.push(self.op);
         buf.push(self.htype);
@@ -118,6 +118,16 @@ impl Layer for DhcpLayer {
         buf.extend_from_slice(&self.options);
 
         buf
+    }
+
+    fn len(&self) -> usize {
+        self.length
+    }
+
+    fn compute_length(&self) -> usize {
+        let fixed_size = 240;
+        let options_size = self.options.len();
+        fixed_size + options_size
     }
 
     fn as_any(&self) -> &dyn Any {

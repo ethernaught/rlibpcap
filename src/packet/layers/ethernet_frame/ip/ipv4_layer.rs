@@ -168,6 +168,24 @@ impl Layer for Ipv4Layer {
         buf
     }
 
+    fn len(&self) -> usize {
+        self.total_length as usize
+    }
+
+    fn compute_length(&mut self) -> usize {
+        let total_length = match &self.data {
+            Some(mut layer) => {
+                layer.compute_length() + IPV4_HEADER_SIZE
+            }
+            None => {
+                IPV4_HEADER_SIZE
+            }
+        };
+
+        self.total_length = total_length as u16;
+        total_length
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }

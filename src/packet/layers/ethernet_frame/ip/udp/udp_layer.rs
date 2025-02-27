@@ -44,6 +44,10 @@ impl UdpLayer {
         }
     }
 
+    pub fn set_payload(&mut self, _type: UdpTypes, layer: Box<dyn Layer>) {
+        //self.payload = payload;
+    }
+
     pub fn get_payload(&self) -> &UdpPayloads {
         &self.payload
     }
@@ -84,6 +88,24 @@ impl Layer for UdpLayer {
         }
 
         buf
+    }
+
+    fn len(&self) -> usize {
+        self.length as usize
+    }
+
+    fn compute_length(&mut self) -> usize {
+        let length = match &self.payload {
+            Some(mut layer) => {
+                layer.compute_length() + UDP_HEADER_SIZE
+            }
+            None => {
+                UDP_HEADER_SIZE
+            }
+        };
+
+        self.length = length as u16;
+        length
     }
 
     fn as_any(&self) -> &dyn Any {
