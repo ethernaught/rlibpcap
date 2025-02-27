@@ -3,14 +3,15 @@ use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_payloads::UdpPayl
 use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes;
 use crate::packet::layers::inter::layer::Layer;
 
+const UDP_HEADER_SIZE: usize = 8;
+
 #[derive(Clone, Debug)]
 pub struct UdpLayer {
     source_port: u16,
     destination_port: u16,
     length: u16,
     checksum: u16,
-    payload: UdpPayloads,
-    payload_length: usize
+    payload: UdpPayloads
 }
 
 impl UdpLayer {
@@ -42,6 +43,10 @@ impl UdpLayer {
         }
     }
 
+    pub fn set_payload(&mut self, _type: UdpTypes, layer: Box<dyn Layer>) {
+        //self.payload = payload;
+    }
+
     pub fn get_payload(&self) -> &UdpPayloads {
         &self.payload
     }
@@ -50,7 +55,7 @@ impl UdpLayer {
 impl Layer for UdpLayer {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < 8 {
+        if buf.len() < UDP_HEADER_SIZE {
             return None;
         }
 
@@ -59,13 +64,12 @@ impl Layer for UdpLayer {
             destination_port: u16::from_be_bytes([buf[2], buf[3]]),
             length: u16::from_be_bytes([buf[4], buf[5]]),
             checksum: u16::from_be_bytes([buf[6], buf[7]]),
-            payload: UdpPayloads::get_type_from_buf(&buf[8..]),
-            payload_length: 0
+            payload: UdpPayloads::get_type_from_buf(&buf[8..])
         })
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; self.len()];
+        let mut buf = vec![0; UDP_HEADER_SIZE];
 
         buf.splice(0..2, self.source_port.to_be_bytes());
         buf.splice(2..4, self.destination_port.to_be_bytes());
@@ -85,7 +89,21 @@ impl Layer for UdpLayer {
     }
 
     fn len(&self) -> usize {
-        8
+        self.length as usize
+    }
+
+    fn compute_length(&mut self) -> usize {
+        let length = match &mut self.payload {
+            UdpPayloads::Known(_, payload) => {
+                payload.compute_length() + UDP_HEADER_SIZE
+            }
+            UdpPayloads::Unknown(payload) => {
+                payload.len() + UDP_HEADER_SIZE
+            }
+        };
+
+        self.length = length as u16;
+        length
     }
 
     fn as_any(&self) -> &dyn Any {

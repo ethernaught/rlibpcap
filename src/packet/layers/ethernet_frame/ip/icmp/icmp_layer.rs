@@ -1,6 +1,8 @@
 use std::any::Any;
 use crate::packet::layers::inter::layer::Layer;
 
+const ICMP_PAYLOAD_SIZE: usize = 8;
+
 #[derive(Clone, Debug)]
 pub struct IcmpLayer {
     pub _type: u8,
@@ -36,7 +38,7 @@ impl IcmpLayer {
 impl Layer for IcmpLayer {
     
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < 8 {
+        if buf.len() < ICMP_PAYLOAD_SIZE {
             return None;
         }
 
@@ -50,7 +52,7 @@ impl Layer for IcmpLayer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; self.len()];
+        let mut buf = vec![0; ICMP_PAYLOAD_SIZE];
 
         buf[0] = self._type;
         buf[1] = self.code;
@@ -62,7 +64,11 @@ impl Layer for IcmpLayer {
     }
 
     fn len(&self) -> usize {
-        8
+        ICMP_PAYLOAD_SIZE
+    }
+
+    fn compute_length(&mut self) -> usize {
+        ICMP_PAYLOAD_SIZE
     }
 
     fn as_any(&self) -> &dyn Any {

@@ -34,12 +34,25 @@ impl Packet {
         }
     }
 
+    pub fn set_interface(&mut self, interface: Interfaces) {
+        self.interface = interface;
+    }
+
     pub fn get_interface(&self) -> &Interfaces {
         &self.interface
     }
 
+    pub fn set_frame(&mut self, frame: Box<dyn Layer>) {
+        self.length = frame.len();
+        self.frame = frame;
+    }
+
     pub fn get_frame(&self) -> &Box<dyn Layer> {
         &self.frame
+    }
+
+    pub fn set_frame_time(&mut self, frame_time: u128) {
+        self.frame_time = frame_time;
     }
 
     pub fn get_frame_time(&self) -> u128 {
@@ -51,7 +64,13 @@ impl Packet {
     }
 
     pub fn len(&self) -> usize {
-        self.length
+        self.frame.len()
+    }
+
+    pub fn compute_length(&mut self) -> usize {
+        let length = self.frame.compute_length();
+        self.length = length;
+        length
     }
 }
 

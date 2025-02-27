@@ -6,6 +6,8 @@ use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
 
+const IPV4_HEADER_SIZE: usize = 20;
+
 #[derive(Clone, Debug)]
 pub struct Ipv4Layer {
     version: u8,
@@ -81,7 +83,7 @@ impl Ipv4Layer {
 impl Layer for Ipv4Layer {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < 20 {
+        if buf.len() < IPV4_HEADER_SIZE {
             return None;
         }
 
@@ -96,16 +98,16 @@ impl Layer for Ipv4Layer {
                 None
             }
             Protocols::Icmp => {
-                Some(IcmpLayer::from_bytes(&buf[20..])?.dyn_clone())
+                Some(IcmpLayer::from_bytes(&buf[IPV4_HEADER_SIZE..])?.dyn_clone())
             }
             Protocols::Igmp => {
                 None
             }
             Protocols::Tcp => {
-                Some(TcpLayer::from_bytes(&buf[20..])?.dyn_clone())
+                Some(TcpLayer::from_bytes(&buf[IPV4_HEADER_SIZE..])?.dyn_clone())
             }
             Protocols::Udp => {
-                Some(UdpLayer::from_bytes(&buf[20..])?.dyn_clone())
+                Some(UdpLayer::from_bytes(&buf[IPV4_HEADER_SIZE..])?.dyn_clone())
             }
             Protocols::Ipv6 => {
                 None
@@ -142,7 +144,7 @@ impl Layer for Ipv4Layer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; self.len()];
+        let mut buf = vec![0; IPV4_HEADER_SIZE];
 
         buf[0] = (self.version << 4) | (self.ihl & 0x0F);
         buf[1] = self.tos;
@@ -167,7 +169,21 @@ impl Layer for Ipv4Layer {
     }
 
     fn len(&self) -> usize {
-        20
+        self.total_length as usize
+    }
+
+    fn compute_length(&mut self) -> usize {
+        let total_length = match &mut self.data {
+            Some(layer) => {
+                layer.compute_length() + IPV4_HEADER_SIZE
+            }
+            None => {
+                IPV4_HEADER_SIZE
+            }
+        };
+
+        self.total_length = total_length as u16;
+        total_length
     }
 
     fn as_any(&self) -> &dyn Any {

@@ -9,6 +9,8 @@ pub trait Layer: Send + Debug {
 
     fn len(&self) -> usize;
 
+    fn compute_length(&mut self) -> usize;
+
     fn as_any(&self) -> &dyn Any;
 
     fn as_any_mut(&mut self) -> &mut dyn Any;
