@@ -54,6 +54,7 @@ impl EthernetFrame {
     }
 
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
+        self.length = data.len();
         self.data = Some(data);
     }
 
