@@ -19,24 +19,6 @@ pub struct ArpLayer {
 
 impl ArpLayer {
 
-    pub fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < 28 {
-            return None;
-        }
-
-        Some(Self {
-            hardware_type: u16::from_be_bytes([buf[0], buf[1]]),
-            protocol_type: u16::from_be_bytes([buf[2], buf[3]]),
-            hardware_size: buf[4],
-            protocol_size: buf[5],
-            opcode: u16::from_be_bytes([buf[6], buf[7]]),
-            sender_mac: EthernetAddress::new(buf[8], buf[9], buf[10], buf[11], buf[12], buf[13]),
-            sender_ip: Ipv4Addr::new(buf[14], buf[15], buf[16], buf[17]),
-            target_mac: EthernetAddress::new(buf[18], buf[19], buf[20], buf[21], buf[22], buf[23]),
-            target_ip: Ipv4Addr::new(buf[24], buf[25], buf[26], buf[27])
-        })
-    }
-
     pub fn get_hardware_type(&self) -> u16 {
         self.hardware_type
     }
@@ -75,6 +57,24 @@ impl ArpLayer {
 }
 
 impl Layer for ArpLayer {
+
+    fn from_bytes(buf: &[u8]) -> Option<Self> {
+        if buf.len() < 28 {
+            return None;
+        }
+
+        Some(Self {
+            hardware_type: u16::from_be_bytes([buf[0], buf[1]]),
+            protocol_type: u16::from_be_bytes([buf[2], buf[3]]),
+            hardware_size: buf[4],
+            protocol_size: buf[5],
+            opcode: u16::from_be_bytes([buf[6], buf[7]]),
+            sender_mac: EthernetAddress::new(buf[8], buf[9], buf[10], buf[11], buf[12], buf[13]),
+            sender_ip: Ipv4Addr::new(buf[14], buf[15], buf[16], buf[17]),
+            target_mac: EthernetAddress::new(buf[18], buf[19], buf[20], buf[21], buf[22], buf[23]),
+            target_ip: Ipv4Addr::new(buf[24], buf[25], buf[26], buf[27])
+        })
+    }
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];

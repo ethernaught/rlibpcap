@@ -21,7 +21,46 @@ pub struct Ipv6Layer {
 
 impl Ipv6Layer {
 
-    pub fn from_bytes(buf: &[u8]) -> Option<Self> {
+    pub fn get_version(&self) -> u8 {
+        self.version
+    }
+
+    pub fn get_traffic_class(&self) -> u8 {
+        self.traffic_class
+    }
+
+    pub fn get_flow_label(&self) -> u32 {
+        self.flow_label
+    }
+
+    pub fn get_payload_length(&self) -> u16 {
+        self.payload_length
+    }
+
+    pub fn get_next_header(&self) -> Protocols {
+        self.next_header
+    }
+
+    pub fn get_hop_limit(&self) -> u8 {
+        self.hop_limit
+    }
+
+    pub fn get_source_ip(&self) -> &Ipv6Addr {
+        &self.source_ip
+    }
+
+    pub fn get_destination_ip(&self) -> &Ipv6Addr {
+        &self.destination_ip
+    }
+
+    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
+        self.data.as_ref()
+    }
+}
+
+impl Layer for Ipv6Layer {
+
+    fn from_bytes(buf: &[u8]) -> Option<Self> {
         if buf.len() < 40 {
             return None;
         }
@@ -73,45 +112,6 @@ impl Ipv6Layer {
             data
         })
     }
-
-    pub fn get_version(&self) -> u8 {
-        self.version
-    }
-
-    pub fn get_traffic_class(&self) -> u8 {
-        self.traffic_class
-    }
-
-    pub fn get_flow_label(&self) -> u32 {
-        self.flow_label
-    }
-
-    pub fn get_payload_length(&self) -> u16 {
-        self.payload_length
-    }
-
-    pub fn get_next_header(&self) -> Protocols {
-        self.next_header
-    }
-
-    pub fn get_hop_limit(&self) -> u8 {
-        self.hop_limit
-    }
-
-    pub fn get_source_ip(&self) -> &Ipv6Addr {
-        &self.source_ip
-    }
-
-    pub fn get_destination_ip(&self) -> &Ipv6Addr {
-        &self.destination_ip
-    }
-
-    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
-        self.data.as_ref()
-    }
-}
-
-impl Layer for Ipv6Layer {
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];

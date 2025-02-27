@@ -15,21 +15,6 @@ pub struct UdpLayer {
 
 impl UdpLayer {
 
-    pub fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < 8 {
-            return None;
-        }
-
-        Some(Self {
-            source_port: u16::from_be_bytes([buf[0], buf[1]]),
-            destination_port: u16::from_be_bytes([buf[2], buf[3]]),
-            length: u16::from_be_bytes([buf[4], buf[5]]),
-            checksum: u16::from_be_bytes([buf[6], buf[7]]),
-            payload: UdpPayloads::get_type_from_buf(&buf[8..]),
-            payload_length: 0
-        })
-    }
-
     pub fn get_source_port(&self) -> u16 {
         self.source_port
     }
@@ -63,6 +48,21 @@ impl UdpLayer {
 }
 
 impl Layer for UdpLayer {
+
+    fn from_bytes(buf: &[u8]) -> Option<Self> {
+        if buf.len() < 8 {
+            return None;
+        }
+
+        Some(Self {
+            source_port: u16::from_be_bytes([buf[0], buf[1]]),
+            destination_port: u16::from_be_bytes([buf[2], buf[3]]),
+            length: u16::from_be_bytes([buf[4], buf[5]]),
+            checksum: u16::from_be_bytes([buf[6], buf[7]]),
+            payload: UdpPayloads::get_type_from_buf(&buf[8..]),
+            payload_length: 0
+        })
+    }
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];

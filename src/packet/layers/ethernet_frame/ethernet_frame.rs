@@ -16,7 +16,26 @@ pub struct EthernetFrame {
 
 impl EthernetFrame {
 
-    pub fn from_bytes(buf: &[u8]) -> Option<Self> {
+    pub fn get_destination(&self) -> EthernetAddress {
+        self.destination
+    }
+
+    pub fn get_source(&self) -> EthernetAddress {
+        self.source
+    }
+
+    pub fn get_type(&self) -> Types {
+        self._type
+    }
+
+    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
+        self.data.as_ref()
+    }
+}
+
+impl Layer for EthernetFrame {
+
+    fn from_bytes(buf: &[u8]) -> Option<Self> {
         if buf.len() < 14 {
             return None;
         }
@@ -45,25 +64,6 @@ impl EthernetFrame {
             data
         })
     }
-
-    pub fn get_destination(&self) -> EthernetAddress {
-        self.destination
-    }
-
-    pub fn get_source(&self) -> EthernetAddress {
-        self.source
-    }
-
-    pub fn get_type(&self) -> Types {
-        self._type
-    }
-
-    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
-        self.data.as_ref()
-    }
-}
-
-impl Layer for EthernetFrame {
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];

@@ -24,8 +24,11 @@ pub struct DhcpLayer {
 }
 
 impl DhcpLayer {
+}
 
-    pub fn from_bytes(buf: &[u8]) -> Option<Self> {
+impl Layer for DhcpLayer {
+
+    fn from_bytes(buf: &[u8]) -> Option<Self> {
         if buf.len() < 239 {
             return None;
         }
@@ -92,9 +95,6 @@ impl DhcpLayer {
             length: buf.len()
         })
     }
-}
-
-impl Layer for DhcpLayer {
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = Vec::new();

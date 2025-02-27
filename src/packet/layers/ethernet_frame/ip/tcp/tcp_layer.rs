@@ -18,26 +18,6 @@ pub struct TcpLayer {
 
 impl TcpLayer {
 
-    pub fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < 20 {
-            return None;
-        }
-
-        Some(Self {
-            source_port: u16::from_be_bytes([buf[0], buf[1]]),
-            destination_port: u16::from_be_bytes([buf[2], buf[3]]),
-            sequence_number: u32::from_be_bytes([buf[4], buf[5], buf[6], buf[7]]),
-            acknowledgment_number: u32::from_be_bytes([buf[8], buf[9], buf[10], buf[11]]),
-            data_offset: (buf[12] >> 4) * 4,
-            flags: u16::from_be_bytes([buf[12] & 0x0F, buf[13]]),
-            window_size: u16::from_be_bytes([buf[14], buf[15]]),
-            checksum: u16::from_be_bytes([buf[16], buf[17]]),
-            urgent_pointer: u16::from_be_bytes([buf[18], buf[19]]),
-            payload: None,
-            payload_length: 0
-        })
-    }
-
     pub fn get_source_port(&self) -> u16 {
         self.source_port
     }
@@ -85,6 +65,26 @@ impl TcpLayer {
 }
 
 impl Layer for TcpLayer {
+
+    fn from_bytes(buf: &[u8]) -> Option<Self> {
+        if buf.len() < 20 {
+            return None;
+        }
+
+        Some(Self {
+            source_port: u16::from_be_bytes([buf[0], buf[1]]),
+            destination_port: u16::from_be_bytes([buf[2], buf[3]]),
+            sequence_number: u32::from_be_bytes([buf[4], buf[5], buf[6], buf[7]]),
+            acknowledgment_number: u32::from_be_bytes([buf[8], buf[9], buf[10], buf[11]]),
+            data_offset: (buf[12] >> 4) * 4,
+            flags: u16::from_be_bytes([buf[12] & 0x0F, buf[13]]),
+            window_size: u16::from_be_bytes([buf[14], buf[15]]),
+            checksum: u16::from_be_bytes([buf[16], buf[17]]),
+            urgent_pointer: u16::from_be_bytes([buf[18], buf[19]]),
+            payload: None,
+            payload_length: 0
+        })
+    }
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];

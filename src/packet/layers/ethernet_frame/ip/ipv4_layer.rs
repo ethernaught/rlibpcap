@@ -25,7 +25,62 @@ pub struct Ipv4Layer {
 
 impl Ipv4Layer {
 
-    pub fn from_bytes(buf: &[u8]) -> Option<Self> {
+    pub fn get_version(&self) -> u8 {
+        self.version
+    }
+
+    pub fn get_ihl(&self) -> u8 {
+        self.ihl
+    }
+
+    pub fn get_tos(&self) -> u8 {
+        self.ihl
+    }
+
+    pub fn get_total_length(&self) -> u16 {
+        self.total_length
+    }
+
+    pub fn get_identification(&self) -> u16 {
+        self.identification
+    }
+
+    pub fn get_flags(&self) -> u8 {
+        self.flags
+    }
+
+    pub fn get_fragment_offset(&self) -> u16 {
+        self.fragment_offset
+    }
+
+    pub fn get_ttl(&self) -> u8 {
+        self.ttl
+    }
+
+    pub fn get_protocol(&self) -> Protocols {
+        self.protocol
+    }
+
+    pub fn get_checksum(&self) -> u16 {
+        self.checksum
+    }
+
+    pub fn get_source_ip(&self) -> &Ipv4Addr {
+        &self.source_ip
+    }
+
+    pub fn get_destination_ip(&self) -> &Ipv4Addr {
+        &self.destination_ip
+    }
+
+    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
+        self.data.as_ref()
+    }
+}
+
+impl Layer for Ipv4Layer {
+
+    fn from_bytes(buf: &[u8]) -> Option<Self> {
         if buf.len() < 20 {
             return None;
         }
@@ -85,61 +140,6 @@ impl Ipv4Layer {
             data
         })
     }
-
-    pub fn get_version(&self) -> u8 {
-        self.version
-    }
-
-    pub fn get_ihl(&self) -> u8 {
-        self.ihl
-    }
-
-    pub fn get_tos(&self) -> u8 {
-        self.ihl
-    }
-
-    pub fn get_total_length(&self) -> u16 {
-        self.total_length
-    }
-
-    pub fn get_identification(&self) -> u16 {
-        self.identification
-    }
-
-    pub fn get_flags(&self) -> u8 {
-        self.flags
-    }
-
-    pub fn get_fragment_offset(&self) -> u16 {
-        self.fragment_offset
-    }
-
-    pub fn get_ttl(&self) -> u8 {
-        self.ttl
-    }
-
-    pub fn get_protocol(&self) -> Protocols {
-        self.protocol
-    }
-
-    pub fn get_checksum(&self) -> u16 {
-        self.checksum
-    }
-
-    pub fn get_source_ip(&self) -> &Ipv4Addr {
-        &self.source_ip
-    }
-
-    pub fn get_destination_ip(&self) -> &Ipv4Addr {
-        &self.destination_ip
-    }
-
-    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
-        self.data.as_ref()
-    }
-}
-
-impl Layer for Ipv4Layer {
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];

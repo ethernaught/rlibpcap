@@ -12,20 +12,6 @@ pub struct IcmpLayer {
 
 impl IcmpLayer {
 
-    pub fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < 8 {
-            return None;
-        }
-
-        Some(Self {
-            _type: buf[0],
-            code: buf[1],
-            checksum: u16::from_be_bytes([buf[2], buf[3]]),
-            identifier: u16::from_be_bytes([buf[4], buf[5]]),
-            sequence_number: u16::from_be_bytes([buf[6], buf[7]])
-        })
-    }
-
     pub fn get_type(&self) -> u8 {
         self._type
     }
@@ -48,6 +34,20 @@ impl IcmpLayer {
 }
 
 impl Layer for IcmpLayer {
+    
+    fn from_bytes(buf: &[u8]) -> Option<Self> {
+        if buf.len() < 8 {
+            return None;
+        }
+
+        Some(Self {
+            _type: buf[0],
+            code: buf[1],
+            checksum: u16::from_be_bytes([buf[2], buf[3]]),
+            identifier: u16::from_be_bytes([buf[4], buf[5]]),
+            sequence_number: u16::from_be_bytes([buf[6], buf[7]])
+        })
+    }
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; self.len()];
