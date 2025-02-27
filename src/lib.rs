@@ -35,12 +35,12 @@ pub mod capture {
     use crate::packet::packet::{decode_packet, Packet};
 
     pub const SYS_SOCKET: i64 = 41;
-    const AF_PACKET: i64 = 17;
-    const SOCK_RAW: i64 = 3;
-    const ETH_P_ALL: u16 = 0x0003;
-    const SOL_SOCKET: i64 = 1;
-    const SO_BINDTODEVICE: i64 = 25;
-    const SYS_IOCTL: i64 = 16;
+    pub const AF_PACKET: i64 = 17;
+    pub const SOCK_RAW: i64 = 3;
+    pub const ETH_P_ALL: u16 = 0x0003;
+    pub const SOL_SOCKET: i64 = 1;
+    pub const SO_BINDTODEVICE: i64 = 25;
+    pub const SYS_IOCTL: i64 = 16;
     pub const SYS_BIND: i64 = 49;
     pub const SYS_RECV_FROM: i64 = 45;
     pub const SYS_SET_SOCK_OPT: i64 = 54;
@@ -206,6 +206,9 @@ mod tests {
     update values of dhcp layer
     try not to use vec::new
     frame should calculate length on the spot...
+
+    - Honestly redo all of the packet class
+    - IE length, interface, and frame time may not be needed...
     */
 
     #[test]

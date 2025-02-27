@@ -1,17 +1,12 @@
-use std::net::Ipv4Addr;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::packet::inter::interfaces::Interfaces;
 use crate::packet::layers::ethernet_frame::ethernet_frame::EthernetFrame;
-use crate::packet::layers::ethernet_frame::inter::types::Types;
-use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
-use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
 
 #[derive(Debug, Clone)]
 pub struct Packet {
     interface: Interfaces,
     frame: Box<dyn Layer>,
-    //layers: Vec<Box<dyn Layer>>,
     frame_time: u128,
     length: usize
 }
@@ -34,7 +29,6 @@ impl Packet {
         Self {
             interface,
             frame,
-            //layers: Vec::new(),
             frame_time,
             length: data.len()
         }
