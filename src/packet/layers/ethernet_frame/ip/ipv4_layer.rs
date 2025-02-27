@@ -34,7 +34,7 @@ impl Ipv4Layer {
     }
 
     pub fn get_tos(&self) -> u8 {
-        self.ihl
+        self.tos
     }
 
     pub fn get_total_length(&self) -> u16 {
