@@ -3,7 +3,7 @@ use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_payloads::UdpPayl
 use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes;
 use crate::packet::layers::inter::layer::Layer;
 
-const UDP_HEADER_SIZE: usize = 14;
+const UDP_HEADER_SIZE: usize = 8;
 
 #[derive(Clone, Debug)]
 pub struct UdpLayer {
