@@ -100,23 +100,37 @@ impl Layer for DhcpLayer {
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0u8; self.length];
 
-        buf.push(self.op.get_code());
-        buf.push(self.htype);
-        buf.push(self.hlen);
-        buf.push(self.hops);
+        buf[0] = self.op.get_code();
+        buf[1] = self.htype;
+        buf[2] = self.hlen;
+        buf[3] = self.hops;
 
-        buf.extend_from_slice(&self.xid.to_be_bytes());
-        buf.extend_from_slice(&self.secs.to_be_bytes());
-        buf.extend_from_slice(&self.flags.to_be_bytes());
-        buf.extend_from_slice(&self.ciaddr.to_be_bytes());
-        buf.extend_from_slice(&self.yiaddr.to_be_bytes());
-        buf.extend_from_slice(&self.siaddr.to_be_bytes());
-        buf.extend_from_slice(&self.giaddr.to_be_bytes());
-        buf.extend_from_slice(&self.chaddr);
-        buf.extend_from_slice(&self.sname);
-        buf.extend_from_slice(&self.file);
-        buf.extend_from_slice(&self.cookie.to_bytes());
-        buf.extend_from_slice(&self.options);
+        let mut off = 4;
+
+        buf[off..off + 4].copy_from_slice(&self.xid.to_be_bytes());
+        off += 4;
+        buf[off..off + 2].copy_from_slice(&self.secs.to_be_bytes());
+        off += 2;
+        buf[off..off + 2].copy_from_slice(&self.flags.to_be_bytes());
+        off += 2;
+        buf[off..off + 4].copy_from_slice(&self.ciaddr.to_be_bytes());
+        off += 4;
+        buf[off..off + 4].copy_from_slice(&self.yiaddr.to_be_bytes());
+        off += 4;
+        buf[off..off + 4].copy_from_slice(&self.siaddr.to_be_bytes());
+        off += 4;
+        buf[off..off + 4].copy_from_slice(&self.giaddr.to_be_bytes());
+        off += 4;
+
+        buf[off..off + self.chaddr.len()].copy_from_slice(&self.chaddr);
+        off += self.chaddr.len();
+        buf[off..off + self.sname.len()].copy_from_slice(&self.sname);
+        off += self.sname.len();
+        buf[off..off + self.file.len()].copy_from_slice(&self.file);
+        off += self.file.len();
+        buf[off..off + 4].copy_from_slice(&self.cookie.to_bytes());
+        off += 4;
+        buf[off..off + self.options.len()].copy_from_slice(&self.options);
 
         buf
     }
