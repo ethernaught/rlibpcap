@@ -17,7 +17,7 @@ impl EthernetAddress {
 
     pub fn to_string(&self) -> String {
         self.address.iter()
-            .map(|byte| format!("{:02x}", byte))
+            .map(|byte| format!("{:02X}", byte))
             .collect::<Vec<String>>()
             .join(":")
     }

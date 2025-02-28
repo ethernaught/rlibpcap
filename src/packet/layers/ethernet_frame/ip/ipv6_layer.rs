@@ -16,8 +16,8 @@ pub struct Ipv6Layer {
     payload_length: u16,
     next_header: Protocols,
     hop_limit: u8,
-    source: Ipv6Addr,
-    destination: Ipv6Addr,
+    source_address: Ipv6Addr,
+    destination_address: Ipv6Addr,
     data: Option<Box<dyn Layer>>
 }
 
@@ -47,12 +47,12 @@ impl Ipv6Layer {
         self.hop_limit
     }
 
-    pub fn get_source(&self) -> &Ipv6Addr {
-        &self.source
+    pub fn get_source_address(&self) -> &Ipv6Addr {
+        &self.source_address
     }
 
-    pub fn get_destination(&self) -> &Ipv6Addr {
-        &self.destination
+    pub fn get_destination_address(&self) -> &Ipv6Addr {
+        &self.destination_address
     }
 
     pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
@@ -109,8 +109,8 @@ impl Layer for Ipv6Layer {
             payload_length: u16::from_be_bytes([buf[4], buf[5]]),
             next_header,
             hop_limit: buf[7],
-            source: Ipv6Addr::from(<[u8; 16]>::try_from(&buf[8..24]).unwrap()),
-            destination: Ipv6Addr::from(<[u8; 16]>::try_from(&buf[24..40]).unwrap()),
+            source_address: Ipv6Addr::from(<[u8; 16]>::try_from(&buf[8..24]).unwrap()),
+            destination_address: Ipv6Addr::from(<[u8; 16]>::try_from(&buf[24..40]).unwrap()),
             data
         })
     }
@@ -125,8 +125,8 @@ impl Layer for Ipv6Layer {
         buf.splice(4..6, self.payload_length.to_be_bytes());
         buf[6] = self.next_header.get_code();
         buf[7] = self.hop_limit;
-        buf.splice(8..24, self.source.octets());
-        buf.splice(24..40, self.destination.octets());
+        buf.splice(8..24, self.source_address.octets());
+        buf.splice(24..40, self.destination_address.octets());
 
         match &self.data {
             Some(data) => {

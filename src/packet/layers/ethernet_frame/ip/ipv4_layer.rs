@@ -21,14 +21,14 @@ pub struct Ipv4Layer {
     ttl: u8,
     protocol: Protocols,
     checksum: u16,
-    source: Ipv4Addr,
-    destination: Ipv4Addr,
+    source_address: Ipv4Addr,
+    destination_address: Ipv4Addr,
     data: Option<Box<dyn Layer>>
 }
 
 impl Ipv4Layer {
 
-    pub fn new(source: Ipv4Addr, destination: Ipv4Addr, protocol: Protocols) -> Self {
+    pub fn new(source_address: Ipv4Addr, destination_address: Ipv4Addr, protocol: Protocols) -> Self {
         Self {
             version: 4,
             ihl: 5,
@@ -40,8 +40,8 @@ impl Ipv4Layer {
             ttl: 64,
             protocol,
             checksum: 0,
-            source,
-            destination,
+            source_address,
+            destination_address,
             data: None
         }
     }
@@ -122,20 +122,20 @@ impl Ipv4Layer {
         self.checksum
     }
 
-    pub fn set_source_ip(&mut self, source: Ipv4Addr) {
-        self.source = source;
+    pub fn set_source_address(&mut self, source_address: Ipv4Addr) {
+        self.source_address = source_address;
     }
 
-    pub fn get_source_ip(&self) -> &Ipv4Addr {
-        &self.source
+    pub fn get_source_address(&self) -> &Ipv4Addr {
+        &self.source_address
     }
 
-    pub fn set_destination(&mut self, destination: Ipv4Addr) {
-        self.destination = destination;
+    pub fn set_destination_address(&mut self, destination_address: Ipv4Addr) {
+        self.destination_address = destination_address;
     }
 
-    pub fn get_destination(&self) -> &Ipv4Addr {
-        &self.destination
+    pub fn get_destination_address(&self) -> &Ipv4Addr {
+        &self.destination_address
     }
 
     pub fn calculate_checksum(&mut self) -> u16 {
@@ -149,8 +149,8 @@ impl Ipv4Layer {
         buf[7] = (self.fragment_offset & 0xFF) as u8;
         buf[8] = self.ttl;
         buf[9] = self.protocol.get_code();
-        buf.splice(12..16, self.source.octets());
-        buf.splice(16..20, self.destination.octets());
+        buf.splice(10..14, self.source_address.octets());
+        buf.splice(14..18, self.destination_address.octets());
 
         let checksum = compute_checksum(&buf);
         self.checksum = checksum;
@@ -228,8 +228,8 @@ impl Layer for Ipv4Layer {
             ttl: buf[8],
             protocol,
             checksum: u16::from_be_bytes([buf[10], buf[11]]),
-            source: Ipv4Addr::new(buf[12], buf[13], buf[14], buf[15]),
-            destination: Ipv4Addr::new(buf[16], buf[17], buf[18], buf[19]),
+            source_address: Ipv4Addr::new(buf[12], buf[13], buf[14], buf[15]),
+            destination_address: Ipv4Addr::new(buf[16], buf[17], buf[18], buf[19]),
             data
         })
     }
@@ -246,8 +246,8 @@ impl Layer for Ipv4Layer {
         buf[8] = self.ttl;
         buf[9] = self.protocol.get_code();
         buf.splice(10..12, self.checksum.to_be_bytes());
-        buf.splice(12..16, self.source.octets());
-        buf.splice(16..20, self.destination.octets());
+        buf.splice(12..16, self.source_address.octets());
+        buf.splice(16..20, self.destination_address.octets());
 
         match &self.data {
             Some(data) => {

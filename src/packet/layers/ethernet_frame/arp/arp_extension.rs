@@ -14,9 +14,9 @@ pub struct ArpLayer {
     protocol_size: u8,
     opcode: u16,
     sender_mac: EthernetAddress,
-    sender_ip: Ipv4Addr,
+    sender_address: Ipv4Addr,
     target_mac: EthernetAddress,
-    target_ip: Ipv4Addr
+    target_address: Ipv4Addr
 }
 
 impl ArpLayer {
@@ -45,16 +45,16 @@ impl ArpLayer {
         self.sender_mac
     }
 
-    pub fn get_sender_ip(&self) -> Ipv4Addr {
-        self.sender_ip
+    pub fn get_sender_address(&self) -> Ipv4Addr {
+        self.sender_address
     }
 
     pub fn get_target_mac(&self) -> EthernetAddress {
         self.target_mac
     }
 
-    pub fn get_target_ip(&self) -> Ipv4Addr {
-        self.target_ip
+    pub fn get_target_address(&self) -> Ipv4Addr {
+        self.target_address
     }
 }
 
@@ -72,9 +72,9 @@ impl Layer for ArpLayer {
             protocol_size: buf[5],
             opcode: u16::from_be_bytes([buf[6], buf[7]]),
             sender_mac: EthernetAddress::new(buf[8], buf[9], buf[10], buf[11], buf[12], buf[13]),
-            sender_ip: Ipv4Addr::new(buf[14], buf[15], buf[16], buf[17]),
+            sender_address: Ipv4Addr::new(buf[14], buf[15], buf[16], buf[17]),
             target_mac: EthernetAddress::new(buf[18], buf[19], buf[20], buf[21], buf[22], buf[23]),
-            target_ip: Ipv4Addr::new(buf[24], buf[25], buf[26], buf[27])
+            target_address: Ipv4Addr::new(buf[24], buf[25], buf[26], buf[27])
         })
     }
 
@@ -87,9 +87,9 @@ impl Layer for ArpLayer {
         buf[5] = self.protocol_size;
         buf.splice(6..8, self.opcode.to_be_bytes());
         buf.splice(8..14, self.sender_mac.to_bytes());
-        buf.splice(14..18, self.sender_ip.octets());
+        buf.splice(14..18, self.sender_address.octets());
         buf.splice(18..24, self.target_mac.to_bytes());
-        buf.splice(24..28, self.target_ip.octets());
+        buf.splice(24..28, self.target_address.octets());
 
         buf
     }
