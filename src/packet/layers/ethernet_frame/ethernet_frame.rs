@@ -1,5 +1,5 @@
 use std::any::Any;
-use crate::packet::layers::ethernet_frame::arp::arp_extension::ArpLayer;
+use crate::packet::layers::ethernet_frame::arp::arp_extension::ArpExtension;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 use crate::packet::layers::ethernet_frame::inter::types::Types;
 use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
@@ -81,7 +81,7 @@ impl Layer for EthernetFrame {
                 Some(Ipv4Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
             }
             Types::Arp => {
-                Some(ArpLayer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
+                Some(ArpExtension::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
             }
             Types::IPv6 => {
                 Some(Ipv6Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
