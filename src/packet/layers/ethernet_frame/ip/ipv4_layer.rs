@@ -9,6 +9,13 @@ use crate::packet::layers::inter::layer::Layer;
 
 const IPV4_HEADER_SIZE: usize = 20;
 
+/*
+let ihl = (packet[0] & 0x0F) as usize * 4; // Internet Header Length (IHL)
+if ihl < IPV4_HEADER_SIZE || ihl > packet.len() {
+    return Err(io::Error::new(io::ErrorKind::Other, "Packet has invalid IHL")); // Too short to be an IPv4 packet
+}
+*/
+
 #[derive(Clone, Debug)]
 pub struct Ipv4Layer {
     version: u8,
@@ -138,8 +145,8 @@ impl Ipv4Layer {
         &self.destination_address
     }
 
-    pub fn calculate_checksum(&mut self) -> u16 {
-        let mut buf = vec![0; IPV4_HEADER_SIZE-2];
+    fn compute_checksum(&self) -> u16 {
+        let mut buf = vec![0; IPV4_HEADER_SIZE];
 
         buf[0] = (self.version << 4) | (self.ihl & 0x0F);
         buf[1] = self.tos;
@@ -149,16 +156,21 @@ impl Ipv4Layer {
         buf[7] = (self.fragment_offset & 0xFF) as u8;
         buf[8] = self.ttl;
         buf[9] = self.protocol.get_code();
-        buf.splice(10..14, self.source_address.octets());
-        buf.splice(14..18, self.destination_address.octets());
+        buf[10..12].copy_from_slice(&[0, 0]);
+        buf.splice(12..16, self.source_address.octets());
+        buf.splice(16..20, self.destination_address.octets());
 
-        let checksum = compute_checksum(&buf);
+        compute_checksum(&buf)
+    }
+
+    pub fn calculate_checksum(&mut self) -> u16 {
+        let checksum = self.compute_checksum();
         self.checksum = checksum;
         checksum
     }
 
     pub fn validate_checksum(&self) -> bool {
-        self.checksum == 0xFFFF
+        self.checksum == self.compute_checksum()
     }
 
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
