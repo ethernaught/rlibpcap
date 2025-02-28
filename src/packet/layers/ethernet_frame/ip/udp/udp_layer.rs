@@ -32,7 +32,6 @@ impl UdpLayer {
     }
 
     fn calculate_checksum(&self, source_address: IpAddr, destination_address: IpAddr) -> u16 {
-        //let mut pseudo_header: Vec<u8> = Vec::new();
         let mut buf = vec![0; UDP_HEADER_SIZE];
         buf.splice(0..2, self.source_port.to_be_bytes());
         buf.splice(2..4, self.destination_port.to_be_bytes());
