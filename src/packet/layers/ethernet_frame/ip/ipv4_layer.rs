@@ -2,6 +2,7 @@ use std::any::Any;
 use std::net::Ipv4Addr;
 use crate::packet::layers::ethernet_frame::ip::icmp::icmp_layer::IcmpLayer;
 use crate::packet::layers::ethernet_frame::ip::inter::protocols::Protocols;
+use crate::packet::layers::ethernet_frame::ip::inter::utils::compute_checksum;
 use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
@@ -20,19 +21,49 @@ pub struct Ipv4Layer {
     ttl: u8,
     protocol: Protocols,
     checksum: u16,
-    source_ip: Ipv4Addr,
-    destination_ip: Ipv4Addr,
+    source: Ipv4Addr,
+    destination: Ipv4Addr,
     data: Option<Box<dyn Layer>>
 }
 
 impl Ipv4Layer {
 
+    pub fn new(source: Ipv4Addr, destination: Ipv4Addr, protocol: Protocols) -> Self {
+        Self {
+            version: 4,
+            ihl: 5,
+            tos: 0,
+            total_length: IPV4_HEADER_SIZE as u16,
+            identification: 0,
+            flags: 0,
+            fragment_offset: 0,
+            ttl: 64,
+            protocol,
+            checksum: 0,
+            source,
+            destination,
+            data: None
+        }
+    }
+
+    pub fn set_version(&mut self, version: u8) {
+        self.version = version;
+    }
+
     pub fn get_version(&self) -> u8 {
         self.version
     }
 
+    pub fn set_ihl(&mut self, ihl: u8) {
+        self.ihl = ihl;
+    }
+
     pub fn get_ihl(&self) -> u8 {
         self.ihl
+    }
+
+    pub fn set_tos(&mut self, tos: u8) {
+        self.tos = tos;
     }
 
     pub fn get_tos(&self) -> u8 {
@@ -43,36 +74,96 @@ impl Ipv4Layer {
         self.total_length
     }
 
+    pub fn set_identification(&mut self, identification: u16) {
+        self.identification = identification;
+    }
+
     pub fn get_identification(&self) -> u16 {
         self.identification
+    }
+
+    pub fn set_flags(&mut self, flags: u8) {
+        self.flags = flags;
     }
 
     pub fn get_flags(&self) -> u8 {
         self.flags
     }
 
+    pub fn set_fragment_offset(&mut self, fragment_offset: u16) {
+        self.fragment_offset = fragment_offset;
+    }
+
     pub fn get_fragment_offset(&self) -> u16 {
         self.fragment_offset
+    }
+
+    pub fn set_ttl(&mut self, ttl: u8) {
+        self.ttl = ttl;
     }
 
     pub fn get_ttl(&self) -> u8 {
         self.ttl
     }
 
+    pub fn set_protocol(&mut self, protocol: Protocols) {
+        self.protocol = protocol;
+    }
+
     pub fn get_protocol(&self) -> Protocols {
         self.protocol
+    }
+
+    pub fn set_checksum(&mut self, checksum: u16) {
+        self.checksum = checksum;
     }
 
     pub fn get_checksum(&self) -> u16 {
         self.checksum
     }
 
-    pub fn get_source_ip(&self) -> &Ipv4Addr {
-        &self.source_ip
+    pub fn set_source_ip(&mut self, source: Ipv4Addr) {
+        self.source = source;
     }
 
-    pub fn get_destination_ip(&self) -> &Ipv4Addr {
-        &self.destination_ip
+    pub fn get_source_ip(&self) -> &Ipv4Addr {
+        &self.source
+    }
+
+    pub fn set_destination(&mut self, destination: Ipv4Addr) {
+        self.destination = destination;
+    }
+
+    pub fn get_destination(&self) -> &Ipv4Addr {
+        &self.destination
+    }
+
+    pub fn calculate_checksum(&mut self) -> u16 {
+        let mut buf = vec![0; IPV4_HEADER_SIZE-2];
+
+        buf[0] = (self.version << 4) | (self.ihl & 0x0F);
+        buf[1] = self.tos;
+        buf.splice(2..4, self.total_length.to_be_bytes());
+        buf.splice(4..6, self.identification.to_be_bytes());
+        buf[6] = (self.flags << 5) | ((self.fragment_offset >> 8) as u8 & 0x1F);
+        buf[7] = (self.fragment_offset & 0xFF) as u8;
+        buf[8] = self.ttl;
+        buf[9] = self.protocol.get_code();
+        buf.splice(12..16, self.source.octets());
+        buf.splice(16..20, self.destination.octets());
+
+        let checksum = compute_checksum(&buf);
+        self.checksum = checksum;
+        checksum
+    }
+
+    pub fn validate_checksum(&self) -> bool {
+        self.checksum == 0xFFFF
+    }
+
+    pub fn set_data(&mut self, data: Box<dyn Layer>) {
+        self.total_length = (data.len() + IPV4_HEADER_SIZE) as u16;
+        self.data = Some(data);
     }
 
     pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
@@ -137,8 +228,8 @@ impl Layer for Ipv4Layer {
             ttl: buf[8],
             protocol,
             checksum: u16::from_be_bytes([buf[10], buf[11]]),
-            source_ip: Ipv4Addr::new(buf[12], buf[13], buf[14], buf[15]),
-            destination_ip: Ipv4Addr::new(buf[16], buf[17], buf[18], buf[19]),
+            source: Ipv4Addr::new(buf[12], buf[13], buf[14], buf[15]),
+            destination: Ipv4Addr::new(buf[16], buf[17], buf[18], buf[19]),
             data
         })
     }
@@ -155,8 +246,8 @@ impl Layer for Ipv4Layer {
         buf[8] = self.ttl;
         buf[9] = self.protocol.get_code();
         buf.splice(10..12, self.checksum.to_be_bytes());
-        buf.splice(12..16, self.source_ip.octets());
-        buf.splice(16..20, self.destination_ip.octets());
+        buf.splice(12..16, self.source.octets());
+        buf.splice(16..20, self.destination.octets());
 
         match &self.data {
             Some(data) => {
