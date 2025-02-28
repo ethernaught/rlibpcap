@@ -14,7 +14,7 @@ pub enum Protocols {
 
 impl Protocols {
 
-    pub fn get_protocol_from_code(code: u8) -> Result<Self, String> {
+    pub fn from_code(code: u8) -> Result<Self, String> {
         for c in [Self::HopByHop, Self::Icmp, Self::Igmp, Self::Tcp, Self::Udp, Self::Ipv6, Self::Icmpv6, Self::Gre, Self::Ospf, Self::Sps] {
             if c.get_code() == code {
                 return Ok(c);

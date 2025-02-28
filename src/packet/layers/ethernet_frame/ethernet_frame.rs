@@ -74,7 +74,7 @@ impl Layer for EthernetFrame {
             return None;
         }
 
-        let _type = Types::get_type_from_code(u16::from_be_bytes([buf[12], buf[13]])).unwrap();
+        let _type = Types::from_code(u16::from_be_bytes([buf[12], buf[13]])).unwrap();
 
         let data = match _type {
             Types::IPv4 => {

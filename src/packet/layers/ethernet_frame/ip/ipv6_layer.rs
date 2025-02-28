@@ -71,7 +71,7 @@ impl Layer for Ipv6Layer {
             return None;
         }
 
-        let next_header = Protocols::get_protocol_from_code(buf[6]).unwrap();
+        let next_header = Protocols::from_code(buf[6]).unwrap();
 
         let data = match next_header {
             Protocols::HopByHop => {

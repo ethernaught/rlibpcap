@@ -193,7 +193,7 @@ impl Layer for Ipv4Layer {
         let version = version_ihl >> 4;
         let ihl = version_ihl & 0x0F;
 
-        let protocol = Protocols::get_protocol_from_code(buf[9]).unwrap();
+        let protocol = Protocols::from_code(buf[9]).unwrap();
 
         let data = match protocol {
             Protocols::HopByHop => {

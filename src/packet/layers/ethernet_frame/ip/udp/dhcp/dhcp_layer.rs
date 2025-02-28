@@ -1,10 +1,11 @@
 use std::any::Any;
 use crate::packet::layers::ethernet_frame::ip::udp::dhcp::inter::dhcp_cookie::DhcpCookie;
+use crate::packet::layers::ethernet_frame::ip::udp::dhcp::inter::dhcp_operations::DhcpOperations;
 use crate::packet::layers::inter::layer::Layer;
 
 #[derive(Clone, Debug)]
 pub struct DhcpLayer {
-    op: u8,           // Message type: 1 = Discover, 2 = Offer, etc.
+    op: DhcpOperations,           // Message type: 1 = Discover, 2 = Offer, etc.
     htype: u8,        // Hardware type (1 = Ethernet)
     hlen: u8,         // Hardware address length (6 for Ethernet)
     hops: u8,         // Number of hops
@@ -33,7 +34,7 @@ impl Layer for DhcpLayer {
             return None;
         }
 
-        let op = buf[0];
+        let op = DhcpOperations::from_code(buf[0]).unwrap();
         let htype = buf[1];
         let hlen = buf[2];
         let hops = buf[3];
@@ -99,7 +100,7 @@ impl Layer for DhcpLayer {
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0u8; self.length];
 
-        buf.push(self.op);
+        buf.push(self.op.get_code());
         buf.push(self.htype);
         buf.push(self.hlen);
         buf.push(self.hops);

@@ -8,7 +8,7 @@ pub enum Types {
 
 impl Types {
 
-    pub fn get_type_from_code(code: u16) -> Result<Self, String> {
+    pub fn from_code(code: u16) -> Result<Self, String> {
         for c in [Self::IPv4, Self::Arp, Self::IPv6, Self::Broadcast] {
             if c.get_code() == code {
                 return Ok(c);

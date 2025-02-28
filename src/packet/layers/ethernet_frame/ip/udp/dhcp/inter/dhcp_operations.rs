@@ -1,0 +1,50 @@
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum DhcpOperations {
+    Discover,
+    Offer,
+    Request,
+    Decline,
+    Pack,
+    Nak,
+    Release,
+    Inform
+}
+
+impl DhcpOperations {
+
+    pub fn from_code(code: u8) -> Result<Self, String> {
+        for c in [Self::Discover, Self::Offer, Self::Request, Self::Decline, Self::Pack, Self::Nak, Self::Release, Self::Inform] {
+            if c.get_code() == code {
+                return Ok(c);
+            }
+        }
+
+        Err(format!("Couldn't find for code: {}", code))
+    }
+
+    pub fn get_code(&self) -> u8 {
+        match self {
+            Self::Discover => 1,
+            Self::Offer => 2,
+            Self::Request => 3,
+            Self::Decline => 4,
+            Self::Pack => 5,
+            Self::Nak => 6,
+            Self::Release => 7,
+            Self::Inform => 8
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::Discover => "Discover",
+            Self::Offer => "Offer",
+            Self::Request => "Request",
+            Self::Decline => "Decline",
+            Self::Pack => "Pack",
+            Self::Nak => "Nak",
+            Self::Release => "Release",
+            Self::Inform => "Inform"
+        }.to_string()
+    }
+}
