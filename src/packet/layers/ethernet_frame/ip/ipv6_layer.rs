@@ -47,12 +47,12 @@ impl Ipv6Layer {
         self.hop_limit
     }
 
-    pub fn get_source_address(&self) -> &Ipv6Addr {
-        &self.source_address
+    pub fn get_source_address(&self) -> Ipv6Addr {
+        self.source_address
     }
 
-    pub fn get_destination_address(&self) -> &Ipv6Addr {
-        &self.destination_address
+    pub fn get_destination_address(&self) -> Ipv6Addr {
+        self.destination_address
     }
 
     pub fn get_data(&self) -> Option<&Box<dyn Layer>> {

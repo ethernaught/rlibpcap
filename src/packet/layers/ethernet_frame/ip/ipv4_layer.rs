@@ -133,16 +133,16 @@ impl Ipv4Layer {
         self.source_address = source_address;
     }
 
-    pub fn get_source_address(&self) -> &Ipv4Addr {
-        &self.source_address
+    pub fn get_source_address(&self) -> Ipv4Addr {
+        self.source_address
     }
 
     pub fn set_destination_address(&mut self, destination_address: Ipv4Addr) {
         self.destination_address = destination_address;
     }
 
-    pub fn get_destination_address(&self) -> &Ipv4Addr {
-        &self.destination_address
+    pub fn get_destination_address(&self) -> Ipv4Addr {
+        self.destination_address
     }
 
     fn calculate_checksum(&self) -> u16 {
