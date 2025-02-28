@@ -4,7 +4,7 @@ pub enum DhcpOperations {
     Offer,
     Request,
     Decline,
-    Pack,
+    Ack,
     Nak,
     Release,
     Inform
@@ -13,7 +13,7 @@ pub enum DhcpOperations {
 impl DhcpOperations {
 
     pub fn from_code(code: u8) -> Result<Self, String> {
-        for c in [Self::Discover, Self::Offer, Self::Request, Self::Decline, Self::Pack, Self::Nak, Self::Release, Self::Inform] {
+        for c in [Self::Discover, Self::Offer, Self::Request, Self::Decline, Self::Ack, Self::Nak, Self::Release, Self::Inform] {
             if c.get_code() == code {
                 return Ok(c);
             }
@@ -28,7 +28,7 @@ impl DhcpOperations {
             Self::Offer => 2,
             Self::Request => 3,
             Self::Decline => 4,
-            Self::Pack => 5,
+            Self::Ack => 5,
             Self::Nak => 6,
             Self::Release => 7,
             Self::Inform => 8
