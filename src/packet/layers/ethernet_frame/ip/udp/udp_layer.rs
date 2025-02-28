@@ -28,6 +28,20 @@ impl UdpLayer {
         self.length
     }
 
+    fn calculate_checksum(&self) -> u16 {
+        0
+    }
+
+    pub fn compute_checksum(&mut self) -> u16 {
+        let checksum = self.calculate_checksum();
+        self.checksum = checksum;
+        checksum
+    }
+
+    pub fn validate_checksum(&self) -> bool {
+        self.checksum == self.calculate_checksum()
+    }
+
     pub fn get_checksum(&self) -> u16 {
         self.checksum
     }

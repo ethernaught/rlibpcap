@@ -2,7 +2,6 @@ use std::any::Any;
 use std::net::Ipv4Addr;
 use crate::packet::layers::ethernet_frame::ip::icmp::icmp_layer::IcmpLayer;
 use crate::packet::layers::ethernet_frame::ip::inter::protocols::Protocols;
-use crate::packet::layers::ethernet_frame::ip::inter::utils::calculate_checksum;
 use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
@@ -121,8 +120,46 @@ impl Ipv4Layer {
         self.protocol
     }
 
-    pub fn set_checksum(&mut self, checksum: u16) {
+    fn calculate_checksum(&self) -> u16 {
+        let mut buf = vec![0; IPV4_HEADER_SIZE];
+
+        buf[0] = (self.version << 4) | (self.ihl & 0x0F);
+        buf[1] = self.tos;
+        buf.splice(2..4, self.total_length.to_be_bytes());
+        buf.splice(4..6, self.identification.to_be_bytes());
+        buf[6] = (self.flags << 5) | ((self.fragment_offset >> 8) as u8 & 0x1F);
+        buf[7] = (self.fragment_offset & 0xFF) as u8;
+        buf[8] = self.ttl;
+        buf[9] = self.protocol.get_code();
+        buf.splice(12..16, self.source_address.octets());
+        buf.splice(16..20, self.destination_address.octets());
+
+        let mut sum: u32 = 0;
+
+        for i in (0..buf.len()).step_by(2) {
+            let word = if i + 1 < buf.len() {
+                (buf[i] as u16) << 8 | (buf[i + 1] as u16)
+            } else {
+                (buf[i] as u16) << 8 // Last odd byte
+            };
+            sum += word as u32;
+        }
+
+        while sum >> 16 != 0 {
+            sum = (sum & 0xFFFF) + (sum >> 16);
+        }
+
+        !(sum as u16)
+    }
+
+    pub fn compute_checksum(&mut self) -> u16 {
+        let checksum = self.calculate_checksum();
         self.checksum = checksum;
+        checksum
+    }
+
+    pub fn validate_checksum(&self) -> bool {
+        self.checksum == self.calculate_checksum()
     }
 
     pub fn get_checksum(&self) -> u16 {
@@ -143,34 +180,6 @@ impl Ipv4Layer {
 
     pub fn get_destination_address(&self) -> Ipv4Addr {
         self.destination_address
-    }
-
-    fn calculate_checksum(&self) -> u16 {
-        let mut buf = vec![0; IPV4_HEADER_SIZE];
-
-        buf[0] = (self.version << 4) | (self.ihl & 0x0F);
-        buf[1] = self.tos;
-        buf.splice(2..4, self.total_length.to_be_bytes());
-        buf.splice(4..6, self.identification.to_be_bytes());
-        buf[6] = (self.flags << 5) | ((self.fragment_offset >> 8) as u8 & 0x1F);
-        buf[7] = (self.fragment_offset & 0xFF) as u8;
-        buf[8] = self.ttl;
-        buf[9] = self.protocol.get_code();
-        buf[10..12].copy_from_slice(&[0, 0]);
-        buf.splice(12..16, self.source_address.octets());
-        buf.splice(16..20, self.destination_address.octets());
-
-        calculate_checksum(&buf)
-    }
-
-    pub fn compute_checksum(&mut self) -> u16 {
-        let checksum = self.calculate_checksum();
-        self.checksum = checksum;
-        checksum
-    }
-
-    pub fn validate_checksum(&self) -> bool {
-        self.checksum == self.calculate_checksum()
     }
 
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
