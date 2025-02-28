@@ -7,7 +7,7 @@ use crate::packet::layers::inter::layer::Layer;
 const ARP_HEADER_LEN: usize = 28;
 
 #[derive(Clone, Debug)]
-pub struct ArpLayer {
+pub struct ArpExtension {
     hardware_type: u16,
     protocol_type: u16,
     hardware_size: u8,
@@ -19,7 +19,7 @@ pub struct ArpLayer {
     target_address: Ipv4Addr
 }
 
-impl ArpLayer {
+impl ArpExtension {
 
     pub fn get_hardware_type(&self) -> u16 {
         self.hardware_type
@@ -58,7 +58,7 @@ impl ArpLayer {
     }
 }
 
-impl Layer for ArpLayer {
+impl Layer for ArpExtension {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
         if buf.len() < ARP_HEADER_LEN {
