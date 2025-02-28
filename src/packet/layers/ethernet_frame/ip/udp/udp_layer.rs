@@ -1,4 +1,7 @@
 use std::any::Any;
+use std::net::IpAddr;
+use crate::packet::layers::ethernet_frame::ip::inter::protocols::Protocols;
+use crate::packet::layers::ethernet_frame::ip::inter::utils::calculate_checksum;
 use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_payloads::UdpPayloads;
 use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes;
 use crate::packet::layers::inter::layer::Layer;
@@ -28,18 +31,55 @@ impl UdpLayer {
         self.length
     }
 
-    fn calculate_checksum(&self) -> u16 {
-        0
+    fn calculate_checksum(&self, source_address: IpAddr, destination_address: IpAddr) -> u16 {
+        //let mut pseudo_header: Vec<u8> = Vec::new();
+        let mut buf = vec![0; UDP_HEADER_SIZE];
+        buf.splice(0..2, self.source_port.to_be_bytes());
+        buf.splice(2..4, self.destination_port.to_be_bytes());
+        buf.splice(4..6, self.length.to_be_bytes());
+
+        match source_address {
+            IpAddr::V4(ip) => {
+                buf.extend_from_slice(&ip.octets());
+            }
+            IpAddr::V6(ip) => {
+                buf.extend_from_slice(&ip.octets());
+            }
+        }
+
+        match destination_address {
+            IpAddr::V4(ip) => {
+                buf.extend_from_slice(&ip.octets());
+            }
+            IpAddr::V6(ip) => {
+                buf.extend_from_slice(&ip.octets());
+            }
+        }
+
+        buf.push(0);
+        buf.push(Protocols::Udp.get_code());
+        buf.extend_from_slice(&self.length.to_be_bytes());
+
+        match &self.payload {
+            UdpPayloads::Known(_, payload) => {
+                buf.extend(payload.to_bytes());
+            }
+            UdpPayloads::Unknown(payload) => {
+                buf.extend(payload);
+            }
+        }
+
+        calculate_checksum(&buf)
     }
 
-    pub fn compute_checksum(&mut self) -> u16 {
-        let checksum = self.calculate_checksum();
+    pub fn compute_checksum(&mut self, source_address: IpAddr, destination_address: IpAddr) -> u16 {
+        let checksum = self.calculate_checksum(source_address, destination_address);
         self.checksum = checksum;
         checksum
     }
 
-    pub fn validate_checksum(&self) -> bool {
-        self.checksum == self.calculate_checksum()
+    pub fn validate_checksum(&self, source_address: IpAddr, destination_address: IpAddr) -> bool {
+        self.checksum == self.calculate_checksum(source_address, destination_address)
     }
 
     pub fn get_checksum(&self) -> u16 {
