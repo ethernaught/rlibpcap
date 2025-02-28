@@ -1,5 +1,5 @@
 
-pub fn compute_checksum(buf: &[u8]) -> u16 {
+pub fn calculate_checksum(buf: &[u8]) -> u16 {
     let mut sum: u32 = 0;
 
     for i in (0..buf.len()).step_by(2) {

@@ -2,7 +2,7 @@ use std::any::Any;
 use std::net::Ipv4Addr;
 use crate::packet::layers::ethernet_frame::ip::icmp::icmp_layer::IcmpLayer;
 use crate::packet::layers::ethernet_frame::ip::inter::protocols::Protocols;
-use crate::packet::layers::ethernet_frame::ip::inter::utils::compute_checksum;
+use crate::packet::layers::ethernet_frame::ip::inter::utils::calculate_checksum;
 use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
@@ -145,7 +145,7 @@ impl Ipv4Layer {
         &self.destination_address
     }
 
-    fn compute_checksum(&self) -> u16 {
+    fn calculate_checksum(&self) -> u16 {
         let mut buf = vec![0; IPV4_HEADER_SIZE];
 
         buf[0] = (self.version << 4) | (self.ihl & 0x0F);
@@ -160,17 +160,17 @@ impl Ipv4Layer {
         buf.splice(12..16, self.source_address.octets());
         buf.splice(16..20, self.destination_address.octets());
 
-        compute_checksum(&buf)
+        calculate_checksum(&buf)
     }
 
-    pub fn calculate_checksum(&mut self) -> u16 {
-        let checksum = self.compute_checksum();
+    pub fn compute_checksum(&mut self) -> u16 {
+        let checksum = self.calculate_checksum();
         self.checksum = checksum;
         checksum
     }
 
     pub fn validate_checksum(&self) -> bool {
-        self.checksum == self.compute_checksum()
+        self.checksum == self.calculate_checksum()
     }
 
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
