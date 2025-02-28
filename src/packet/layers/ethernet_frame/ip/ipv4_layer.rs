@@ -181,6 +181,10 @@ impl Ipv4Layer {
     pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
         self.data.as_ref()
     }
+
+    pub fn get_data_mut(&mut self) -> Option<&mut Box<dyn Layer>> {
+        self.data.as_mut()
+    }
 }
 
 impl Layer for Ipv4Layer {
@@ -278,7 +282,7 @@ impl Layer for Ipv4Layer {
     fn compute_length(&mut self) -> usize {
         let total_length = match &mut self.data {
             Some(layer) => {
-                layer.compute_length() + IPV4_HEADER_SIZE
+                layer.len() + IPV4_HEADER_SIZE
             }
             None => {
                 IPV4_HEADER_SIZE

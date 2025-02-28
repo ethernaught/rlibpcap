@@ -50,6 +50,10 @@ impl UdpLayer {
     pub fn get_payload(&self) -> &UdpPayloads {
         &self.payload
     }
+
+    pub fn get_payload_mut(&mut self) -> &mut UdpPayloads {
+        &mut self.payload
+    }
 }
 
 impl Layer for UdpLayer {
@@ -95,7 +99,7 @@ impl Layer for UdpLayer {
     fn compute_length(&mut self) -> usize {
         let length = match &mut self.payload {
             UdpPayloads::Known(_, payload) => {
-                payload.compute_length() + UDP_HEADER_SIZE
+                payload.len() + UDP_HEADER_SIZE
             }
             UdpPayloads::Unknown(payload) => {
                 payload.len() + UDP_HEADER_SIZE

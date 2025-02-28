@@ -61,6 +61,10 @@ impl EthernetFrame {
     pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
         self.data.as_ref()
     }
+
+    pub fn get_data_mut(&mut self) -> Option<&mut Box<dyn Layer>> {
+        self.data.as_mut()
+    }
 }
 
 impl Layer for EthernetFrame {
@@ -119,7 +123,7 @@ impl Layer for EthernetFrame {
     fn compute_length(&mut self) -> usize {
         let length = match &mut self.data {
             Some(layer) => {
-                layer.compute_length() + ETHERNET_FRAME_LEN
+                layer.len() + ETHERNET_FRAME_LEN
             }
             None => {
                 ETHERNET_FRAME_LEN

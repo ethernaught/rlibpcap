@@ -59,6 +59,12 @@ impl TcpLayer {
     pub fn get_payload(&self) -> &Option<Vec<u8>> {
         &self.payload
     }
+
+    /*
+    pub fn get_payload_mut(&mut self) -> Option<&mut Vec<u8>> {
+        &mut self.payload
+    }
+    */
 }
 
 impl Layer for TcpLayer {

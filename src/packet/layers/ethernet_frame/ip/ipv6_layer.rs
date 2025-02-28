@@ -58,6 +58,10 @@ impl Ipv6Layer {
     pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
         self.data.as_ref()
     }
+
+    pub fn get_data_mut(&mut self) -> Option<&mut Box<dyn Layer>> {
+        self.data.as_mut()
+    }
 }
 
 impl Layer for Ipv6Layer {
@@ -145,7 +149,7 @@ impl Layer for Ipv6Layer {
     fn compute_length(&mut self) -> usize {
         let payload_length = match &mut self.data {
             Some(layer) => {
-                layer.compute_length()
+                layer.len()
             }
             None => {
                 0
