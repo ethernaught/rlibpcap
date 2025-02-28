@@ -19,6 +19,16 @@ pub struct UdpLayer {
 
 impl UdpLayer {
 
+    pub fn new(source_port: u16, destination_port: u16) -> Self {
+        Self {
+            source_port,
+            destination_port,
+            length: UDP_HEADER_SIZE as u16,
+            checksum: 0,
+            payload: UdpPayloads::None
+        }
+    }
+
     pub fn get_source_port(&self) -> u16 {
         self.source_port
     }
@@ -66,6 +76,7 @@ impl UdpLayer {
             UdpPayloads::Unknown(payload) => {
                 buf.extend(payload);
             }
+            _ => {}
         }
 
         calculate_checksum(&buf)
@@ -93,6 +104,7 @@ impl UdpLayer {
             UdpPayloads::Unknown(_) => {
                 UdpTypes::Unknown
             }
+            _ => UdpTypes::None
         }
     }
 
@@ -140,6 +152,7 @@ impl Layer for UdpLayer {
             UdpPayloads::Unknown(payload) => {
                 buf.extend(payload);
             }
+            _ => {}
         }
 
         buf
@@ -157,6 +170,7 @@ impl Layer for UdpLayer {
             UdpPayloads::Unknown(payload) => {
                 payload.len() + UDP_HEADER_SIZE
             }
+            _ => UDP_HEADER_SIZE
         };
 
         self.length = length as u16;

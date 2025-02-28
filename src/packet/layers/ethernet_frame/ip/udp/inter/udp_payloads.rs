@@ -5,7 +5,8 @@ use crate::packet::layers::inter::layer::Layer;
 #[derive(Clone, Debug)]
 pub enum UdpPayloads {
     Known(UdpTypes, Box<dyn Layer>),
-    Unknown(Vec<u8>)
+    Unknown(Vec<u8>),
+    None
 }
 
 impl UdpPayloads {

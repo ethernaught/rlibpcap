@@ -5,7 +5,8 @@ pub enum UdpTypes {
     Quick,
     uTp,
     BitTorrent,
-    Unknown
+    Unknown,
+    None
 }
 
 impl UdpTypes {
