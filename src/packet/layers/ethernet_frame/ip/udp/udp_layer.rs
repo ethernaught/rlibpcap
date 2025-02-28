@@ -29,8 +29,16 @@ impl UdpLayer {
         }
     }
 
+    pub fn set_source_port(&mut self, source_port: u16) {
+        self.source_port = source_port;
+    }
+
     pub fn get_source_port(&self) -> u16 {
         self.source_port
+    }
+
+    pub fn set_destination_port(&mut self, destination_port: u16) {
+        self.destination_port = destination_port;
     }
 
     pub fn get_destination_port(&self) -> u16 {
@@ -108,8 +116,14 @@ impl UdpLayer {
         }
     }
 
-    pub fn set_payload(&mut self, _type: UdpTypes, layer: Box<dyn Layer>) {
-        //self.payload = payload;
+    pub fn set_payload_layer(&mut self, _type: UdpTypes, layer: Box<dyn Layer>) {
+        self.length = (layer.len() + UDP_HEADER_SIZE) as u16;
+        self.payload = UdpPayloads::Known(_type, layer);
+    }
+
+    pub fn set_payload_data(&mut self, data: Vec<u8>) {
+        self.length = (data.len() + UDP_HEADER_SIZE) as u16;
+        self.payload = UdpPayloads::Unknown(data);
     }
 
     pub fn get_payload(&self) -> &UdpPayloads {
