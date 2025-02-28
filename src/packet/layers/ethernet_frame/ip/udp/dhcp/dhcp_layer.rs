@@ -126,9 +126,9 @@ impl Layer for DhcpLayer {
     }
 
     fn compute_length(&mut self) -> usize {
-        let fixed_size = 240;
-        let options_size = self.options.len();
-        fixed_size + options_size
+        let length = 240 + self.options.len();
+        self.length = length;
+        length
     }
 
     fn as_any(&self) -> &dyn Any {
