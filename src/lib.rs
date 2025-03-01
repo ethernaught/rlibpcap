@@ -65,7 +65,7 @@ pub mod capture {
         sll_addr: [u8; 8],
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     pub struct Capture {
         fd: RawFd,
         device: Device,
@@ -168,7 +168,7 @@ pub mod capture {
             Ok(())
         }
 
-        pub fn send_packet(&mut self, packet: Packet) -> io::Result<usize> {
+        pub fn send_packet(&self, packet: Packet) -> io::Result<usize> {
             let packet = packet.to_bytes();
 
             let len = unsafe {
