@@ -51,6 +51,10 @@ impl Packet {
         &self.frame
     }
 
+    pub fn get_frame_mut(&mut self) -> &mut Box<dyn Layer> {
+        &mut self.frame
+    }
+
     pub fn set_frame_time(&mut self, frame_time: u128) {
         self.frame_time = frame_time;
     }
