@@ -5,11 +5,13 @@ const ICMP_PAYLOAD_SIZE: usize = 8;
 
 #[derive(Clone, Debug)]
 pub struct IcmpLayer {
-    pub _type: u8,
-    pub code: u8,
-    pub checksum: u16,
-    pub identifier: u16,
-    pub sequence_number: u16
+    _type: u8,
+    code: u8,
+    checksum: u16,
+    identifier: u16,
+    sequence_number: u16,
+    data: Vec<u8>,
+    length: usize
 }
 
 impl IcmpLayer {
@@ -47,7 +49,9 @@ impl Layer for IcmpLayer {
             code: buf[1],
             checksum: u16::from_be_bytes([buf[2], buf[3]]),
             identifier: u16::from_be_bytes([buf[4], buf[5]]),
-            sequence_number: u16::from_be_bytes([buf[6], buf[7]])
+            sequence_number: u16::from_be_bytes([buf[6], buf[7]]),
+            data: buf[8..].to_vec(),
+            length: buf.len(),
         })
     }
 
@@ -59,16 +63,19 @@ impl Layer for IcmpLayer {
         buf.splice(2..4, self.checksum.to_be_bytes());
         buf.splice(4..6, self.identifier.to_be_bytes());
         buf.splice(6..8, self.sequence_number.to_be_bytes());
+        buf.extend_from_slice(&self.data);
 
         buf
     }
 
     fn len(&self) -> usize {
-        ICMP_PAYLOAD_SIZE
+        self.length
     }
 
     fn compute_length(&mut self) -> usize {
-        ICMP_PAYLOAD_SIZE
+        let length = ICMP_PAYLOAD_SIZE + self.data.len();
+        self.length = length;
+        self.length
     }
 
     fn as_any(&self) -> &dyn Any {
