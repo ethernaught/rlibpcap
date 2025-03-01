@@ -147,7 +147,7 @@ impl Layer for Ipv6Layer {
     }
 
     fn compute_length(&mut self) -> usize {
-        let payload_length = match &mut self.data {
+        let payload_length = match &self.data {
             Some(layer) => {
                 layer.len()
             }

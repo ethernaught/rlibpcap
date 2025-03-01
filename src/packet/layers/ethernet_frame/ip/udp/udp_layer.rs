@@ -177,7 +177,7 @@ impl Layer for UdpLayer {
     }
 
     fn compute_length(&mut self) -> usize {
-        let length = match &mut self.payload {
+        self.length = match &self.payload {
             UdpPayloads::Known(_, payload) => {
                 payload.len() + UDP_HEADER_SIZE
             }
@@ -185,10 +185,9 @@ impl Layer for UdpLayer {
                 payload.len() + UDP_HEADER_SIZE
             }
             _ => UDP_HEADER_SIZE
-        };
+        } as u16;
 
-        self.length = length as u16;
-        length
+        self.length as usize
     }
 
     fn as_any(&self) -> &dyn Any {

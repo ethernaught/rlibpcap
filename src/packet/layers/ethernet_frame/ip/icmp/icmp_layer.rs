@@ -73,8 +73,7 @@ impl Layer for IcmpLayer {
     }
 
     fn compute_length(&mut self) -> usize {
-        let length = ICMP_PAYLOAD_SIZE + self.data.len();
-        self.length = length;
+        self.length = ICMP_PAYLOAD_SIZE + self.data.len();
         self.length
     }
 

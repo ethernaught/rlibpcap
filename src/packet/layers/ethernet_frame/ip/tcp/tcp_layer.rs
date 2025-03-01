@@ -118,7 +118,7 @@ impl Layer for TcpLayer {
     }
 
     fn compute_length(&mut self) -> usize {
-        let length = match &self.payload {
+        self.length = match &self.payload {
             Some(payload) => {
                 payload.len() + TCP_HEADER_SIZE
             }
@@ -127,8 +127,7 @@ impl Layer for TcpLayer {
             }
         };
 
-        self.length = length;
-        length
+        self.length
     }
 
     fn as_any(&self) -> &dyn Any {

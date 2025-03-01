@@ -121,7 +121,7 @@ impl Layer for EthernetFrame {
     }
 
     fn compute_length(&mut self) -> usize {
-        let length = match &mut self.data {
+        self.length = match &self.data {
             Some(layer) => {
                 layer.len() + ETHERNET_FRAME_LEN
             }
@@ -130,8 +130,7 @@ impl Layer for EthernetFrame {
             }
         };
 
-        self.length = length;
-        length
+        self.length
     }
 
     fn as_any(&self) -> &dyn Any {

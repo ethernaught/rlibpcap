@@ -275,17 +275,16 @@ impl Layer for Ipv4Layer {
     }
 
     fn compute_length(&mut self) -> usize {
-        let total_length = match &mut self.data {
+        self.total_length = match &self.data {
             Some(layer) => {
                 layer.len() + IPV4_HEADER_SIZE
             }
             None => {
                 IPV4_HEADER_SIZE
             }
-        };
+        } as u16;
 
-        self.total_length = total_length as u16;
-        total_length
+        self.total_length as usize
     }
 
     fn as_any(&self) -> &dyn Any {

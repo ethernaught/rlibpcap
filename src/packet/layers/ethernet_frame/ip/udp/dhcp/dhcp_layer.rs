@@ -140,9 +140,8 @@ impl Layer for DhcpLayer {
     }
 
     fn compute_length(&mut self) -> usize {
-        let length = 240 + self.options.len();
-        self.length = length;
-        length
+        self.length = 240 + self.options.len();
+        self.length
     }
 
     fn as_any(&self) -> &dyn Any {

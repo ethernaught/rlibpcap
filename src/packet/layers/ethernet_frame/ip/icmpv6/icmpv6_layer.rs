@@ -73,8 +73,7 @@ impl Layer for Icmpv6Layer {
     }
 
     fn compute_length(&mut self) -> usize {
-        let length = ICMPV6_HEADER_SIZE + self.data.len();
-        self.length = length;
+        self.length = ICMPV6_HEADER_SIZE + self.data.len();
         self.length
     }
 
