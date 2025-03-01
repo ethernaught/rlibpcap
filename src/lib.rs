@@ -42,6 +42,7 @@ pub mod capture {
     pub const SO_BINDTODEVICE: i64 = 25;
     pub const SYS_IOCTL: i64 = 16;
     pub const SYS_BIND: i64 = 49;
+    pub const SYS_SENDTO: i64 = 0x2C;
     pub const SYS_RECV_FROM: i64 = 45;
     pub const SYS_SET_SOCK_OPT: i64 = 54;
     pub const IFNAMSIZ: usize = 16;
@@ -165,6 +166,27 @@ pub mod capture {
 
             self.promiscuous = promiscuous;
             Ok(())
+        }
+
+        pub fn send_packet(&mut self, packet: Packet) -> io::Result<usize> {
+            let packet = packet.to_bytes();
+
+            let len = unsafe {
+                Self::syscall(
+                    SYS_SENDTO,                  // Send syscall number
+                    self.fd as i64,              // File descriptor
+                    packet.as_ptr() as i64,      // Pointer to the data to send
+                    packet.len() as i64,         // Length of the data
+                    0,                            // Flags (0 if no flags needed)
+                    0                             // Address (0 for no address, required for UDP etc.)
+                )
+            };
+
+            if len > 0 {
+                Ok(len as usize)
+            } else {
+                Err(io::Error::last_os_error())
+            }
         }
 
         pub fn next_packet(&mut self) -> io::Result<Packet> {
