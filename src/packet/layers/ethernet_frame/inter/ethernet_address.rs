@@ -15,6 +15,10 @@ impl EthernetAddress {
         self.address
     }
 
+    pub fn is_broadcast(&self) -> bool {
+        self.address == [255; 6]
+    }
+
     pub fn to_string(&self) -> String {
         self.address.iter()
             .map(|byte| format!("{:02X}", byte))
