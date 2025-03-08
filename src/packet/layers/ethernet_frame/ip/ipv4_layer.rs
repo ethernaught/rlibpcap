@@ -2,7 +2,7 @@ use std::any::Any;
 use std::net::Ipv4Addr;
 use crate::packet::layers::ethernet_frame::ip::icmp::icmp_layer::IcmpLayer;
 use crate::packet::layers::ethernet_frame::ip::inter::protocols::Protocols;
-use crate::packet::layers::ethernet_frame::ip::inter::utils::calculate_checksum;
+use crate::packet::layers::ethernet_frame::ip::inter::ip_utils::calculate_checksum;
 use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
