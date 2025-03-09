@@ -189,9 +189,6 @@ impl Layer for Ipv4Layer {
             return None;
         }
 
-        let version = buf[0] >> 4;
-        let ihl = buf[0] & 0x0F;
-
         let protocol = Protocols::from_code(buf[9]).unwrap();
 
         let data = match protocol {
@@ -228,8 +225,8 @@ impl Layer for Ipv4Layer {
         };
 
         Some(Self {
-            version,
-            ihl,
+            version: buf[0] >> 4,
+            ihl: buf[0] & 0x0F,
             tos: buf[1],
             total_length: u16::from_be_bytes([buf[2], buf[3]]),
             identification: u16::from_be_bytes([buf[4], buf[5]]),
