@@ -51,7 +51,7 @@ pub mod capture {
     #[repr(C)]
     pub struct IfReq {
         ifr_name: [u8; IFNAMSIZ],
-        ifr_ifindex: i32,
+        ifr_ifindex: i32
     }
 
     #[repr(C)]
@@ -62,7 +62,7 @@ pub mod capture {
         sll_hatype: u16,
         sll_pkttype: u8,
         sll_halen: u8,
-        sll_addr: [u8; 8],
+        sll_addr: [u8; 8]
     }
 
     #[derive(Debug, Clone)]
