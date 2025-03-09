@@ -6,7 +6,7 @@ use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_payloads::UdpPayl
 use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes;
 use crate::packet::layers::inter::layer::Layer;
 
-const UDP_HEADER_SIZE: usize = 8;
+const UDP_HEADER_LEN: usize = 8;
 
 #[derive(Clone, Debug)]
 pub struct UdpLayer {
@@ -23,7 +23,7 @@ impl UdpLayer {
         Self {
             source_port,
             destination_port,
-            length: UDP_HEADER_SIZE as u16,
+            length: UDP_HEADER_LEN as u16,
             checksum: 0,
             payload: UdpPayloads::None
         }
@@ -50,7 +50,7 @@ impl UdpLayer {
     }
 
     fn calculate_checksum(&self, source_address: IpAddr, destination_address: IpAddr) -> u16 {
-        let mut buf = vec![0; UDP_HEADER_SIZE];
+        let mut buf = vec![0; UDP_HEADER_LEN];
         buf.splice(0..2, self.source_port.to_be_bytes());
         buf.splice(2..4, self.destination_port.to_be_bytes());
         buf.splice(4..6, self.length.to_be_bytes());
@@ -117,12 +117,12 @@ impl UdpLayer {
     }
 
     pub fn set_payload_layer(&mut self, _type: UdpTypes, layer: Box<dyn Layer>) {
-        self.length = (layer.len() + UDP_HEADER_SIZE) as u16;
+        self.length = (layer.len() + UDP_HEADER_LEN) as u16;
         self.payload = UdpPayloads::Known(_type, layer);
     }
 
     pub fn set_payload_data(&mut self, data: Vec<u8>) {
-        self.length = (data.len() + UDP_HEADER_SIZE) as u16;
+        self.length = (data.len() + UDP_HEADER_LEN) as u16;
         self.payload = UdpPayloads::Unknown(data);
     }
 
@@ -138,7 +138,7 @@ impl UdpLayer {
 impl Layer for UdpLayer {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < UDP_HEADER_SIZE {
+        if buf.len() < UDP_HEADER_LEN {
             return None;
         }
 
@@ -152,7 +152,7 @@ impl Layer for UdpLayer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; UDP_HEADER_SIZE];
+        let mut buf = vec![0; UDP_HEADER_LEN];
 
         buf.splice(0..2, self.source_port.to_be_bytes());
         buf.splice(2..4, self.destination_port.to_be_bytes());
@@ -179,12 +179,12 @@ impl Layer for UdpLayer {
     fn compute_length(&mut self) -> usize {
         self.length = match &self.payload {
             UdpPayloads::Known(_, payload) => {
-                payload.len() + UDP_HEADER_SIZE
+                payload.len() + UDP_HEADER_LEN
             }
             UdpPayloads::Unknown(payload) => {
-                payload.len() + UDP_HEADER_SIZE
+                payload.len() + UDP_HEADER_LEN
             }
-            _ => UDP_HEADER_SIZE
+            _ => UDP_HEADER_LEN
         } as u16;
 
         self.length as usize

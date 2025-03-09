@@ -7,7 +7,7 @@ use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
 
-const IPV4_HEADER_SIZE: usize = 20;
+const IPV4_HEADER_LEN: usize = 20;
 
 /*
 let ihl = (packet[0] & 0x0F) as usize * 4; // Internet Header Length (IHL)
@@ -40,7 +40,7 @@ impl Ipv4Layer {
             version: 4,
             ihl: 5,
             tos: 0,
-            total_length: IPV4_HEADER_SIZE as u16,
+            total_length: IPV4_HEADER_LEN as u16,
             identification: 0,
             flags: 0,
             fragment_offset: 0,
@@ -122,7 +122,7 @@ impl Ipv4Layer {
     }
 
     fn calculate_checksum(&self) -> u16 {
-        let mut buf = vec![0; IPV4_HEADER_SIZE];
+        let mut buf = vec![0; IPV4_HEADER_LEN];
 
         buf[0] = (self.version << 4) | (self.ihl & 0x0F);
         buf[1] = self.tos;
@@ -169,7 +169,7 @@ impl Ipv4Layer {
     }
 
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
-        self.total_length = (data.len() + IPV4_HEADER_SIZE) as u16;
+        self.total_length = (data.len() + IPV4_HEADER_LEN) as u16;
         self.data = Some(data);
     }
 
@@ -185,7 +185,7 @@ impl Ipv4Layer {
 impl Layer for Ipv4Layer {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < IPV4_HEADER_SIZE {
+        if buf.len() < IPV4_HEADER_LEN {
             return None;
         }
 
@@ -200,16 +200,16 @@ impl Layer for Ipv4Layer {
                 None
             }
             Protocols::Icmp => {
-                Some(IcmpLayer::from_bytes(&buf[IPV4_HEADER_SIZE..])?.dyn_clone())
+                Some(IcmpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.dyn_clone())
             }
             Protocols::Igmp => {
                 None
             }
             Protocols::Tcp => {
-                Some(TcpLayer::from_bytes(&buf[IPV4_HEADER_SIZE..])?.dyn_clone())
+                Some(TcpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.dyn_clone())
             }
             Protocols::Udp => {
-                Some(UdpLayer::from_bytes(&buf[IPV4_HEADER_SIZE..])?.dyn_clone())
+                Some(UdpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.dyn_clone())
             }
             Protocols::Ipv6 => {
                 None
@@ -246,7 +246,7 @@ impl Layer for Ipv4Layer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; IPV4_HEADER_SIZE];
+        let mut buf = vec![0; IPV4_HEADER_LEN];
 
         buf[0] = (self.version << 4) | (self.ihl & 0x0F);
         buf[1] = self.tos;
@@ -277,10 +277,10 @@ impl Layer for Ipv4Layer {
     fn compute_length(&mut self) -> usize {
         self.total_length = match &self.data {
             Some(layer) => {
-                layer.len() + IPV4_HEADER_SIZE
+                layer.len() + IPV4_HEADER_LEN
             }
             None => {
-                IPV4_HEADER_SIZE
+                IPV4_HEADER_LEN
             }
         } as u16;
 

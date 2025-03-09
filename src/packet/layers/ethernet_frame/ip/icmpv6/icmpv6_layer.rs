@@ -1,7 +1,7 @@
 use std::any::Any;
 use crate::packet::layers::inter::layer::Layer;
 
-const ICMPV6_HEADER_SIZE: usize = 8;
+const ICMPV6_HEADER_LEN: usize = 8;
 
 #[derive(Clone, Debug)]
 pub struct Icmpv6Layer {
@@ -40,7 +40,7 @@ impl Icmpv6Layer {
 impl Layer for Icmpv6Layer {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < ICMPV6_HEADER_SIZE {
+        if buf.len() < ICMPV6_HEADER_LEN {
             return None;
         }
 
@@ -56,7 +56,7 @@ impl Layer for Icmpv6Layer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; ICMPV6_HEADER_SIZE];
+        let mut buf = vec![0; ICMPV6_HEADER_LEN];
 
         buf[0] = self._type;
         buf[1] = self.code;
@@ -73,7 +73,7 @@ impl Layer for Icmpv6Layer {
     }
 
     fn compute_length(&mut self) -> usize {
-        self.length = ICMPV6_HEADER_SIZE + self.data.len();
+        self.length = ICMPV6_HEADER_LEN + self.data.len();
         self.length
     }
 

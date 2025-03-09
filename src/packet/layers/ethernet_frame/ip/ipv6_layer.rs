@@ -6,7 +6,7 @@ use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
 
-const IPV6_HEADER_SIZE: usize = 40;
+const IPV6_HEADER_LEN: usize = 40;
 
 #[derive(Clone, Debug)]
 pub struct Ipv6Layer {
@@ -67,7 +67,7 @@ impl Ipv6Layer {
 impl Layer for Ipv6Layer {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < IPV6_HEADER_SIZE {
+        if buf.len() < IPV6_HEADER_LEN {
             return None;
         }
 
@@ -84,10 +84,10 @@ impl Layer for Ipv6Layer {
                 None
             }
             Protocols::Tcp => {
-                Some(TcpLayer::from_bytes(&buf[IPV6_HEADER_SIZE..])?.dyn_clone())
+                Some(TcpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.dyn_clone())
             }
             Protocols::Udp => {
-                Some(UdpLayer::from_bytes(&buf[IPV6_HEADER_SIZE..])?.dyn_clone())
+                Some(UdpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.dyn_clone())
             }
             Protocols::Ipv6 => {
                 None
@@ -96,7 +96,7 @@ impl Layer for Ipv6Layer {
                 None
             }
             Protocols::Icmpv6 => {
-                Some(Icmpv6Layer::from_bytes(&buf[IPV6_HEADER_SIZE..])?.dyn_clone())
+                Some(Icmpv6Layer::from_bytes(&buf[IPV6_HEADER_LEN..])?.dyn_clone())
             }
             Protocols::Ospf => {
                 None
@@ -120,7 +120,7 @@ impl Layer for Ipv6Layer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; IPV6_HEADER_SIZE];
+        let mut buf = vec![0; IPV6_HEADER_LEN];
 
         buf[0] = (self.version << 4) | ((self.traffic_class >> 4) & 0x0F);
         buf[1] = ((self.traffic_class & 0x0F) << 4) | ((self.flow_label >> 16) as u8 & 0x0F);
@@ -143,7 +143,7 @@ impl Layer for Ipv6Layer {
     }
 
     fn len(&self) -> usize {
-        self.payload_length as usize + IPV6_HEADER_SIZE
+        self.payload_length as usize + IPV6_HEADER_LEN
     }
 
     fn compute_length(&mut self) -> usize {
@@ -157,7 +157,7 @@ impl Layer for Ipv6Layer {
         };
 
         self.payload_length = payload_length as u16;
-        payload_length + IPV6_HEADER_SIZE
+        payload_length + IPV6_HEADER_LEN
     }
 
     fn as_any(&self) -> &dyn Any {
