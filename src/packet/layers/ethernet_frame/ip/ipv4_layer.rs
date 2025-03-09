@@ -189,9 +189,8 @@ impl Layer for Ipv4Layer {
             return None;
         }
 
-        let version_ihl = buf[0];
-        let version = version_ihl >> 4;
-        let ihl = version_ihl & 0x0F;
+        let version = buf[0] >> 4;
+        let ihl = buf[0] & 0x0F;
 
         let protocol = Protocols::from_code(buf[9]).unwrap();
 
