@@ -28,6 +28,10 @@ pub mod pcap;
 ]
 */
 
+//cat /sys/class/net/wlp7s0/type
+//https://www.tcpdump.org/linktypes.html
+//65534 - TUN
+
 #[cfg(test)]
 mod tests {
     use std::fs::File;
@@ -47,7 +51,7 @@ mod tests {
         }
         */
 
-        println!("{:?} {} {} {}", pcap.total_packets(), pcap.get_snaplen(), pcap.get_accuracy(), pcap.get_zone());
+        println!("{:?}", pcap.get_network());
     }
 
     #[test]

@@ -48,7 +48,8 @@ impl Pcap {
         let zone = i32::from_le_bytes([buf[8], buf[9], buf[10], buf[11]]);
         let accuracy = u32::from_le_bytes([buf[12], buf[13], buf[14], buf[15]]);
         let payload_length = u32::from_le_bytes([buf[16], buf[17], buf[18], buf[19]]);
-        let network = PcapNetworks::from_code(u32::from_le_bytes([buf[20], buf[21], buf[22], buf[23]]))?;
+        let network = PcapNetworks::from_code(u32::from_le_bytes([buf[20], buf[21], buf[22], buf[23]]))
+            .map_err(|e| io::Error::new(ErrorKind::InvalidData, e.as_str()))?;
 
         let mut packets = Vec::new();
 
@@ -100,6 +101,10 @@ impl Pcap {
 
     pub fn get_payload_length(&self) -> usize {
         self.payload_length as usize
+    }
+
+    pub fn get_network(&self) -> PcapNetworks {
+        self.network
     }
 
     pub fn add_packet(&mut self, packet: Packet) {
