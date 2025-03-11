@@ -1,7 +1,8 @@
 use std::any::Any;
-use crate::packet::layers::ethernet_frame::ip::udp::dhcp::inter::dhcp_cookie::DhcpCookie;
 use crate::packet::layers::ethernet_frame::ip::udp::dhcp::inter::dhcp_operations::DhcpOperations;
 use crate::packet::layers::inter::layer::Layer;
+
+pub const DHCP_COOKIE: [u8; 4] = [0x63, 0x82, 0x53, 0x63];
 
 #[derive(Clone, Debug)]
 pub struct DhcpLayer {
@@ -19,7 +20,6 @@ pub struct DhcpLayer {
     chaddr: [u8; 16], // Client hardware address
     sname: [u8; 64],  // Server name
     file: [u8; 128],  // Boot file name
-    cookie: DhcpCookie,
     options: Vec<u8>, // DHCP options (e.g., DHCP message type, etc.)
     length: usize
 }
@@ -67,7 +67,10 @@ impl Layer for DhcpLayer {
         file.copy_from_slice(&buf[offset..offset + 128]);
         offset += 128;
 
-        let cookie = DhcpCookie::new(buf[offset], buf[offset+1], buf[offset+2], buf[offset+3]);
+        if DHCP_COOKIE != [buf[offset], buf[offset+1], buf[offset+2], buf[offset+3]] {
+            return None;
+        }
+
         offset += 4;
 
         let mut options = Vec::new();
@@ -91,7 +94,6 @@ impl Layer for DhcpLayer {
             chaddr,
             sname,
             file,
-            cookie,
             options,
             length: buf.len()
         })
@@ -128,7 +130,7 @@ impl Layer for DhcpLayer {
         off += self.sname.len();
         buf[off..off + self.file.len()].copy_from_slice(&self.file);
         off += self.file.len();
-        buf[off..off + 4].copy_from_slice(&self.cookie.to_bytes());
+        buf[off..off + 4].copy_from_slice(&DHCP_COOKIE);
         off += 4;
         buf[off..off + self.options.len()].copy_from_slice(&self.options);
 
