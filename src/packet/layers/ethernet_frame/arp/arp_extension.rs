@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use std::net::Ipv4Addr;
 use crate::packet::layers::ethernet_frame::arp::inter::arp_operations::ArpOperations;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
-use crate::packet::layers::ethernet_frame::inter::ether_types::EtherTypes;
+use crate::packet::layers::ethernet_frame::inter::ethernet_types::EthernetTypes;
 use crate::packet::layers::inter::layer::Layer;
 
 const ARP_HEADER_LEN: usize = 28;
@@ -11,7 +11,7 @@ const ARP_HEADER_LEN: usize = 28;
 #[derive(Clone, Debug)]
 pub struct ArpExtension {
     hardware_type: u16,
-    protocol_type: EtherTypes,
+    protocol_type: EthernetTypes,
     hardware_size: u8,
     protocol_size: u8,
     opcode: ArpOperations,
@@ -26,7 +26,7 @@ impl ArpExtension {
     pub fn new(opcode: ArpOperations, sender_mac: EthernetAddress, sender_address: Ipv4Addr, target_mac: EthernetAddress, target_address: Ipv4Addr) -> Self {
         Self {
             hardware_type: 1,
-            protocol_type: EtherTypes::IPv4,
+            protocol_type: EthernetTypes::IPv4,
             hardware_size: 6,
             protocol_size: 4,
             opcode,
@@ -45,11 +45,11 @@ impl ArpExtension {
         self.hardware_type
     }
 
-    pub fn set_protocol_type(&mut self, protocol_type: EtherTypes) {
+    pub fn set_protocol_type(&mut self, protocol_type: EthernetTypes) {
         self.protocol_type = protocol_type;
     }
 
-    pub fn get_protocol_type(&self) -> EtherTypes {
+    pub fn get_protocol_type(&self) -> EthernetTypes {
         self.protocol_type
     }
 
@@ -119,7 +119,7 @@ impl Layer for ArpExtension {
 
         Some(Self {
             hardware_type: u16::from_be_bytes([buf[0], buf[1]]),
-            protocol_type: EtherTypes::from_code(u16::from_be_bytes([buf[2], buf[3]])).unwrap(),
+            protocol_type: EthernetTypes::from_code(u16::from_be_bytes([buf[2], buf[3]])).unwrap(),
             hardware_size: buf[4],
             protocol_size: buf[5],
             opcode: ArpOperations::from_code(u16::from_be_bytes([buf[6], buf[7]])).unwrap(),

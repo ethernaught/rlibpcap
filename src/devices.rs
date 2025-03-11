@@ -1,11 +1,11 @@
 use std::{fs, io};
-use crate::packet::inter::interfaces::Interfaces;
+use crate::packet::inter::data_link_types::DataLinkTypes;
 
 #[derive(Clone, Debug)]
 pub struct Device {
     name: String,
     description: Option<String>,
-    interface: Interfaces
+    data_link_type: DataLinkTypes
     //addresses: Vec<Address>,
     //flags: DeviceFlags
 }
@@ -42,7 +42,7 @@ impl Device {
             devices.push(Self {
                 name: interface_name,
                 description: Some(mac_address),
-                interface: Interfaces::Ethernet,
+                data_link_type: DataLinkTypes::Ethernet,
                 //addresses,
                 //flags,
             });
@@ -59,7 +59,7 @@ impl Device {
         self.description.clone()
     }
 
-    pub fn get_interface(&self) -> Interfaces {
-        self.interface
+    pub fn get_data_link_type(&self) -> DataLinkTypes {
+        self.data_link_type
     }
 }

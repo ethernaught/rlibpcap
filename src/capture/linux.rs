@@ -1,7 +1,9 @@
 use std::{io, mem};
+use std::io::ErrorKind;
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
+use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::packet::Packet;
 
 pub const SYS_SOCKET: i64 = 41;
@@ -17,14 +19,40 @@ pub const SYS_RECV_FROM: i64 = 45;
 pub const SYS_SET_SOCK_OPT: i64 = 54;
 pub const IFNAMSIZ: usize = 16;
 pub const SIOCGIFINDEX: u64 = 0x8933;
+pub const SIOCGIFHWADDR: u64 = 0x00008927;
 
 #[repr(C)]
 pub struct IfReq {
     ifr_name: [u8; IFNAMSIZ],
-    ifr_ifindex: i32
+    ifr_ifru: IfrIfru
 }
 
 #[repr(C)]
+pub union IfrIfru {
+    pub ifru_addr: SockAddr,
+    pub ifru_dstaddr: SockAddr,
+    pub ifru_broadaddr: SockAddr,
+    pub ifru_netmask: SockAddr,
+    pub ifru_hwaddr: SockAddr,
+    pub ifru_flags: i16,
+    pub ifru_ifindex: i32,
+    pub ifru_metric: i32,
+    pub ifru_mtu: i32,
+    pub ifru_map: u16,
+    pub ifru_slave: [i8; 16],
+    pub ifru_newname: [i8; 16],
+    pub ifru_data: *mut i8,
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SockAddr {
+    pub sa_family: u16,
+    pub sa_data: [i8; 14],
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct SockAddrLl {
     sll_family: u16,
     sll_protocol: u16,
@@ -39,6 +67,7 @@ pub struct SockAddrLl {
 pub struct Capture {
     fd: RawFd,
     device: Device,
+    data_link_type: Option<DataLinkTypes>,
     promiscuous: bool
 }
 
@@ -56,39 +85,48 @@ impl Capture {
         Ok(Self {
             fd: fd as RawFd,
             device: device.clone(),
+            data_link_type: None,
             promiscuous: false
         })
     }
 
-    pub fn open(&self) -> io::Result<()> {
+    pub fn open(&mut self) -> io::Result<()> {
         if self.fd < 0 {
             return Err(io::Error::last_os_error());
         }
 
+        let mut ifreq: IfReq = unsafe { mem::zeroed() };
+
+        let if_name_bytes = self.device.get_name().into_bytes();
+        if if_name_bytes.len() >= IFNAMSIZ {
+            return Err(io::Error::new(io::ErrorKind::InvalidInput, "Interface name too long"));
+        }
+
+        ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
+
+        let res = unsafe {
+            syscall(SYS_IOCTL, self.fd as i64, SIOCGIFINDEX as i64, &mut ifreq as *mut _ as i64, 0, 0)
+        };
+
+        if res < 0 {
+            return Err(io::Error::last_os_error());
+        }
+
+        let if_index = unsafe { ifreq.ifr_ifru.ifru_ifindex };
+
+        let res = unsafe {
+            syscall(SYS_IOCTL, self.fd as i64, SIOCGIFHWADDR as i64, &mut ifreq as *mut _ as i64, 0, 0)
+        };
+
+        if res < 0 {
+            return Err(io::Error::last_os_error());
+        }
+
+        self.data_link_type = Some(unsafe { DataLinkTypes::from_code(ifreq.ifr_ifru.ifru_hwaddr.sa_family as u32)
+            .map_err(|e| io::Error::new(ErrorKind::InvalidData, e.as_str()))? });
+
         let res = match !self.promiscuous {
             true => {
-                let mut ifreq = IfReq {
-                    ifr_name: [0; IFNAMSIZ],
-                    ifr_ifindex: 0,
-                };
-
-                let if_name_bytes = self.device.get_name().into_bytes();
-                if if_name_bytes.len() >= IFNAMSIZ {
-                    return Err(io::Error::new(io::ErrorKind::InvalidInput, "Interface name too long"));
-                }
-
-                ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
-
-                let res = unsafe {
-                    syscall(SYS_IOCTL, self.fd as i64, SIOCGIFINDEX as i64, &mut ifreq as *mut _ as i64, 0, 0)
-                };
-
-                if res < 0 {
-                    return Err(io::Error::last_os_error());
-                }
-
-                let if_index = ifreq.ifr_ifindex;
-
                 let sockaddr = SockAddrLl {
                     sll_family: AF_PACKET as u16,
                     sll_protocol: ETH_P_ALL.to_be(),
@@ -179,11 +217,15 @@ impl Capture {
                 .expect("Time went backwards")
                 .as_millis();
 
-            Ok(Packet::new(self.device.get_interface(), now, &buffer[..len as usize]))
+            Ok(Packet::new(self.data_link_type.expect("Unknown data link type"), now, &buffer[..len as usize]))
 
         } else {
             Err(io::Error::last_os_error())
         }
+    }
+
+    pub fn get_data_link_type(&self) -> Option<DataLinkTypes> {
+        self.data_link_type
     }
 }
 

@@ -51,7 +51,7 @@ mod tests {
         }
         */
 
-        println!("{:?}", pcap.get_network());
+        println!("{:?}", pcap.get_data_link_type());
     }
 
     #[test]

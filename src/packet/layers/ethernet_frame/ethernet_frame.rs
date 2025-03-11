@@ -1,7 +1,7 @@
 use std::any::Any;
 use crate::packet::layers::ethernet_frame::arp::arp_extension::ArpExtension;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
-use crate::packet::layers::ethernet_frame::inter::ether_types::EtherTypes;
+use crate::packet::layers::ethernet_frame::inter::ethernet_types::EthernetTypes;
 use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
 use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
@@ -12,14 +12,14 @@ const ETHERNET_FRAME_LEN: usize = 14;
 pub struct EthernetFrame {
     destination_mac: EthernetAddress,
     source_mac: EthernetAddress,
-    _type: EtherTypes,
+    _type: EthernetTypes,
     data: Option<Box<dyn Layer>>,
     length: usize
 }
 
 impl EthernetFrame {
 
-    pub fn new(destination_mac: EthernetAddress, source_mac: EthernetAddress, _type: EtherTypes) -> Self {
+    pub fn new(destination_mac: EthernetAddress, source_mac: EthernetAddress, _type: EthernetTypes) -> Self {
         Self {
             destination_mac,
             source_mac,
@@ -45,11 +45,11 @@ impl EthernetFrame {
         self.source_mac
     }
 
-    pub fn set_type(&mut self, _type: EtherTypes) {
+    pub fn set_type(&mut self, _type: EthernetTypes) {
         self._type = _type;
     }
 
-    pub fn get_type(&self) -> EtherTypes {
+    pub fn get_type(&self) -> EthernetTypes {
         self._type
     }
 
@@ -74,19 +74,19 @@ impl Layer for EthernetFrame {
             return None;
         }
 
-        let _type = EtherTypes::from_code(u16::from_be_bytes([buf[12], buf[13]])).unwrap();
+        let _type = EthernetTypes::from_code(u16::from_be_bytes([buf[12], buf[13]])).unwrap();
 
         let data = match _type {
-            EtherTypes::IPv4 => {
+            EthernetTypes::IPv4 => {
                 Some(Ipv4Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
             }
-            EtherTypes::Arp => {
+            EthernetTypes::Arp => {
                 Some(ArpExtension::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
             }
-            EtherTypes::IPv6 => {
+            EthernetTypes::IPv6 => {
                 Some(Ipv6Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
             }
-            EtherTypes::Broadcast => {
+            EthernetTypes::Broadcast => {
                 None
             }
         };

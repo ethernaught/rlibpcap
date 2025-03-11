@@ -1,10 +1,10 @@
-use crate::packet::inter::interfaces::Interfaces;
+use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::ethernet_frame::EthernetFrame;
 use crate::packet::layers::inter::layer::Layer;
 
 #[derive(Debug, Clone)]
 pub struct Packet {
-    interface: Interfaces,
+    data_link_type: DataLinkTypes,
     frame: Box<dyn Layer>,
     frame_time: u128,
     length: usize
@@ -12,33 +12,30 @@ pub struct Packet {
 
 impl Packet {
 
-    pub fn new(interface: Interfaces, frame_time: u128, data: &[u8]) -> Self {
-        let frame = match interface {
-            Interfaces::Ethernet => {
+    pub fn new(data_link_type: DataLinkTypes, frame_time: u128, data: &[u8]) -> Self {
+        let frame = match data_link_type {
+            DataLinkTypes::Ethernet => {
                 EthernetFrame::from_bytes(data).unwrap().dyn_clone()
             }
-            Interfaces::WiFi => {
-                todo!()
-            }
-            Interfaces::Bluetooth => {
+            _ => {
                 todo!()
             }
         };
 
         Self {
-            interface,
+            data_link_type,
             frame,
             frame_time,
             length: data.len()
         }
     }
 
-    pub fn set_interface(&mut self, interface: Interfaces) {
-        self.interface = interface;
+    pub fn set_data_link_type(&mut self, data_link_type: DataLinkTypes) {
+        self.data_link_type = data_link_type;
     }
 
-    pub fn get_interface(&self) -> &Interfaces {
-        &self.interface
+    pub fn get_data_link_type(&self) -> DataLinkTypes {
+        self.data_link_type
     }
 
     pub fn set_frame(&mut self, frame: Box<dyn Layer>) {

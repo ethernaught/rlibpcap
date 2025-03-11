@@ -2,9 +2,8 @@ use std::fs::File;
 use std::io;
 use std::io::{ErrorKind, Read};
 use std::vec::IntoIter;
-use crate::packet::inter::interfaces::Interfaces;
+use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::packet::Packet;
-use crate::pcap::inter::pcap_networks::PcapNetworks;
 
 pub const PCAP_HEADER_LEN: usize = 24;
 pub const MAGIC_NUMBER: u32 = 0xA1B2C3D4;
@@ -16,7 +15,7 @@ pub struct Pcap {
     zone: i32,
     accuracy: u32,
     payload_length: u32,
-    network: PcapNetworks,
+    data_link_type: DataLinkTypes,
     packets: Vec<Packet>
 }
 
@@ -48,7 +47,7 @@ impl Pcap {
         let zone = i32::from_le_bytes([buf[8], buf[9], buf[10], buf[11]]);
         let accuracy = u32::from_le_bytes([buf[12], buf[13], buf[14], buf[15]]);
         let payload_length = u32::from_le_bytes([buf[16], buf[17], buf[18], buf[19]]);
-        let network = PcapNetworks::from_code(u32::from_le_bytes([buf[20], buf[21], buf[22], buf[23]]))
+        let data_link_type = DataLinkTypes::from_code(u32::from_le_bytes([buf[20], buf[21], buf[22], buf[23]]))
             .map_err(|e| io::Error::new(ErrorKind::InvalidData, e.as_str()))?;
 
         let mut packets = Vec::new();
@@ -69,7 +68,7 @@ impl Pcap {
             let mut buf = vec![0u8; packet_header.captured_len as usize];
             file.read_exact(&mut buf)?;
 
-            packets.push(Packet::new(Interfaces::Ethernet, 0, &buf));
+            packets.push(Packet::new(data_link_type, 0, &buf));
         }
 
         Ok(Self {
@@ -78,7 +77,7 @@ impl Pcap {
             zone,
             accuracy,
             payload_length,
-            network,
+            data_link_type,
             packets
         })
     }
@@ -103,8 +102,8 @@ impl Pcap {
         self.payload_length as usize
     }
 
-    pub fn get_network(&self) -> PcapNetworks {
-        self.network
+    pub fn get_data_link_type(&self) -> DataLinkTypes {
+        self.data_link_type
     }
 
     pub fn add_packet(&mut self, packet: Packet) {

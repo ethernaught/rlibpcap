@@ -1,5 +1,5 @@
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub enum PcapNetworks {
+pub enum DataLinkTypes {
     Null,
     Ethernet,
     Raw,
@@ -9,7 +9,7 @@ pub enum PcapNetworks {
     Tun
 }
 
-impl PcapNetworks {
+impl DataLinkTypes {
 
     pub fn from_code(code: u32) -> Result<Self, String> {
         for c in [
