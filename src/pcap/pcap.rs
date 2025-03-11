@@ -29,6 +29,18 @@ pub struct PacketHeader {
 
 impl Pcap {
 
+    pub fn new() -> Self {
+        Self {
+            version_major: 2, //VERIFY...
+            version_minor: 5, //VERIFY...
+            zone: 0,
+            accuracy: 0, //I THINK 0...
+            payload_length: 0,
+            data_link_type: DataLinkTypes::Null,
+            packets: Vec::new()
+        }
+    }
+
     pub fn from_file(file_path: &str) -> io::Result<Self> {
         let mut file = File::open(file_path)?;
         let mut buf = [0u8; 24]; // Global header is 24 bytes
@@ -82,6 +94,13 @@ impl Pcap {
         })
     }
 
+    pub fn to_file(&self, file_path: &str) -> io::Result<()> {
+        let mut file = File::create(file_path)?;
+
+
+        Ok(())
+    }
+
     pub fn get_version_major(&self) -> u16 {
         self.version_major
     }
@@ -104,6 +123,10 @@ impl Pcap {
 
     pub fn get_data_link_type(&self) -> DataLinkTypes {
         self.data_link_type
+    }
+
+    pub fn set_packets(&mut self, packets: Vec<Packet>) {
+        self.packets = packets;
     }
 
     pub fn add_packet(&mut self, packet: Packet) {
