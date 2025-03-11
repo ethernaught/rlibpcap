@@ -1,5 +1,5 @@
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub enum Protocols {
+pub enum IpProtocols {
     HopByHop,
     Icmp,
     Igmp,
@@ -12,7 +12,7 @@ pub enum Protocols {
     Sps
 }
 
-impl Protocols {
+impl IpProtocols {
 
     pub fn from_code(code: u8) -> Result<Self, String> {
         for c in [Self::HopByHop, Self::Icmp, Self::Igmp, Self::Tcp, Self::Udp, Self::Ipv6, Self::Icmpv6, Self::Gre, Self::Ospf, Self::Sps] {

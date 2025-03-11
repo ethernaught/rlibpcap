@@ -1,7 +1,7 @@
 use std::any::Any;
 use std::net::Ipv4Addr;
 use crate::packet::layers::ethernet_frame::ip::icmp::icmp_layer::IcmpLayer;
-use crate::packet::layers::ethernet_frame::ip::inter::protocols::Protocols;
+use crate::packet::layers::ethernet_frame::ip::inter::ip_protocols::IpProtocols;
 use crate::packet::layers::ethernet_frame::ip::inter::ip_utils::calculate_checksum;
 use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
@@ -26,7 +26,7 @@ pub struct Ipv4Layer {
     flags: u8,
     fragment_offset: u16,
     ttl: u8,
-    protocol: Protocols,
+    protocol: IpProtocols,
     checksum: u16,
     source_address: Ipv4Addr,
     destination_address: Ipv4Addr,
@@ -35,7 +35,7 @@ pub struct Ipv4Layer {
 
 impl Ipv4Layer {
 
-    pub fn new(source_address: Ipv4Addr, destination_address: Ipv4Addr, protocol: Protocols) -> Self {
+    pub fn new(source_address: Ipv4Addr, destination_address: Ipv4Addr, protocol: IpProtocols) -> Self {
         Self {
             version: 4,
             ihl: 5,
@@ -113,11 +113,11 @@ impl Ipv4Layer {
         self.ttl
     }
 
-    pub fn set_protocol(&mut self, protocol: Protocols) {
+    pub fn set_protocol(&mut self, protocol: IpProtocols) {
         self.protocol = protocol;
     }
 
-    pub fn get_protocol(&self) -> Protocols {
+    pub fn get_protocol(&self) -> IpProtocols {
         self.protocol
     }
 
@@ -189,37 +189,37 @@ impl Layer for Ipv4Layer {
             return None;
         }
 
-        let protocol = Protocols::from_code(buf[9]).unwrap();
+        let protocol = IpProtocols::from_code(buf[9]).unwrap();
 
         let data = match protocol {
-            Protocols::HopByHop => {
+            IpProtocols::HopByHop => {
                 None
             }
-            Protocols::Icmp => {
+            IpProtocols::Icmp => {
                 Some(IcmpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.dyn_clone())
             }
-            Protocols::Igmp => {
+            IpProtocols::Igmp => {
                 None
             }
-            Protocols::Tcp => {
+            IpProtocols::Tcp => {
                 Some(TcpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.dyn_clone())
             }
-            Protocols::Udp => {
+            IpProtocols::Udp => {
                 Some(UdpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.dyn_clone())
             }
-            Protocols::Ipv6 => {
+            IpProtocols::Ipv6 => {
                 None
             }
-            Protocols::Gre => {
+            IpProtocols::Gre => {
                 None
             }
-            Protocols::Icmpv6 => {
+            IpProtocols::Icmpv6 => {
                 None
             }
-            Protocols::Ospf => {
+            IpProtocols::Ospf => {
                 None
             }
-            Protocols::Sps => {
+            IpProtocols::Sps => {
                 None
             }
         };

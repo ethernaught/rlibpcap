@@ -1,6 +1,6 @@
 use std::any::Any;
 use std::net::IpAddr;
-use crate::packet::layers::ethernet_frame::ip::inter::protocols::Protocols;
+use crate::packet::layers::ethernet_frame::ip::inter::ip_protocols::IpProtocols;
 use crate::packet::layers::ethernet_frame::ip::inter::ip_utils::calculate_checksum;
 use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_payloads::UdpPayloads;
 use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes;
@@ -74,7 +74,7 @@ impl UdpLayer {
         }
 
         buf.push(0);
-        buf.push(Protocols::Udp.get_code());
+        buf.push(IpProtocols::Udp.get_code());
         buf.extend_from_slice(&self.length.to_be_bytes());
 
         match &self.payload {

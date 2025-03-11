@@ -1,7 +1,7 @@
 use std::any::Any;
 use std::net::Ipv6Addr;
 use crate::packet::layers::ethernet_frame::ip::icmpv6::icmpv6_layer::Icmpv6Layer;
-use crate::packet::layers::ethernet_frame::ip::inter::protocols::Protocols;
+use crate::packet::layers::ethernet_frame::ip::inter::ip_protocols::IpProtocols;
 use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
@@ -14,7 +14,7 @@ pub struct Ipv6Layer {
     traffic_class: u8,
     flow_label: u32,
     payload_length: u16,
-    next_header: Protocols,
+    next_header: IpProtocols,
     hop_limit: u8,
     source_address: Ipv6Addr,
     destination_address: Ipv6Addr,
@@ -39,7 +39,7 @@ impl Ipv6Layer {
         self.payload_length
     }
 
-    pub fn get_next_header(&self) -> Protocols {
+    pub fn get_next_header(&self) -> IpProtocols {
         self.next_header
     }
 
@@ -71,37 +71,37 @@ impl Layer for Ipv6Layer {
             return None;
         }
 
-        let next_header = Protocols::from_code(buf[6]).unwrap();
+        let next_header = IpProtocols::from_code(buf[6]).unwrap();
 
         let data = match next_header {
-            Protocols::HopByHop => {
+            IpProtocols::HopByHop => {
                 None
             }
-            Protocols::Icmp => {
+            IpProtocols::Icmp => {
                 None
             }
-            Protocols::Igmp => {
+            IpProtocols::Igmp => {
                 None
             }
-            Protocols::Tcp => {
+            IpProtocols::Tcp => {
                 Some(TcpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.dyn_clone())
             }
-            Protocols::Udp => {
+            IpProtocols::Udp => {
                 Some(UdpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.dyn_clone())
             }
-            Protocols::Ipv6 => {
+            IpProtocols::Ipv6 => {
                 None
             }
-            Protocols::Gre => {
+            IpProtocols::Gre => {
                 None
             }
-            Protocols::Icmpv6 => {
+            IpProtocols::Icmpv6 => {
                 Some(Icmpv6Layer::from_bytes(&buf[IPV6_HEADER_LEN..])?.dyn_clone())
             }
-            Protocols::Ospf => {
+            IpProtocols::Ospf => {
                 None
             }
-            Protocols::Sps => {
+            IpProtocols::Sps => {
                 None
             }
         };
