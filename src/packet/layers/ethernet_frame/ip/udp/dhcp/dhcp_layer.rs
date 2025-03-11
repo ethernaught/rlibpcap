@@ -2,7 +2,7 @@ use std::any::Any;
 use crate::packet::layers::ethernet_frame::ip::udp::dhcp::inter::dhcp_operations::DhcpOperations;
 use crate::packet::layers::inter::layer::Layer;
 
-pub const DHCP_COOKIE: [u8; 4] = [0x63, 0x82, 0x53, 0x63];
+pub const DHCP_COOKIE: u32 = 0x63825363;
 
 #[derive(Clone, Debug)]
 pub struct DhcpLayer {
@@ -67,7 +67,7 @@ impl Layer for DhcpLayer {
         file.copy_from_slice(&buf[offset..offset + 128]);
         offset += 128;
 
-        if DHCP_COOKIE != [buf[offset], buf[offset+1], buf[offset+2], buf[offset+3]] {
+        if DHCP_COOKIE != u32::from_be_bytes([buf[offset], buf[offset+1], buf[offset+2], buf[offset+3]]) {
             return None;
         }
 
@@ -130,7 +130,7 @@ impl Layer for DhcpLayer {
         off += self.sname.len();
         buf[off..off + self.file.len()].copy_from_slice(&self.file);
         off += self.file.len();
-        buf[off..off + 4].copy_from_slice(&DHCP_COOKIE);
+        buf[off..off + 4].copy_from_slice(&DHCP_COOKIE.to_be_bytes());
         off += 4;
         buf[off..off + self.options.len()].copy_from_slice(&self.options);
 
