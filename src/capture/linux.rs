@@ -122,7 +122,7 @@ impl Capture {
         }
 
         self.data_link_type = Some(unsafe { DataLinkTypes::from_code(ifreq.ifr_ifru.ifru_hwaddr.sa_family as u32)
-            .map_err(|e| io::Error::new(ErrorKind::InvalidData, e.as_str()))? });
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.as_str()))? });
 
         let res = match !self.promiscuous {
             true => {
