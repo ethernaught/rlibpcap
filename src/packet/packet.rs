@@ -1,4 +1,3 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 use crate::packet::inter::interfaces::Interfaces;
 use crate::packet::layers::ethernet_frame::ethernet_frame::EthernetFrame;
 use crate::packet::layers::inter::layer::Layer;
@@ -76,13 +75,4 @@ impl Packet {
         self.length = length;
         length
     }
-}
-
-pub fn decode_packet(interface: Interfaces, data: &[u8]) -> Packet {
-    let now = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards")
-        .as_millis();
-
-    Packet::new(interface, now, data)
 }

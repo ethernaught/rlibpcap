@@ -38,15 +38,16 @@ mod tests {
 
     #[test]
     fn pcap() {
-        let mut file = File::open("/home/brad/Downloads/EthernetIP-CIP.pcap").unwrap();
 
-        // Allocate a buffer for the 24-byte PCAP header
-        let mut buffer = [0u8; 24];
-        file.read_exact(&mut buffer);
+        let pcap = Pcap::from_file("/home/brad/Downloads/EthernetIP-CIP.pcap").expect("Failed to open pcap file");
 
-        let pcap = Pcap::from_bytes(&buffer);
+        /*
+        for packet in pcap {
+            println!("{:?}", packet);
+        }
+        */
 
-        println!("{:?}", pcap);
+        println!("{:?} {} {} {}", pcap.total_packets(), pcap.get_snaplen(), pcap.get_accuracy(), pcap.get_zone());
     }
 
     #[test]

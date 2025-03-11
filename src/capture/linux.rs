@@ -1,7 +1,8 @@
 use std::{io, mem};
 use std::os::fd::RawFd;
+use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
-use crate::packet::packet::{decode_packet, Packet};
+use crate::packet::packet::Packet;
 
 pub const SYS_SOCKET: i64 = 41;
 pub const AF_PACKET: i64 = 17;
@@ -173,7 +174,12 @@ impl Capture {
         };
 
         if len > 0 {
-            Ok(decode_packet(self.device.get_interface(), &buffer[..len as usize]))
+            let now = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_millis();
+
+            Ok(Packet::new(self.device.get_interface(), now, &buffer[..len as usize]))
 
         } else {
             Err(io::Error::last_os_error())
