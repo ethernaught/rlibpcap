@@ -1,5 +1,4 @@
 use std::{io, mem};
-use std::io::ErrorKind;
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
