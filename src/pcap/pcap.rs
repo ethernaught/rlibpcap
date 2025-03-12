@@ -8,7 +8,7 @@ use crate::packet::packet::Packet;
 pub const PCAP_HEADER_LEN: usize = 24;
 pub const MAGIC_NUMBER: u32 = 0xA1B2C3D4;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Pcap {
     version_major: u16,
     version_minor: u16,
@@ -151,6 +151,10 @@ impl Pcap {
 
     pub fn get_packet(&self, index: usize) -> &Packet {
         &self.packets[index]
+    }
+
+    pub fn get_packets(&self) -> Vec<Packet> {
+        self.packets.clone()
     }
 
     pub fn total_packets(&self) -> usize {
