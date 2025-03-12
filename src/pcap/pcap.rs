@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io;
-use std::io::{ErrorKind, Read, Write};
+use std::io::{Read, Write};
 use std::vec::IntoIter;
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::packet::Packet;
@@ -39,11 +39,11 @@ impl Pcap {
         file.read_exact(&mut buf)?;
 
         if buf.len() < PCAP_HEADER_LEN {
-            return Err(io::Error::new(ErrorKind::InvalidData, "Invalid header length in pcap file"));
+            return Err(io::Error::new(io::ErrorKind::InvalidData, "Invalid header length in pcap file"));
         }
 
         if u32::from_le_bytes([buf[0], buf[1], buf[2], buf[3]]) != MAGIC_NUMBER {
-            return Err(io::Error::new(ErrorKind::InvalidData, "Magic number mismatch"));
+            return Err(io::Error::new(io::ErrorKind::InvalidData, "Magic number mismatch"));
         }
 
         let version_major = u16::from_le_bytes([buf[4], buf[5]]);
@@ -52,7 +52,7 @@ impl Pcap {
         let accuracy = u32::from_le_bytes([buf[12], buf[13], buf[14], buf[15]]);
         let payload_length = u32::from_le_bytes([buf[16], buf[17], buf[18], buf[19]]);
         let data_link_type = DataLinkTypes::from_code(u32::from_le_bytes([buf[20], buf[21], buf[22], buf[23]]))
-            .map_err(|e| io::Error::new(ErrorKind::InvalidData, e.as_str()))?;
+            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
         let mut packets = Vec::new();
 

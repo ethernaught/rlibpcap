@@ -39,11 +39,12 @@ mod tests {
     use crate::capture::Capture;
     use crate::devices::Device;
     use crate::pcap::pcap::Pcap;
+    use crate::pcap::pcapng::PcapNg;
 
     #[test]
     fn pcap() {
 
-        let pcap = Pcap::from_file("/home/brad/Downloads/EthernetIP-CIP.pcap").expect("Failed to open pcap file");
+        let pcap = PcapNg::from_file("/home/brad/Downloads/pcap.pcapng").expect("Failed to open pcap file");
 
         /*
         for packet in pcap {
@@ -51,7 +52,7 @@ mod tests {
         }
         */
 
-        println!("{:?}", pcap.get_data_link_type());
+        println!("{:?}", pcap);
     }
 
     #[test]
