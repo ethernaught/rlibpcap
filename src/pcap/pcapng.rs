@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io;
 use std::io::{Read, Write};
@@ -16,7 +17,7 @@ pub struct PcapNg {
     version_major: u16,
     version_minor: u16,
     section_length: i64, // Can be -1 if unspecified
-    options: Vec<u8>, // Store raw options for now
+    options: HashMap<PcapNgOptions, String>, // Store raw options for now
     data_link_type: DataLinkTypes,
     packets: Vec<Packet>
 }
@@ -50,10 +51,6 @@ impl PcapNg {
             return Err(io::Error::new(io::ErrorKind::InvalidData, "Magic number mismatch"));
         }
 
-
-
-
-
         let block_length = u32::from_le_bytes([buf[4], buf[5], buf[6], buf[7]]);
         if block_length < 24 {
             return Err(io::Error::new(io::ErrorKind::InvalidData, "Invalid SHB block length"));
@@ -80,7 +77,7 @@ impl PcapNg {
         let mut buf = vec![0u8; options_length];
         file.read_exact(&mut buf)?;
 
-
+        let mut options = HashMap::new();
         let mut off = 0;
 
         while off < options_length {
@@ -92,40 +89,18 @@ impl PcapNg {
 
             let length = u16::from_le_bytes([buf[off+2], buf[off+3]]) as usize;
 
-            let value = String::from_utf8_lossy(&buf[off + 4..off + 4 + length]);
-
-            println!("{} {} {:?}", opt.to_string(), length, value);
+            options.insert(opt, String::from_utf8_lossy(&buf[off + 4..off + 4 + length]).to_string());
 
             let padding = (4 - ((length + 4) % 4)) % 4;
             off += padding + length + 4;
         }
-
-        //let opt = u32::from_le_bytes([buf[0], buf[1], buf[2], buf[3]]);
-
-        /*
-        let options_length = (block_length - 24 - 4) as usize;
-        let mut options = vec![0u8; options_length];
-        file.read_exact(&mut options)?;
-
-        let mut final_block_length_buf = [0u8; 4];
-        file.read_exact(&mut final_block_length_buf)?;
-        let final_block_length = u32::from_le_bytes(final_block_length_buf);
-
-        if final_block_length != block_length {
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "Mismatched SHB block length"));
-        }
-        */
-
-
-
-
 
         Ok(Self {
             byte_order,
             version_major,
             version_minor,
             section_length,
-            options: buf,
+            options,
             data_link_type: DataLinkTypes::Null,
             packets: Vec::new()
         })
