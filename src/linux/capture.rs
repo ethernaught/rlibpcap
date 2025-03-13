@@ -2,16 +2,14 @@ use std::{io, mem};
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
-use crate::linux::syscall;
-use crate::packet::inter::data_link_types::DataLinkTypes;
+use crate::linux::sys::syscall;
 use crate::packet::packet::Packet;
-use crate::{Ifreq, SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_IOCTL, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
+use crate::linux::sys::{Ifreq, SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 
 #[derive(Debug, Clone)]
 pub struct Capture {
     fd: RawFd,
     device: Device,
-    data_link_type: Option<DataLinkTypes>,
     promiscuous: bool
 }
 
@@ -29,7 +27,6 @@ impl Capture {
         Ok(Self {
             fd: fd as RawFd,
             device: device.clone(),
-            data_link_type: None,
             promiscuous: false
         })
     }
@@ -48,6 +45,8 @@ impl Capture {
 
         ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
 
+
+        /*
         let res = unsafe {
             syscall(SYS_IOCTL, self.fd as i64, SIOCGIFINDEX as i64, &mut ifreq as *mut _ as i64, 0, 0)
         };
@@ -68,13 +67,14 @@ impl Capture {
 
         self.data_link_type = Some(unsafe { DataLinkTypes::from_code(ifreq.ifr_ifru.ifru_hwaddr.sa_family as u32)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))? });
+            */
 
         let res = match !self.promiscuous {
             true => {
                 let sockaddr = SockAddrLl {
                     sll_family: AF_PACKET as u16,
                     sll_protocol: ETH_P_ALL.to_be(),
-                    sll_ifindex: if_index,
+                    sll_ifindex: self.device.get_index(),
                     sll_hatype: 0,
                     sll_pkttype: 0,
                     sll_halen: 0,
@@ -147,14 +147,10 @@ impl Capture {
                 .expect("Time went backwards")
                 .as_millis();
 
-            Ok(Packet::new(self.data_link_type.expect("Unknown data link type"), now, &buffer[..len as usize]))
+            Ok(Packet::new(self.device.get_data_link_type(), now, &buffer[..len as usize]))
 
         } else {
             Err(io::Error::last_os_error())
         }
-    }
-
-    pub fn get_data_link_type(&self) -> Option<DataLinkTypes> {
-        self.data_link_type
     }
 }

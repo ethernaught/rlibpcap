@@ -6,6 +6,7 @@ pub enum DataLinkTypes {
     Ipv4,
     Ipv6,
     BluetoothHciH4,
+    Loopback,
     Tun
 }
 
@@ -19,6 +20,7 @@ impl DataLinkTypes {
             Self::Ipv4,
             Self::Ipv6,
             Self::BluetoothHciH4,
+            Self::Loopback,
             Self::Tun
         ] {
             if c.get_code() == code {
@@ -37,6 +39,7 @@ impl DataLinkTypes {
             Self::Ipv4 => 49,
             Self::Ipv6 => 50,
             Self::BluetoothHciH4 => 108,
+            Self::Loopback => 772,
             Self::Tun => 65534
         }
     }
@@ -49,6 +52,7 @@ impl DataLinkTypes {
             Self::Ipv4 => "IPv4",
             Self::Ipv6 => "IPv6",
             Self::BluetoothHciH4 => "Bluetooth HCI",
+            Self::Loopback => "Loopback",
             Self::Tun => "Tunnel"
         }.to_string()
     }
