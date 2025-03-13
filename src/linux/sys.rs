@@ -6,12 +6,13 @@ pub const AF_PACKET: i64 = 17;
 pub const SOCK_RAW: i64 = 3;
 pub const ETH_P_ALL: u16 = 0x0003;
 pub const SOL_SOCKET: i64 = 1;
-pub const SO_BINDTODEVICE: i64 = 25;
+pub const SYS_CLOSE: i64 = 3;
 pub const SYS_IOCTL: i64 = 16;
 pub const SYS_BIND: i64 = 49;
 pub const SYS_SENDTO: i64 = 0x2C;
 pub const SYS_RECV_FROM: i64 = 45;
 pub const SYS_SET_SOCK_OPT: i64 = 54;
+pub const SO_BINDTODEVICE: i64 = 25;
 pub const IFNAMSIZ: usize = 16;
 pub const SIOCGIFINDEX: u64 = 0x8933;
 pub const SIOCGIFCONF: u64 = 0x8912;
@@ -103,7 +104,7 @@ pub unsafe fn ioctl(fd: RawFd, request: i64, arg: i64) -> i64 {
 }
 
 pub unsafe fn close(fd: RawFd) {
-
+    unsafe { syscall(SYS_CLOSE, fd as i64, 0, 0, 0, 0) };
 }
 
 pub unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {

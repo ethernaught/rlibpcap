@@ -2,7 +2,7 @@ use std::{io, mem};
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
-use crate::linux::sys::syscall;
+use crate::linux::sys::{close, syscall};
 use crate::packet::packet::Packet;
 use crate::linux::sys::{Ifreq, SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 
@@ -40,6 +40,7 @@ impl Capture {
 
         let if_name_bytes = self.device.get_name().into_bytes();
         if if_name_bytes.len() >= IFNAMSIZ {
+            unsafe { close(self.fd) };
             return Err(io::Error::new(io::ErrorKind::InvalidInput, "Interface name too long"));
         }
 
@@ -86,6 +87,7 @@ impl Capture {
                 };
 
                 if res < 0 {
+                    unsafe { close(self.fd) };
                     return Err(io::Error::last_os_error());
                 }
 
@@ -101,6 +103,7 @@ impl Capture {
         };
 
         if res < 0 {
+            unsafe { close(self.fd) };
             return Err(io::Error::last_os_error());
         }
 
@@ -152,5 +155,9 @@ impl Capture {
         } else {
             Err(io::Error::last_os_error())
         }
+    }
+
+    pub fn close(&self) {
+        unsafe { close(self.fd) };
     }
 }
