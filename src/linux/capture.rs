@@ -2,65 +2,10 @@ use std::{io, mem};
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
+use crate::linux::syscall;
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::packet::Packet;
-
-pub const SYS_SOCKET: i64 = 41;
-pub const AF_PACKET: i64 = 17;
-pub const SOCK_RAW: i64 = 3;
-pub const ETH_P_ALL: u16 = 0x0003;
-pub const SOL_SOCKET: i64 = 1;
-pub const SO_BINDTODEVICE: i64 = 25;
-pub const SYS_IOCTL: i64 = 16;
-pub const SYS_BIND: i64 = 49;
-pub const SYS_SENDTO: i64 = 0x2C;
-pub const SYS_RECV_FROM: i64 = 45;
-pub const SYS_SET_SOCK_OPT: i64 = 54;
-pub const IFNAMSIZ: usize = 16;
-pub const SIOCGIFINDEX: u64 = 0x8933;
-pub const SIOCGIFHWADDR: u64 = 0x00008927;
-
-#[repr(C)]
-pub struct IfReq {
-    ifr_name: [u8; IFNAMSIZ],
-    ifr_ifru: IfrIfru
-}
-
-#[repr(C)]
-pub union IfrIfru {
-    pub ifru_addr: SockAddr,
-    pub ifru_dstaddr: SockAddr,
-    pub ifru_broadaddr: SockAddr,
-    pub ifru_netmask: SockAddr,
-    pub ifru_hwaddr: SockAddr,
-    pub ifru_flags: i16,
-    pub ifru_ifindex: i32,
-    pub ifru_metric: i32,
-    pub ifru_mtu: i32,
-    pub ifru_map: u16,
-    pub ifru_slave: [i8; 16],
-    pub ifru_newname: [i8; 16],
-    pub ifru_data: *mut i8,
-}
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SockAddr {
-    pub sa_family: u16,
-    pub sa_data: [i8; 14],
-}
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SockAddrLl {
-    sll_family: u16,
-    sll_protocol: u16,
-    sll_ifindex: i32,
-    sll_hatype: u16,
-    sll_pkttype: u8,
-    sll_halen: u8,
-    sll_addr: [u8; 8]
-}
+use crate::{IfReq, SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_IOCTL, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 
 #[derive(Debug, Clone)]
 pub struct Capture {
@@ -179,14 +124,7 @@ impl Capture {
         let packet = packet.to_bytes();
 
         let len = unsafe {
-            syscall(
-                SYS_SENDTO,                  // Send syscall number
-                self.fd as i64,              // File descriptor
-                packet.as_ptr() as i64,      // Pointer to the data to send
-                packet.len() as i64,         // Length of the data
-                0,                            // Flags (0 if no flags needed)
-                0                             // Address (0 for no address, required for UDP etc.)
-            )
+            syscall(SYS_SENDTO, self.fd as i64, packet.as_ptr() as i64, packet.len() as i64, 0, 0)
         };
 
         if len > 0 {
@@ -200,14 +138,7 @@ impl Capture {
         let mut buffer = vec![0u8; 4096];
 
         let len = unsafe {
-            syscall(
-                SYS_RECV_FROM,
-                self.fd as i64,
-                buffer.as_mut_ptr() as i64,
-                buffer.len() as i64,
-                0,
-                0
-            )
+            syscall(SYS_RECV_FROM, self.fd as i64, buffer.as_mut_ptr() as i64, buffer.len() as i64, 0, 0)
         };
 
         if len > 0 {
@@ -226,10 +157,4 @@ impl Capture {
     pub fn get_data_link_type(&self) -> Option<DataLinkTypes> {
         self.data_link_type
     }
-}
-
-unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {
-    let ret: i64;
-    core::arch::asm!("syscall", in("rax") number, in("rdi") a1, in("rsi") a2, in("rdx") a3, in("r10") a4, in("r8") a5, lateout("rax") ret);
-    ret
 }

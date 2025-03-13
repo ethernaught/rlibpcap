@@ -43,6 +43,11 @@ impl Device {
         let mut devices = Vec::new();
 
 
+        devices.push(Self {
+            name: String::from("HELLO WORLD"),
+            description: None,
+            data_link_type: DataLinkTypes::Ethernet
+        });
 
 
 
