@@ -2,9 +2,9 @@ use std::{io, mem};
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
-use crate::linux::sys::{close, syscall};
+use crate::linux::sys::{close, syscall, IfreqInterface};
 use crate::packet::packet::Packet;
-use crate::linux::sys::{Ifreq, SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
+use crate::linux::sys::{SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 
 #[derive(Debug, Clone)]
 pub struct Capture {
@@ -24,8 +24,6 @@ impl Capture {
             return Err(io::Error::last_os_error());
         }
 
-        println!("{:?}", device);
-
         Ok(Self {
             fd: fd as RawFd,
             device: device.clone(),
@@ -38,7 +36,9 @@ impl Capture {
             return Err(io::Error::last_os_error());
         }
 
-        let mut ifreq: Ifreq = unsafe { mem::zeroed() };
+        let mut ifreq = IfreqInterface {
+            ifr_name: [0; IFNAMSIZ],
+        };
 
         let if_name_bytes = self.device.get_name().into_bytes();
         if if_name_bytes.len() >= IFNAMSIZ {
@@ -47,30 +47,6 @@ impl Capture {
         }
 
         ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
-
-
-        /*
-        let res = unsafe {
-            syscall(SYS_IOCTL, self.fd as i64, SIOCGIFINDEX as i64, &mut ifreq as *mut _ as i64, 0, 0)
-        };
-
-        if res < 0 {
-            return Err(io::Error::last_os_error());
-        }
-
-        let if_index = unsafe { ifreq.ifr_ifru.ifru_ifindex };
-
-        let res = unsafe {
-            syscall(SYS_IOCTL, self.fd as i64, SIOCGIFHWADDR as i64, &mut ifreq as *mut _ as i64, 0, 0)
-        };
-
-        if res < 0 {
-            return Err(io::Error::last_os_error());
-        }
-
-        self.data_link_type = Some(unsafe { DataLinkTypes::from_code(ifreq.ifr_ifru.ifru_hwaddr.sa_family as u32)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))? });
-            */
 
         let res = match !self.promiscuous {
             true => {

@@ -24,6 +24,13 @@ pub const AF_INET: i64 = 2;
 pub const AF_INET6: i64 = 10;
 pub const SOCK_DGRAM: i64 = 2;
 
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct IfreqInterface {
+    pub ifr_name: [u8; IFNAMSIZ]
+}
+
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct Ifreq {
