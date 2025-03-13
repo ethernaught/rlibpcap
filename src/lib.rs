@@ -1,32 +1,10 @@
-pub mod devices;
 pub mod packet;
-pub mod capture;
 pub mod pcap;
-/*
-[
-    Device {
-        name: "wlp7s0",
-        desc: None,
-        addresses: [
-            Address {
-                addr: 192.168.0.129,
-                netmask: Some(255.255.255.0),
-                broadcast_addr: Some(192.168.0.255),
-                dst_addr: None
-            },
-            Address {
-                addr: xxx:xxx:xxx:xxx,
-                netmask: Some(ffff:ffff:ffff:ffff::),
-                broadcast_addr: None,
-                dst_addr: None
-            }
-        ],
-        flags: DeviceFlags {
-            if_flags: UP | RUNNING | WIRELESS, connection_status: Connected
-        }
-    }
-]
-*/
+#[cfg(target_os = "linux")]
+pub mod linux;
+#[cfg(target_os = "linux")]
+pub use linux::*;
+
 
 //cat /sys/class/net/wlp7s0/type
 //https://www.tcpdump.org/linktypes.html
@@ -43,8 +21,7 @@ mod tests {
 
     #[test]
     fn pcap() {
-
-        let pcap = PcapNg::from_file("/home/brad/Downloads/pcap.pcapng").expect("Failed to open pcap file");
+        //let pcap = PcapNg::from_file("/home/brad/Downloads/pcap.pcapng").expect("Failed to open pcap file");
 
         /*
         for packet in pcap {
@@ -52,7 +29,15 @@ mod tests {
         }
         */
 
-        println!("{:?}", pcap);
+        //println!("{:?}", pcap);
+    }
+
+    #[test]
+    fn devices() {
+        let devices = Device::list().unwrap();
+
+
+        println!("{:?}", devices);
     }
 
     #[test]
