@@ -27,33 +27,8 @@ pub const SOCK_DGRAM: i64 = 2;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub struct IfreqInterface {
+pub struct IfreqName {
     pub ifr_name: [u8; IFNAMSIZ]
-}
-
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub struct Ifreq {
-    pub ifr_name: [u8; IFNAMSIZ],
-    pub ifr_ifru: IfrIfru
-}
-
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub union IfrIfru {
-    pub ifru_addr: SockAddr,
-    pub ifru_dstaddr: SockAddr,
-    pub ifru_broadaddr: SockAddr,
-    pub ifru_netmask: SockAddr,
-    pub ifru_hwaddr: SockAddr,
-    pub ifru_flags: i16,
-    pub ifru_ifindex: i32,
-    pub ifru_metric: i32,
-    pub ifru_mtu: i32,
-    pub ifru_map: u16,
-    pub ifru_slave: [i8; 16],
-    pub ifru_newname: [i8; 16],
-    pub ifru_data: *mut i8,
 }
 
 #[repr(C)]

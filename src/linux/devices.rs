@@ -1,6 +1,6 @@
 use std::{io, mem};
 use std::net::IpAddr;
-use crate::linux::sys::{Ifreq, IfreqAddr, IfreqHwAddr, IfreqIndex, SockAddr, AF_INET, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_DGRAM};
+use crate::linux::sys::{IfreqAddr, IfreqHwAddr, IfreqIndex, SockAddr, AF_INET, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_DGRAM};
 use crate::linux::sys::{close, ioctl, parse_ip, socket, IfConf, IfreqFlags, SIOCGIFCONF, SIOCGIFFLAGS};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
@@ -77,7 +77,6 @@ impl Device {
             let mac_bytes = unsafe { ifreq_hwaddr.ifr_hwaddr.sa_data };
             let mac = EthernetAddress::new(mac_bytes[0], mac_bytes[1], mac_bytes[2], mac_bytes[3], mac_bytes[4], mac_bytes[5]);
 
-            //CHECK FLAGS
             let mut ifr_flags = IfreqFlags {
                 ifr_name: ifr.ifr_name,
                 ifr_flags: 0

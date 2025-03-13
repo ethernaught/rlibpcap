@@ -2,7 +2,7 @@ use std::{io, mem};
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
-use crate::linux::sys::{close, syscall, IfreqInterface};
+use crate::linux::sys::{close, syscall, IfreqName};
 use crate::packet::packet::Packet;
 use crate::linux::sys::{SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 
@@ -36,7 +36,7 @@ impl Capture {
             return Err(io::Error::last_os_error());
         }
 
-        let mut ifreq = IfreqInterface {
+        let mut ifreq = IfreqName {
             ifr_name: [0; IFNAMSIZ],
         };
 

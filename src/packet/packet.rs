@@ -14,7 +14,7 @@ impl Packet {
 
     pub fn new(data_link_type: DataLinkTypes, frame_time: u128, data: &[u8]) -> Self {
         let frame = match data_link_type {
-            DataLinkTypes::Ethernet => {
+            DataLinkTypes::Ethernet | DataLinkTypes::Loopback => {
                 EthernetFrame::from_bytes(data).unwrap().dyn_clone()
             }
             _ => {
