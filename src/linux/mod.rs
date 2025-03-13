@@ -26,12 +26,20 @@ pub const AF_INET: i64 = 2;
 pub const SOCK_DGRAM: i64 = 2;
 
 #[repr(C)]
+pub struct Ifreq2 {
+    ifr_name: [u8; IFNAMSIZ], // Interface name (e.g., "eth0")
+    ifr_addr: [u8; 24],  // IP address (for IPv4)
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
 pub struct Ifreq {
     ifr_name: [u8; IFNAMSIZ],
     ifr_ifru: IfrIfru
 }
 
 #[repr(C)]
+#[derive(Copy, Clone)]
 pub union IfrIfru {
     pub ifru_addr: SockAddr,
     pub ifru_dstaddr: SockAddr,
@@ -49,18 +57,21 @@ pub union IfrIfru {
 }
 
 #[repr(C)]
+#[derive(Debug, Copy, Clone)]
 struct IfConf {
     ifc_len: c_int,
-    ifc_buf: *mut Ifreq,
+    ifc_buf: *mut Ifreq2,
 }
 
 #[repr(C)]
+#[derive(Debug, Copy, Clone)]
 struct IfreqIndex {
     ifr_name: [c_char; IFNAMSIZ],
     ifr_ifindex: c_int,
 }
 
 #[repr(C)]
+#[derive(Debug, Copy, Clone)]
 struct IfreqFlags {
     ifr_name: [c_char; IFNAMSIZ],
     ifr_flags: c_short,
@@ -89,8 +100,8 @@ unsafe fn socket(domain: i64, _type: i64, protocol: i64) -> RawFd {
     syscall(SYS_SOCKET, domain, _type, protocol, 0, 0) as RawFd
 }
 
-unsafe fn ioctl(fd: RawFd, _type: i64, req: i64) -> i64 {
-    syscall(SYS_IOCTL, fd as i64, _type, req, 0, 0)
+unsafe fn ioctl(fd: RawFd, request: i64, arg: i64) -> i64 {
+    syscall(SYS_IOCTL, fd as i64, request, arg, 0, 0)
 }
 
 unsafe fn close(fd: RawFd) {

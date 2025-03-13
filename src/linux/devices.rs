@@ -1,7 +1,7 @@
 use std::{io, mem};
-use std::ffi::{c_int};
+use std::ffi::{c_int, CStr};
 use std::net::Ipv4Addr;
-use crate::{Ifreq, SockAddr, AF_INET, SIOCGIFINDEX, SOCK_DGRAM};
+use crate::{Ifreq, Ifreq2, SockAddr, AF_INET, SIOCGIFINDEX, SOCK_DGRAM};
 use crate::linux::{close, ioctl, socket, IfConf, IfreqFlags, IfreqIndex, SIOCGIFCONF, SIOCGIFFLAGS};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 
@@ -80,29 +80,38 @@ impl Device {
             panic!("Failed to create socket");
         }
 
-        let mut ifreqs: [Ifreq; 32] = unsafe { mem::zeroed() };
+        let mut ifreqs: [Ifreq2; 32] = unsafe { mem::zeroed() };
         let mut ifc = IfConf {
-            ifc_len: (mem::size_of::<Ifreq>() * ifreqs.len()) as c_int,
-            ifc_buf: ifreqs.as_mut_ptr(),
+            ifc_len: (mem::size_of::<Ifreq2>() * ifreqs.len()) as c_int,
+            ifc_buf: ifreqs.as_mut_ptr()
         };
 
-        if unsafe { ioctl(sockfd, SIOCGIFCONF as i64, &mut ifc as *const _ as i64) } < 0 {
+
+        let res = unsafe { ioctl(sockfd, SIOCGIFCONF as i64, &mut ifc as *mut _ as i64) };
+
+        if res < 0 {
             unsafe { close(sockfd) };
             panic!("ioctl SIOCGIFCONF failed");
         }
 
         let mut interfaces = Vec::new();
-        let count = ifc.ifc_len as usize / mem::size_of::<Ifreq>();
+        let count = ifc.ifc_len as usize / mem::size_of::<Ifreq2>();
+
+        println!("{}", count);
 
         for i in 0..count {
             let ifr = &ifreqs[i];
 
-            let name = String::from_utf8_lossy(&ifr.ifr_name);
             /*
-            let name = unsafe { CStr::from_ptr(ifr.ifr_name.as_ptr()) }
+            let name = String::from_utf8_lossy(&ifr.ifr_name)
+                .trim_end_matches('\0') // Trim null terminators
+                .to_string();*/
+
+            let name = unsafe { CStr::from_ptr(ifr.ifr_name.as_ptr() as *const i8) }
                 .to_str()
                 .unwrap_or("Unknown")
-                .to_string();*/
+                .to_string();
+            //let name = String::from_utf8_lossy(&ifr.ifr_name);
 
             println!("name: {}", name);
 
