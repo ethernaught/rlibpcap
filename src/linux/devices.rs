@@ -1,6 +1,6 @@
 use std::{io, mem};
 use std::net::IpAddr;
-use crate::linux::sys::{Ifreq, IfreqAddr, AF_INET, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_DGRAM};
+use crate::linux::sys::{Ifreq, IfreqAddr, IfreqHwAddr, IfreqIndex, SockAddr, AF_INET, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_DGRAM};
 use crate::linux::sys::{close, ioctl, parse_ip, socket, IfConf, IfreqFlags, SIOCGIFCONF, SIOCGIFFLAGS};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
@@ -50,29 +50,32 @@ impl Device {
             let address = parse_ip(&ifr.ifr_addr);
 
 
-            let mut ifreq: Ifreq = unsafe { mem::zeroed() };
-
-            let if_name_bytes = name.as_bytes();
-            ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
-
+            let mut ifr_index = IfreqIndex {
+                ifr_name: ifr.ifr_name,
+                ifr_ifindex: 0,
+            };
 
             //CHECK INTERFACE INDEX
-            if unsafe { ioctl(fd, SIOCGIFINDEX as i64, &mut ifreq as *const _ as i64) } < 0 {
+            if unsafe { ioctl(fd, SIOCGIFINDEX as i64, &mut ifr_index as *const _ as i64) } < 0 {
                 continue;
             }
 
-            let index = unsafe { ifreq.ifr_ifru.ifru_ifindex };
+            let index = ifr_index.ifr_ifindex;
 
-            //CHECK DATA LINK TYPE
-            if unsafe { ioctl(fd, SIOCGIFHWADDR as i64, &mut ifreq as *mut _ as i64) } < 0 {
-                continue;
+            let mut ifreq_hwaddr = IfreqHwAddr {
+                ifr_name: ifr.ifr_name,
+                ifr_hwaddr: SockAddr { sa_family: 0, sa_data: [0; 14] },
+            };
+
+            if unsafe { ioctl(fd, SIOCGIFHWADDR as i64, &mut ifreq_hwaddr as *mut _ as i64) } < 0 {
+                return Err(io::Error::new(io::ErrorKind::Other, "Failed to get hardware address"));
             }
 
-            let data_link_type = Some(unsafe { DataLinkTypes::from_code(ifreq.ifr_ifru.ifru_hwaddr.sa_family as u32)
+            let data_link_type = Some(unsafe { DataLinkTypes::from_code(ifreq_hwaddr.ifr_hwaddr.sa_family as u32)
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))? }).unwrap();
 
-            let ether_bytes = unsafe { ifreq.ifr_ifru.ifru_hwaddr.sa_data };
-            let mac = EthernetAddress::new(ether_bytes[0], ether_bytes[1], ether_bytes[2], ether_bytes[3], ether_bytes[4], ether_bytes[5]);
+            let mac_bytes = unsafe { ifreq_hwaddr.ifr_hwaddr.sa_data };
+            let mac = EthernetAddress::new(mac_bytes[0], mac_bytes[1], mac_bytes[2], mac_bytes[3], mac_bytes[4], mac_bytes[5]);
 
             //CHECK FLAGS
             let mut ifr_flags = IfreqFlags {

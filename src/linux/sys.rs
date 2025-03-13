@@ -50,9 +50,17 @@ pub union IfrIfru {
 }
 
 #[repr(C)]
+#[derive(Copy, Clone)]
 pub struct IfreqAddr {
     pub ifr_name: [u8; IFNAMSIZ], // Interface name (e.g., "eth0")
     pub ifr_addr: [u8; 24],  // IP address (for IPv4)
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct IfreqHwAddr {
+    pub ifr_name: [u8; IFNAMSIZ],
+    pub ifr_hwaddr: SockAddr
 }
 
 #[repr(C)]
@@ -61,14 +69,14 @@ pub struct IfConf {
     pub ifc_len: i32,
     pub ifc_buf: *mut IfreqAddr,
 }
-/*
+
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-struct IfreqIndex {
+pub struct IfreqIndex {
     pub ifr_name: [u8; IFNAMSIZ],
     pub ifr_ifindex: i32,
 }
-*/
+
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct IfreqFlags {

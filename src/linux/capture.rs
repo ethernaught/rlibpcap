@@ -24,6 +24,8 @@ impl Capture {
             return Err(io::Error::last_os_error());
         }
 
+        println!("{:?}", device);
+
         Ok(Self {
             fd: fd as RawFd,
             device: device.clone(),
