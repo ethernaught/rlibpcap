@@ -5,7 +5,7 @@ use crate::devices::Device;
 use crate::linux::syscall;
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::packet::Packet;
-use crate::{IfReq, SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_IOCTL, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
+use crate::{Ifreq, SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_IOCTL, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 
 #[derive(Debug, Clone)]
 pub struct Capture {
@@ -39,7 +39,7 @@ impl Capture {
             return Err(io::Error::last_os_error());
         }
 
-        let mut ifreq: IfReq = unsafe { mem::zeroed() };
+        let mut ifreq: Ifreq = unsafe { mem::zeroed() };
 
         let if_name_bytes = self.device.get_name().into_bytes();
         if if_name_bytes.len() >= IFNAMSIZ {

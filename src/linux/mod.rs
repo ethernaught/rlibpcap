@@ -1,3 +1,6 @@
+use std::ffi::{c_char, c_int, c_short};
+use std::os::fd::RawFd;
+
 pub mod capture;
 pub mod devices;
 
@@ -14,13 +17,16 @@ pub const SYS_RECV_FROM: i64 = 45;
 pub const SYS_SET_SOCK_OPT: i64 = 54;
 pub const IFNAMSIZ: usize = 16;
 pub const SIOCGIFINDEX: u64 = 0x8933;
+const SIOCGIFCONF: u64 = 0x8912;
+const SIOCGIFADDR: u64 = 0x8915;
+const SIOCGIFFLAGS: u64 = 0x8913;
 pub const SIOCGIFHWADDR: u64 = 0x00008927;
 
 pub const AF_INET: i64 = 2;
 pub const SOCK_DGRAM: i64 = 2;
 
 #[repr(C)]
-pub struct IfReq {
+pub struct Ifreq {
     ifr_name: [u8; IFNAMSIZ],
     ifr_ifru: IfrIfru
 }
@@ -43,6 +49,24 @@ pub union IfrIfru {
 }
 
 #[repr(C)]
+struct IfConf {
+    ifc_len: c_int,
+    ifc_buf: *mut Ifreq,
+}
+
+#[repr(C)]
+struct IfreqIndex {
+    ifr_name: [c_char; IFNAMSIZ],
+    ifr_ifindex: c_int,
+}
+
+#[repr(C)]
+struct IfreqFlags {
+    ifr_name: [c_char; IFNAMSIZ],
+    ifr_flags: c_short,
+}
+
+#[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SockAddr {
     pub sa_family: u16,
@@ -59,6 +83,18 @@ pub struct SockAddrLl {
     sll_pkttype: u8,
     sll_halen: u8,
     sll_addr: [u8; 8]
+}
+
+unsafe fn socket(domain: i64, _type: i64, protocol: i64) -> RawFd {
+    syscall(SYS_SOCKET, domain, _type, protocol, 0, 0) as RawFd
+}
+
+unsafe fn ioctl(fd: RawFd, _type: i64, req: i64) -> i64 {
+    syscall(SYS_IOCTL, fd as i64, _type, req, 0, 0)
+}
+
+unsafe fn close(fd: RawFd) {
+
 }
 
 unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {

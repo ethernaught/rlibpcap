@@ -46,6 +46,7 @@ mod tests {
     #[test]
     fn devices() {
         let devices = Device::list().unwrap();
+        Device::get_interfaces();
 
 
         println!("{:?}", devices);
