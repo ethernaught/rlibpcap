@@ -1,4 +1,3 @@
-use std::ffi::{c_char, c_int, c_short};
 use std::os::fd::RawFd;
 
 pub mod capture;
@@ -26,12 +25,6 @@ pub const AF_INET: i64 = 2;
 pub const SOCK_DGRAM: i64 = 2;
 
 #[repr(C)]
-pub struct Ifreq2 {
-    ifr_name: [u8; IFNAMSIZ], // Interface name (e.g., "eth0")
-    ifr_addr: [u8; 24],  // IP address (for IPv4)
-}
-
-#[repr(C)]
 #[derive(Copy, Clone)]
 pub struct Ifreq {
     ifr_name: [u8; IFNAMSIZ],
@@ -57,24 +50,30 @@ pub union IfrIfru {
 }
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
-struct IfConf {
-    ifc_len: c_int,
-    ifc_buf: *mut Ifreq2,
+pub struct IfreqAddr {
+    ifr_name: [u8; IFNAMSIZ], // Interface name (e.g., "eth0")
+    ifr_addr: [u8; 24],  // IP address (for IPv4)
 }
 
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+struct IfConf {
+    ifc_len: i32,
+    ifc_buf: *mut IfreqAddr,
+}
+/*
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 struct IfreqIndex {
-    ifr_name: [c_char; IFNAMSIZ],
-    ifr_ifindex: c_int,
+    ifr_name: [u8; IFNAMSIZ],
+    ifr_ifindex: i32,
 }
-
+*/
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 struct IfreqFlags {
-    ifr_name: [c_char; IFNAMSIZ],
-    ifr_flags: c_short,
+    ifr_name: [u8; IFNAMSIZ],
+    ifr_flags: i16,
 }
 
 #[repr(C)]

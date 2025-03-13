@@ -1,10 +1,9 @@
 use std::{io, mem};
-use std::ffi::{c_int, CStr};
 use std::net::Ipv4Addr;
-use crate::{Ifreq, Ifreq2, SockAddr, AF_INET, SIOCGIFINDEX, SOCK_DGRAM};
-use crate::linux::{close, ioctl, socket, IfConf, IfreqFlags, IfreqIndex, SIOCGIFCONF, SIOCGIFFLAGS};
+use crate::{Ifreq, IfreqAddr, SockAddr, AF_INET, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_DGRAM, SYS_IOCTL};
+use crate::linux::{close, ioctl, socket, syscall, IfConf, IfreqFlags, SIOCGIFCONF, SIOCGIFFLAGS};
 use crate::packet::inter::data_link_types::DataLinkTypes;
-
+use crate::pcap::pcapng::PcapNg;
 /*
 [
     Device {
@@ -80,9 +79,9 @@ impl Device {
             panic!("Failed to create socket");
         }
 
-        let mut ifreqs: [Ifreq2; 32] = unsafe { mem::zeroed() };
+        let mut ifreqs: [IfreqAddr; 32] = unsafe { mem::zeroed() };
         let mut ifc = IfConf {
-            ifc_len: (mem::size_of::<Ifreq2>() * ifreqs.len()) as c_int,
+            ifc_len: (mem::size_of::<IfreqAddr>() * ifreqs.len()) as i32,
             ifc_buf: ifreqs.as_mut_ptr()
         };
 
@@ -95,25 +94,63 @@ impl Device {
         }
 
         let mut interfaces = Vec::new();
-        let count = ifc.ifc_len as usize / mem::size_of::<Ifreq2>();
+        let count = ifc.ifc_len as usize / mem::size_of::<IfreqAddr>();
 
         println!("{}", count);
 
         for i in 0..count {
             let ifr = &ifreqs[i];
 
-            /*
             let name = String::from_utf8_lossy(&ifr.ifr_name)
                 .trim_end_matches('\0') // Trim null terminators
-                .to_string();*/
-
-            let name = unsafe { CStr::from_ptr(ifr.ifr_name.as_ptr() as *const i8) }
-                .to_str()
-                .unwrap_or("Unknown")
                 .to_string();
-            //let name = String::from_utf8_lossy(&ifr.ifr_name);
 
-            println!("name: {}", name);
+
+            let mut ifreq: Ifreq = unsafe { mem::zeroed() };
+
+            let if_name_bytes = name.as_bytes();
+            ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
+
+
+            //CHECK INTERFACE INDEX
+            if unsafe { ioctl(sockfd, SIOCGIFINDEX as i64, &mut ifreq as *const _ as i64) } < 0 {
+                continue;
+            }
+
+            let if_index = unsafe { ifreq.ifr_ifru.ifru_ifindex };
+
+            //CHECK DATA LINK TYPE
+            if unsafe { ioctl(sockfd, SIOCGIFHWADDR as i64, &mut ifreq as *mut _ as i64) } < 0 {
+                continue;
+            }
+
+            let if_type = unsafe{ ifreq.ifr_ifru.ifru_hwaddr.sa_family };
+
+
+
+            //ADDRESSES
+
+
+
+
+            //CHECK INTERFACE FLAGS
+            let mut ifr_flags = IfreqFlags {
+                ifr_name: ifr.ifr_name,
+                ifr_flags: 0,
+            };
+
+            if unsafe { ioctl(sockfd, SIOCGIFFLAGS as i64, &mut ifr_flags as *mut _ as i64) } < 0 {
+                continue;
+            }
+
+            let flags = ifr_flags.ifr_flags as u16;
+
+
+
+
+
+
+
 
             /*
             let mut ifr_index = IfreqIndex {
@@ -127,26 +164,35 @@ impl Device {
 
             let index = ifr_index.ifr_ifindex as u32;
 
-            let sockaddr = unsafe { &*(ifr.ifr_data.as_ptr() as *const SockAddr) };
+            println!("{:?}", ifr.ifr_addr);*/
+            /*
+            let sockaddr = unsafe { &*(ifr.ifr_addr.as_ptr() as *const SockAddr) };
+            let ip = if sockaddr.sa_family == AF_INET as u16 {
+                Some(Ipv4Addr::from([sockaddr.sa_data[2], sockaddr.sa_data[3], sockaddr.sa_data[4], sockaddr.sa_data[5]]))
+                //Some(Ipv4Addr::new(sockaddr.sa_data[2], sockaddr.sa_data[3], sockaddr.sa_data[4], sockaddr.sa_data[5]))
+            } else {
+                None
+            };*/
+            /*
+            let sockaddr = unsafe { &*(ifr.ifr_addr.as_ptr() as *const SockAddr) };
             let ip_addr = if sockaddr.sa_family as i32 == AF_INET {
                 Some(Ipv4Addr::new(sockaddr.sa_data[2], sockaddr.sa_data[3], sockaddr.sa_data[4], sockaddr.sa_data[5]))
             } else {
                 None
             };
-
-            let mut ifr_flags = IfreqFlags {
-                ifr_name: ifr.ifr_name,
-                ifr_flags: 0,
-            };
-
-            if unsafe { ioctl(sockfd, SIOCGIFFLAGS, &mut ifr_flags) } < 0 {
-                continue;
-            }
-
-            let flags = ifr_flags.ifr_flags as u16;
-
-            interfaces.push((name, index, ip_addr, flags));
             */
+
+
+
+
+
+
+
+
+
+
+            println!("index: {} name: {} flags: {} type: {}", if_index, name, flags, if_type);
+            //interfaces.push((name, index, ip_addr, flags));
         }
 
         unsafe { close(sockfd) };
