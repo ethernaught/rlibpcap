@@ -12,6 +12,7 @@ pub const SYS_IOCTL: i64 = 16;
 pub const SYS_BIND: i64 = 49;
 pub const SYS_SENDTO: i64 = 0x2C;
 pub const SYS_RECV_FROM: i64 = 45;
+pub const SYS_GET_SOCK_OPT: i64 = 50;
 pub const SYS_SET_SOCK_OPT: i64 = 54;
 pub const SO_BINDTODEVICE: i64 = 25;
 pub const IFNAMSIZ: usize = 16;
@@ -100,6 +101,10 @@ pub unsafe fn ioctl(fd: RawFd, request: i64, arg: i64) -> i64 {
 
 pub unsafe fn close(fd: RawFd) {
     syscall(SYS_CLOSE, fd as i64, 0, 0, 0, 0);
+}
+
+pub unsafe fn getsockopt(fd: RawFd, level: i64, optname: i64, optval: i64, optlen: i64) -> i64 {
+    syscall(SYS_GET_SOCK_OPT, fd as i64, level, optname, optval, optlen)
 }
 
 pub unsafe fn setsockopt(fd: RawFd, level: i64, optname: i64, optval: i64, optlen: i64) -> i64 {
