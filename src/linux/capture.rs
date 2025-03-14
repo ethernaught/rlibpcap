@@ -48,7 +48,7 @@ impl Capture {
 
         ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
 
-        let res = match !self.promiscuous {
+        if match !self.promiscuous {
             true => {
                 let sockaddr = SockAddrLl {
                     sll_family: AF_PACKET as u16,
@@ -60,11 +60,7 @@ impl Capture {
                     sll_addr: [0; 8],
                 };
 
-                let res = unsafe {
-                    syscall(SYS_BIND, self.fd as i64, &sockaddr as *const _ as i64, mem::size_of::<SockAddrLl>() as i64, 0, 0)
-                };
-
-                if res < 0 {
+                if unsafe { syscall(SYS_BIND, self.fd as i64, &sockaddr as *const _ as i64, mem::size_of::<SockAddrLl>() as i64, 0, 0) } < 0 {
                     unsafe { close(self.fd) };
                     return Err(io::Error::last_os_error());
                 }
@@ -78,9 +74,7 @@ impl Capture {
                     syscall(SYS_SET_SOCK_OPT, self.fd as i64, SOL_SOCKET, SO_BINDTODEVICE, 0, 0)
                 }
             }
-        };
-
-        if res < 0 {
+        } < 0 {
             unsafe { close(self.fd) };
             return Err(io::Error::last_os_error());
         }
