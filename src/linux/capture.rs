@@ -96,16 +96,6 @@ impl Capture {
         println!("Setting capture to immediate mode");
     }
 
-    /*
-    pub fn set_promiscuous_mode(&mut self, promiscuous: bool) -> io::Result<()> {
-        if self.fd < 0 {
-            return Err(io::Error::last_os_error());
-        }
-
-        self.promiscuous = promiscuous;
-        Ok(())
-    }*/
-
     pub fn send_packet(&self, packet: Packet) -> io::Result<usize> {
         let mut packet = packet.to_bytes();
 
@@ -130,16 +120,10 @@ impl Capture {
                 .expect("Time went backwards")
                 .as_millis();
 
-            let data_link_type = match &self.device {
-                Some(device) => {
-                    device.get_data_link_type()
-                }
-                None => {
-                    DataLinkTypes::Ethernet
-                }
-            };
+            let data_link_type = DataLinkTypes::from_code(sockaddr.sll_hatype as u32)
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
-            //println!("{:?}", sockaddr);
+            println!("{:?}", sockaddr);
 
             Ok(Packet::new(data_link_type, now, &buffer[..len as usize]))
 
