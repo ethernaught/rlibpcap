@@ -100,14 +100,18 @@ pub unsafe fn ioctl(fd: RawFd, request: i64, arg: i64) -> i64 {
     syscall(SYS_IOCTL, fd as i64, request, arg, 0, 0)
 }
 
-pub unsafe fn recvfrom(fd: i32, buffer: &mut [u8], flags: i64, sockaddr: &mut SockAddrLl) -> isize {
+pub unsafe fn sendto(fd: RawFd, buffer: &mut [u8]) -> i64 {
+    syscall(SYS_SENDTO, fd as i64, buffer.as_mut_ptr() as *mut _ as i64, buffer.len() as i64, 0, 0)
+}
+
+pub unsafe fn recvfrom(fd: RawFd, buffer: &mut [u8], flags: i64, sockaddr: &mut SockAddrLl) -> i64 {
     let mut addr_len = mem::size_of::<SockAddrLl>() as u32;
-    let ret: isize;
+    let ret: i64;
 
     asm!(
         "syscall",
         in("rax") SYS_RECV_FROM,
-        in("rdi") fd,
+        in("rdi") fd as i64,
         in("rsi") buffer.as_mut_ptr() as *mut _ as i64,
         in("rdx") buffer.len(),
         in("r10") flags,

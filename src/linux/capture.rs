@@ -2,7 +2,7 @@ use std::{io, mem};
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
-use crate::linux::sys::{bind, close, recvfrom, setsockopt, socket, syscall, IfreqName};
+use crate::linux::sys::{bind, close, recvfrom, sendto, setsockopt, socket, syscall, IfreqName};
 use crate::packet::packet::Packet;
 use crate::linux::sys::{SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 use crate::packet::inter::data_link_types::DataLinkTypes;
@@ -107,11 +107,9 @@ impl Capture {
     }*/
 
     pub fn send_packet(&self, packet: Packet) -> io::Result<usize> {
-        let packet = packet.to_bytes();
+        let mut packet = packet.to_bytes();
 
-        let len = unsafe {
-            syscall(SYS_SENDTO, self.fd as i64, packet.as_ptr() as i64, packet.len() as i64, 0, 0)
-        };
+        let len = unsafe { sendto(self.fd, &mut packet) };
 
         if len > 0 {
             Ok(len as usize)
@@ -124,9 +122,7 @@ impl Capture {
         let mut buffer = vec![0u8; 4096];
         let mut sockaddr: SockAddrLl = unsafe { mem::zeroed() };
 
-        let len = unsafe {
-            recvfrom(self.fd, &mut buffer, 0, &mut sockaddr)
-        };
+        let len = unsafe { recvfrom(self.fd, &mut buffer, 0, &mut sockaddr) };
 
         if len > 0 {
             let now = SystemTime::now()
@@ -143,7 +139,7 @@ impl Capture {
                 }
             };
 
-            println!("{:?}", sockaddr);
+            //println!("{:?}", sockaddr);
 
             Ok(Packet::new(data_link_type, now, &buffer[..len as usize]))
 
