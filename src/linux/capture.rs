@@ -108,7 +108,7 @@ impl Capture {
         }
     }
 
-    pub fn next_packet(&mut self) -> io::Result<Packet> {
+    pub fn next_packet(&mut self) -> io::Result<(SockAddrLl, Packet)> {
         let mut buffer = vec![0u8; 4096];
         let mut sockaddr: SockAddrLl = unsafe { mem::zeroed() };
 
@@ -123,9 +123,7 @@ impl Capture {
             let data_link_type = DataLinkTypes::from_code(sockaddr.sll_hatype as u32)
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
-            println!("{:?}", sockaddr);
-
-            Ok(Packet::new(data_link_type, now, &buffer[..len as usize]))
+            Ok((sockaddr, Packet::new(data_link_type, now, &buffer[..len as usize])))
 
         } else {
             Err(io::Error::last_os_error())
