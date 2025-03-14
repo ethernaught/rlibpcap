@@ -1,3 +1,4 @@
+use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::fd::RawFd;
 
@@ -89,12 +90,20 @@ pub unsafe fn socket(domain: i64, _type: i64, protocol: i64) -> RawFd {
     syscall(SYS_SOCKET, domain, _type, protocol, 0, 0) as RawFd
 }
 
+pub unsafe fn bind(fd: RawFd, address: i64, address_len: i64) -> i64 {
+    syscall(SYS_BIND, fd as i64, address, address_len, 0, 0)
+}
+
 pub unsafe fn ioctl(fd: RawFd, request: i64, arg: i64) -> i64 {
     syscall(SYS_IOCTL, fd as i64, request, arg, 0, 0)
 }
 
 pub unsafe fn close(fd: RawFd) {
-    unsafe { syscall(SYS_CLOSE, fd as i64, 0, 0, 0, 0) };
+    syscall(SYS_CLOSE, fd as i64, 0, 0, 0, 0);
+}
+
+pub unsafe fn setsockopt(fd: RawFd, level: i64, optname: i64, optval: i64, optlen: i64) -> i64 {
+    syscall(SYS_SET_SOCK_OPT, fd as i64, level, optname, optval, optlen)
 }
 
 pub unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {

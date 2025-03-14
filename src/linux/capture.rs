@@ -2,7 +2,7 @@ use std::{io, mem};
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
-use crate::linux::sys::{close, socket, syscall, IfreqName};
+use crate::linux::sys::{bind, close, setsockopt, socket, syscall, IfreqName};
 use crate::packet::packet::Packet;
 use crate::linux::sys::{SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 use crate::packet::inter::data_link_types::DataLinkTypes;
@@ -70,18 +70,18 @@ impl Capture {
                     sll_addr: [0; 8],
                 };
 
-                if unsafe { syscall(SYS_BIND, self.fd as i64, &sockaddr as *const _ as i64, mem::size_of::<SockAddrLl>() as i64, 0, 0) } < 0 {
+                if unsafe { bind(self.fd, &sockaddr as *const _ as i64, mem::size_of::<SockAddrLl>() as i64) } < 0 {
                     unsafe { close(self.fd) };
                     return Err(io::Error::last_os_error());
                 }
 
                 unsafe {
-                    syscall(SYS_SET_SOCK_OPT, self.fd as i64, SOL_SOCKET, SO_BINDTODEVICE, ifreq.ifr_name.as_ptr() as i64, IFNAMSIZ as i64)
+                    setsockopt(self.fd, SOL_SOCKET, SO_BINDTODEVICE, ifreq.ifr_name.as_ptr() as i64, IFNAMSIZ as i64)
                 }
             }
             None => {
                 unsafe {
-                    syscall(SYS_SET_SOCK_OPT, self.fd as i64, SOL_SOCKET, SO_BINDTODEVICE, 0, 0)
+                    setsockopt(self.fd, SOL_SOCKET, SO_BINDTODEVICE, 0, 0)
                 }
             }
         } < 0 {
