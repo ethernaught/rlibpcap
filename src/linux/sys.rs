@@ -26,20 +26,20 @@ pub const SOCK_DGRAM: i64 = 2;
 
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct IfreqName {
     pub ifr_name: [u8; IFNAMSIZ]
 }
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct IfreqAddr {
     pub ifr_name: [u8; IFNAMSIZ],
     pub ifr_addr: [u8; 24]
 }
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct IfreqHwAddr {
     pub ifr_name: [u8; IFNAMSIZ],
     pub ifr_hwaddr: SockAddr
