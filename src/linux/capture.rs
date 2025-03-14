@@ -2,7 +2,7 @@ use std::{io, mem};
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
-use crate::linux::sys::{bind, close, setsockopt, socket, syscall, IfreqName};
+use crate::linux::sys::{bind, close, recvfrom, setsockopt, socket, syscall, IfreqName};
 use crate::packet::packet::Packet;
 use crate::linux::sys::{SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 use crate::packet::inter::data_link_types::DataLinkTypes;
@@ -122,9 +122,10 @@ impl Capture {
 
     pub fn next_packet(&mut self) -> io::Result<Packet> {
         let mut buffer = vec![0u8; 4096];
+        let mut sockaddr: SockAddrLl = unsafe { mem::zeroed() };
 
         let len = unsafe {
-            syscall(SYS_RECV_FROM, self.fd as i64, buffer.as_mut_ptr() as i64, buffer.len() as i64, 0, 0)
+            recvfrom(self.fd, &mut buffer, 0, &mut sockaddr)
         };
 
         if len > 0 {
@@ -141,6 +142,8 @@ impl Capture {
                     DataLinkTypes::Ethernet
                 }
             };
+
+            println!("{:?}", sockaddr);
 
             Ok(Packet::new(data_link_type, now, &buffer[..len as usize]))
 

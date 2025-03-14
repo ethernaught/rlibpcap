@@ -1,3 +1,4 @@
+use std::arch::asm;
 use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::fd::RawFd;
@@ -99,6 +100,27 @@ pub unsafe fn ioctl(fd: RawFd, request: i64, arg: i64) -> i64 {
     syscall(SYS_IOCTL, fd as i64, request, arg, 0, 0)
 }
 
+pub unsafe fn recvfrom(fd: i32, buffer: &mut [u8], flags: i64, sockaddr: &mut SockAddrLl) -> isize {
+    let mut addr_len = mem::size_of::<SockAddrLl>() as u32;
+    let ret: isize;
+
+    asm!(
+        "syscall",
+        in("rax") SYS_RECV_FROM,
+        in("rdi") fd,
+        in("rsi") buffer.as_mut_ptr() as *mut _ as i64,
+        in("rdx") buffer.len(),
+        in("r10") flags,
+        in("r8") sockaddr as *mut _ as *mut _ as i64,
+        in("r9") &mut addr_len as *mut u32,
+        lateout("rax") ret,
+        lateout("rcx") _,
+        lateout("r11") _,
+    );
+
+    ret
+}
+
 pub unsafe fn close(fd: RawFd) {
     syscall(SYS_CLOSE, fd as i64, 0, 0, 0, 0);
 }
@@ -113,7 +135,7 @@ pub unsafe fn setsockopt(fd: RawFd, level: i64, optname: i64, optval: i64, optle
 
 pub unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {
     let ret: i64;
-    core::arch::asm!("syscall", in("rax") number, in("rdi") a1, in("rsi") a2, in("rdx") a3, in("r10") a4, in("r8") a5, lateout("rax") ret);
+    asm!("syscall", in("rax") number, in("rdi") a1, in("rsi") a2, in("rdx") a3, in("r10") a4, in("r8") a5, lateout("rax") ret);
     ret
 }
 
