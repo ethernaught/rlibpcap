@@ -34,8 +34,8 @@ pub struct IfreqName {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct IfreqAddr {
-    pub ifr_name: [u8; IFNAMSIZ], // Interface name (e.g., "eth0")
-    pub ifr_addr: [u8; 24],  // IP address (for IPv4)
+    pub ifr_name: [u8; IFNAMSIZ],
+    pub ifr_addr: [u8; 24]
 }
 
 #[repr(C)]
@@ -56,21 +56,21 @@ pub struct IfConf {
 #[derive(Debug, Copy, Clone)]
 pub struct IfreqIndex {
     pub ifr_name: [u8; IFNAMSIZ],
-    pub ifr_ifindex: i32,
+    pub ifr_ifindex: i32
 }
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct IfreqFlags {
     pub ifr_name: [u8; IFNAMSIZ],
-    pub ifr_flags: i16,
+    pub ifr_flags: i16
 }
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SockAddr {
     pub sa_family: u16,
-    pub sa_data: [u8; 14],
+    pub sa_data: [u8; 14]
 }
 
 #[repr(C)]
@@ -127,42 +127,3 @@ pub fn parse_ip(buf: &[u8]) -> Option<IpAddr> {
         _ => None
     }
 }
-/*
-const IFF_UP: u16 = 0x1;
-const IFF_BROADCAST: u16 = 0x2;
-const IFF_DEBUG: u16 = 0x4;
-const IFF_LOOPBACK: u16 = 0x8;
-const IFF_POINTOPOINT: u16 = 0x10;
-const IFF_NOTRAILERS: u16 = 0x20;
-const IFF_RUNNING: u16 = 0x40;
-const IFF_NOARP: u16 = 0x80;
-const IFF_PROMISC: u16 = 0x100;
-const IFF_ALLMULTI: u16 = 0x200;
-const IFF_MASTER: u16 = 0x400;
-const IFF_SLAVE: u16 = 0x800;
-const IFF_MULTICAST: u16 = 0x1000;
-const IFF_PORTSEL: u16 = 0x2000;
-const IFF_AUTOMEDIA: u16 = 0x4000;
-const IFF_DYNAMIC: u16 = 0x8000;
-
-fn print_flags(flags: u16) {
-    println!("Interface Flags: {:04x}", flags);
-
-    if flags & IFF_UP != 0 { println!(" - UP"); }
-    if flags & IFF_BROADCAST != 0 { println!(" - BROADCAST"); }
-    if flags & IFF_DEBUG != 0 { println!(" - DEBUG"); }
-    if flags & IFF_LOOPBACK != 0 { println!(" - LOOPBACK"); }
-    if flags & IFF_POINTOPOINT != 0 { println!(" - POINTOPOINT"); }
-    if flags & IFF_NOTRAILERS != 0 { println!(" - NOTRAILERS"); }
-    if flags & IFF_RUNNING != 0 { println!(" - RUNNING"); }
-    if flags & IFF_NOARP != 0 { println!(" - NOARP"); }
-    if flags & IFF_PROMISC != 0 { println!(" - PROMISCUOUS"); }
-    if flags & IFF_ALLMULTI != 0 { println!(" - ALLMULTI"); }
-    if flags & IFF_MASTER != 0 { println!(" - MASTER"); }
-    if flags & IFF_SLAVE != 0 { println!(" - SLAVE"); }
-    if flags & IFF_MULTICAST != 0 { println!(" - MULTICAST"); }
-    if flags & IFF_PORTSEL != 0 { println!(" - PORTSEL"); }
-    if flags & IFF_AUTOMEDIA != 0 { println!(" - AUTOMEDIA"); }
-    if flags & IFF_DYNAMIC != 0 { println!(" - DYNAMIC"); }
-}
-*/

@@ -1,5 +1,6 @@
 use std::{io, mem};
 use std::net::IpAddr;
+use crate::interface_flags::InterfaceFlags;
 use crate::linux::sys::{IfreqAddr, IfreqHwAddr, IfreqIndex, SockAddr, AF_INET, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_DGRAM};
 use crate::linux::sys::{close, ioctl, parse_ip, socket, IfConf, IfreqFlags, SIOCGIFCONF, SIOCGIFFLAGS};
 use crate::packet::inter::data_link_types::DataLinkTypes;
@@ -12,7 +13,7 @@ pub struct Device {
     index: i32,
     data_link_type: DataLinkTypes,
     mac: EthernetAddress,
-    flags: u16
+    flags: Vec<InterfaceFlags>
 }
 
 impl Device {
@@ -86,7 +87,7 @@ impl Device {
                 continue;
             }
 
-            let flags = ifr_flags.ifr_flags as u16;
+            let flags = InterfaceFlags::from_code(ifr_flags.ifr_flags as u16);
 
             devices.push(Self {
                 name,
@@ -122,7 +123,7 @@ impl Device {
         self.mac
     }
 
-    pub fn get_flags(&self) -> u16 {
-        self.flags
+    pub fn get_flags(&self) -> Vec<InterfaceFlags> {
+        self.flags.clone()
     }
 }
