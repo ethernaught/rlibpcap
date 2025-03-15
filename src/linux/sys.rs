@@ -26,6 +26,7 @@ pub const SIOCGIFHWADDR: u64 = 0x00008927;
 pub const AF_INET: i64 = 2;
 pub const AF_INET6: i64 = 10;
 pub const SOCK_DGRAM: i64 = 2;
+pub const MSG_DONTWAIT: i64 = 0x40;
 
 
 #[repr(C)]

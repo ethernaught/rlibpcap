@@ -2,7 +2,7 @@ use std::{io, mem};
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
-use crate::linux::sys::{bind, close, recvfrom, sendto, setsockopt, socket, syscall, IfreqName};
+use crate::linux::sys::{bind, close, recvfrom, sendto, setsockopt, socket, syscall, IfreqName, MSG_DONTWAIT};
 use crate::packet::packet::Packet;
 use crate::linux::sys::{SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 use crate::packet::inter::data_link_types::DataLinkTypes;
@@ -96,7 +96,7 @@ impl Capture {
         println!("Setting capture to immediate mode");
     }
 
-    pub fn send_packet(&self, packet: Packet) -> io::Result<usize> {
+    pub fn send(&self, packet: Packet) -> io::Result<usize> {
         let mut packet = packet.to_bytes();
 
         let len = unsafe { sendto(self.fd, &mut packet) };
@@ -108,11 +108,19 @@ impl Capture {
         }
     }
 
-    pub fn next_packet(&mut self) -> io::Result<(SockAddrLl, Packet)> {
+    pub fn recv(&mut self) -> io::Result<(SockAddrLl, Packet)> {
+        self.recv_with_flags(0)
+    }
+
+    pub fn try_recv(&mut self) -> io::Result<(SockAddrLl, Packet)> {
+        self.recv_with_flags(MSG_DONTWAIT)
+    }
+
+    fn recv_with_flags(&self, flags: i64) -> io::Result<(SockAddrLl, Packet)> {
         let mut buffer = vec![0u8; 4096];
         let mut sockaddr: SockAddrLl = unsafe { mem::zeroed() };
 
-        let len = unsafe { recvfrom(self.fd, &mut buffer, 0, &mut sockaddr) };
+        let len = unsafe { recvfrom(self.fd, &mut buffer, flags, &mut sockaddr) };
 
         if len > 0 {
             let now = SystemTime::now()
@@ -123,11 +131,19 @@ impl Capture {
             let data_link_type = DataLinkTypes::from_code(sockaddr.sll_hatype as u32)
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
-            Ok((sockaddr, Packet::new(data_link_type, now, &buffer[..len as usize])))
+            return Ok((sockaddr, Packet::new(data_link_type, now, &buffer[..len as usize])));
 
-        } else {
-            Err(io::Error::last_os_error())
+        } else if len == -1 {
+            let err = io::Error::last_os_error();
+
+            if err.kind() == io::ErrorKind::WouldBlock {
+                return Err(io::Error::new(io::ErrorKind::WouldBlock, "No data available"));
+            }
+
+            return Err(err);
         }
+
+        Err(io::Error::last_os_error())
     }
 
     pub fn close(&self) {
