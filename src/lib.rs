@@ -32,7 +32,7 @@ mod tests {
 
     #[test]
     fn pcap() {
-        //let pcap = PcapNg::from_file("/home/brad/Downloads/pcap.pcapng").expect("Failed to open pcap file");
+        let pcap = Pcap::from_file("/home/brad/Downloads/traffic_capture.pcap").expect("Failed to open pcap file");
 
         /*
         for packet in pcap {
@@ -40,7 +40,7 @@ mod tests {
         }
         */
 
-        //println!("{:?}", pcap);
+        println!("{:?}", pcap);
     }
 
     #[test]
