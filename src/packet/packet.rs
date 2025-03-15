@@ -1,5 +1,7 @@
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::ethernet_frame::EthernetFrame;
+use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
+use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
 
 #[derive(Debug, Clone)]
@@ -16,6 +18,19 @@ impl Packet {
         let frame = match data_link_type {
             DataLinkTypes::Ethernet | DataLinkTypes::Loopback => {
                 EthernetFrame::from_bytes(data).unwrap().dyn_clone()
+            }
+            DataLinkTypes::Raw | DataLinkTypes::Tun => {
+                match (data[0] >> 4) & 0x0F {
+                    4 => {
+                        Ipv4Layer::from_bytes(data).unwrap().dyn_clone()
+                    }
+                    6 => {
+                        Ipv6Layer::from_bytes(data).unwrap().dyn_clone()
+                    }
+                    _ => {
+                        unimplemented!()
+                    }
+                }
             }
             _ => {
                 todo!()

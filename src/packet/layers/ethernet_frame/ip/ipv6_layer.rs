@@ -107,7 +107,7 @@ impl Layer for Ipv6Layer {
         };
 
         Some(Self {
-            version: (buf[0] >> 4) & 0x0F,
+            version: buf[0] >> 4,//) & 0x0F,
             traffic_class: ((buf[0] & 0x0F) << 4) | (buf[1] >> 4),
             flow_label: ((buf[1] as u32 & 0x0F) << 16) | ((buf[2] as u32) << 8) | (buf[3] as u32),
             payload_length: u16::from_be_bytes([buf[4], buf[5]]),
