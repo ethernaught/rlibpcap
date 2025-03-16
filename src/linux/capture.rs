@@ -41,7 +41,7 @@ impl Capture {
         })
     }
 
-    pub fn open(&mut self) -> io::Result<()> {
+    pub fn open(&self) -> io::Result<()> {
         if self.fd < 0 {
             return Err(io::Error::last_os_error());
         }
@@ -108,11 +108,11 @@ impl Capture {
         }
     }
 
-    pub fn recv(&mut self) -> io::Result<(SockAddrLl, Packet)> {
+    pub fn recv(&self) -> io::Result<(SockAddrLl, Packet)> {
         self.recv_with_flags(0)
     }
 
-    pub fn try_recv(&mut self) -> io::Result<(SockAddrLl, Packet)> {
+    pub fn try_recv(&self) -> io::Result<(SockAddrLl, Packet)> {
         self.recv_with_flags(MSG_DONTWAIT)
     }
 
