@@ -3,7 +3,7 @@ use crate::packet::layers::ethernet_frame::ethernet_frame::EthernetFrame;
 use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
 use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::sll2_frame::Sll2Frame;
+use crate::packet::layers::sll2_frame::sll2_frame::Sll2Frame;
 
 #[derive(Debug, Clone)]
 pub struct Packet {

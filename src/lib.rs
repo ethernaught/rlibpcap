@@ -27,7 +27,6 @@ mod tests {
     use std::io::Read;
     use crate::capture::Capture;
     use crate::devices::Device;
-    use crate::packet::layers::sll2_frame::Sll2Frame;
     use crate::pcap::pcap::Pcap;
     use crate::pcap::pcapng::PcapNg;
 
