@@ -38,6 +38,54 @@ impl Sll2Frame {
         }
     }
 
+    pub fn get_protocol(&self) -> EthernetTypes {
+        self.protocol
+    }
+
+    pub fn set_protocol(&mut self, protocol: EthernetTypes) {
+        self.protocol = protocol;
+    }
+
+    pub fn get_if_index(&self) -> i32 {
+        self.if_index
+    }
+
+    pub fn set_if_index(&mut self, if_index: i32) {
+        self.if_index = if_index;
+    }
+
+    pub fn get_data_link_type(&self) -> DataLinkTypes {
+        self.data_link_type
+    }
+
+    pub fn set_data_link_type(&mut self, data_link_type: DataLinkTypes) {
+        self.data_link_type = data_link_type;
+    }
+
+    pub fn get_packet_type(&self) -> PacketTypes {
+        self.packet_type
+    }
+
+    pub fn set_packet_type(&mut self, packet_type: PacketTypes) {
+        self.packet_type = packet_type;
+    }
+
+    pub fn get_address_length(&self) -> u8 {
+        self.address_length
+    }
+
+    pub fn set_address_length(&mut self, address_length: u8) {
+        self.address_length = address_length;
+    }
+
+    pub fn get_address(&self) -> &[u8; 8] {
+        &self.address
+    }
+
+    pub fn set_address(&mut self, address: [u8; 8]) {
+        self.address = address;
+    }
+
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
         self.length = data.len();
         self.data = Some(data);
