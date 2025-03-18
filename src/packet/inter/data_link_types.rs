@@ -50,7 +50,7 @@ impl DataLinkTypes {
     pub fn to_string(&self) -> String {
         match self {
             Self::Null => "Null",
-            Self::Ethernet => "Ethernet 10MB",
+            Self::Ethernet => "Ethernet",
             Self::Raw => "Raw IP packets",
             Self::Ipv4 => "IPv4",
             Self::Ipv6 => "IPv6",
