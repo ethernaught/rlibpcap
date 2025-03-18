@@ -27,12 +27,15 @@ mod tests {
     use std::io::Read;
     use crate::capture::Capture;
     use crate::devices::Device;
+    use crate::packet::layers::sll2_frame::Sll2Frame;
     use crate::pcap::pcap::Pcap;
     use crate::pcap::pcapng::PcapNg;
 
     #[test]
     fn pcap() {
         let pcap = Pcap::from_file("/home/brad/Downloads/traffic_capture.pcap").expect("Failed to open pcap file");
+
+
 
         /*
         for packet in pcap {
@@ -45,10 +48,10 @@ mod tests {
 
     #[test]
     fn devices() {
-        let devices = Device::list().unwrap();
+        //let devices = Device::list().unwrap();
 
 
-        println!("{:?}", devices);
+        //println!("{:?}", devices);
     }
 
     #[test]
