@@ -32,7 +32,7 @@ mod tests {
 
     #[test]
     fn pcap() {
-        let pcap = Pcap::from_file("/home/brad/Downloads/traffic_capture.pcap").expect("Failed to open pcap file");
+        let pcap = Pcap::from_file("/home/brad/Downloads/sll2.pcap").expect("Failed to open pcap file");
 
 
 

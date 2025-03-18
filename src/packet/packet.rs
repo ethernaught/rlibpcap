@@ -41,8 +41,6 @@ impl Packet {
             }
         };
 
-        println!("{:?}", frame);
-
         Self {
             data_link_type,
             frame,

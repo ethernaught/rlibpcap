@@ -65,6 +65,7 @@ impl Pcap {
             let timestamp_sec = u32::from_le_bytes([buf[0], buf[1], buf[2], buf[3]]);
             let timestamp_usec = u32::from_le_bytes([buf[4], buf[5], buf[6], buf[7]]);
             let captured_len = u32::from_le_bytes([buf[8], buf[9], buf[10], buf[11]]);
+            let original_len = u32::from_le_bytes([buf[12], buf[13], buf[14], buf[15]]);
             let frame_time = Self::combine_timestamp(timestamp_sec, timestamp_usec);
 
             let mut buf = vec![0u8; captured_len as usize];

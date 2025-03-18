@@ -1,17 +1,22 @@
 use std::any::Any;
+use crate::packet::inter::data_link_types::DataLinkTypes;
+use crate::packet::layers::ethernet_frame::arp::arp_extension::ArpExtension;
 use crate::packet::layers::ethernet_frame::inter::ethernet_types::EthernetTypes;
+use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
+use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::sll2_frame::inter::packet_types::PacketTypes;
 
-const SLL2_FRAME_LEN: usize = 14;
+const SLL2_FRAME_LEN: usize = 20;
 
 #[derive(Clone, Debug)]
 pub struct Sll2Frame {
-    family: u16,
-    protocol: u16,//EthernetTypes,
+    protocol: EthernetTypes,
+    reserved: u16,
     if_index: i32,
-    data_link_type: u16,
-    packet_type: u8,//PacketTypes,
+    data_link_type: DataLinkTypes,
+    packet_type: PacketTypes,
+    address_length: u8,
     address: [u8; 8],
     data: Option<Box<dyn Layer>>,
     length: usize
@@ -19,19 +24,19 @@ pub struct Sll2Frame {
 
 impl Sll2Frame {
 
-    /*
-    pub fn new(protocol: EthernetTypes, packet_type: PacketTypes) -> Self {
+    pub fn new(address: [u8; 8], address_length: u8, protocol: EthernetTypes, packet_type: PacketTypes) -> Self {
         Self {
             protocol,
             reserved: 0,
-            if_index: 0,
-            hatype: 0,
-            packet_type,
-            addrress: Vec::new(),
+            if_index: 1,
+            data_link_type: DataLinkTypes::Null,
+            packet_type: PacketTypes::Host,
+            address_length,
+            address,
             data: None,
             length: SLL2_FRAME_LEN
         }
-    }*/
+    }
 
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
         self.length = data.len();
@@ -54,43 +59,43 @@ impl Layer for Sll2Frame {
             return None;
         }
 
-        //address_length: u16::from_be_bytes(buf[12..14].try_into().unwrap()),
+        let protocol = EthernetTypes::from_code(u16::from_be_bytes(buf[0..2].try_into().unwrap())).unwrap();
 
-        //SockAddrLl { sll_family: 17, sll_protocol: 8, sll_ifindex: 3, sll_hatype: 1, sll_pkttype: 0, sll_halen: 6, sll_addr: [60, 82, 161, 18, 164, 80, 0, 0] }
-
-        /*
-        let ssl = Self {
-            family: u16::from_be_bytes(buf[0..2].try_into().unwrap()),
-            protocol: u16::from_be_bytes(buf[2..4].try_into().unwrap()),
-            if_index: i32::from_be_bytes(buf[4..8].try_into().unwrap()),
-            data_link_type: u16::from_be_bytes(buf[8..10].try_into().unwrap()),
-            pkttype: buf[10],
-            halen: buf[11],
-            addr: [0u8; 8],
-        };*/
+        let data = match protocol {
+            EthernetTypes::IPv4 => {
+                Some(Ipv4Layer::from_bytes(&buf[SLL2_FRAME_LEN..])?.dyn_clone())
+            }
+            EthernetTypes::Arp => {
+                Some(ArpExtension::from_bytes(&buf[SLL2_FRAME_LEN..])?.dyn_clone())
+            }
+            EthernetTypes::IPv6 => {
+                Some(Ipv6Layer::from_bytes(&buf[SLL2_FRAME_LEN..])?.dyn_clone())
+            }
+            EthernetTypes::Broadcast => {
+                None
+            }
+        };
 
         Some(Self {
-            family: u16::from_be_bytes(buf[0..2].try_into().unwrap()),
-            protocol: u16::from_be_bytes(buf[2..4].try_into().unwrap()),
+            protocol,
+            reserved: u16::from_be_bytes(buf[2..4].try_into().unwrap()),
             if_index: i32::from_be_bytes(buf[4..8].try_into().unwrap()),
-            data_link_type: u16::from_be_bytes(buf[8..10].try_into().unwrap()),
-            packet_type: buf[11],//PacketTypes::from_code(u16::from_be_bytes(buf[10..12].try_into().unwrap())).unwrap(),
-            address: [0u8; 8],//buf[14..20].try_into().unwrap(),
-            data: None,
+            data_link_type: DataLinkTypes::from_code(u16::from_be_bytes(buf[8..10].try_into().unwrap()) as u32).unwrap(),
+            packet_type: PacketTypes::from_code(buf[10]).unwrap(),
+            address_length: buf[11],
+            address: buf[12..20].try_into().unwrap(),
+            data,
             length: buf.len()
         })
     }
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; SLL2_FRAME_LEN];
-        /*
         buf.splice(0..2, self.protocol.get_code().to_be_bytes());
-        buf.splice(2..4, self.reserved.to_be_bytes());
         buf.splice(4..8, self.if_index.to_be_bytes());
-        buf.splice(8..10, self.hatype.to_be_bytes());
-        buf.splice(10..12, self.packet_type.get_code().to_be_bytes());*/
-        //buf.splice(12..14, self.halen.to_be_bytes());
-        //buf.splice(0..6, self.addr.to_bytes());
+        buf.splice(8..10, self.data_link_type.get_code().to_be_bytes());
+        buf[10] = self.packet_type.get_code();
+        buf[11] = self.address_length;
 
         match &self.data {
             Some(data) => {
