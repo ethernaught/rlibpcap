@@ -64,6 +64,7 @@ pub struct IfMsghdr {
     pub ifm_snd_maxlen: u16,
     pub ifm_snd_drops: u16,
     pub ifm_timer: u32,
+    _padding: u32,
     pub ifm_data: IfData64,    // Interface data (e.g., RX/TX bytes, MTU)
 }
 
