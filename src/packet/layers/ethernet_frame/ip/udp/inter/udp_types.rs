@@ -3,7 +3,7 @@ pub enum UdpTypes {
     Dhcp,
     Dns,
     Quick,
-    uTp,
+    Utp,
     BitTorrent,
     Unknown,
     None

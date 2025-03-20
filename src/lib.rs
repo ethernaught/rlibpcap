@@ -27,8 +27,6 @@ pub use macos::*;
 
 #[cfg(test)]
 mod tests {
-    use std::fs::File;
-    use std::io::Read;
     use crate::capture::Capture;
     use crate::devices::Device;
     use crate::pcap::pcap::Pcap;

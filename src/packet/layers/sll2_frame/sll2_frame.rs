@@ -30,7 +30,7 @@ impl Sll2Frame {
             reserved: 0,
             if_index: 1,
             data_link_type: DataLinkTypes::Null,
-            packet_type: PacketTypes::Host,
+            packet_type,
             address_length,
             address,
             data: None,
