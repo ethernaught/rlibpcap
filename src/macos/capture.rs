@@ -2,7 +2,7 @@ use std::{io, mem};
 use std::os::fd::RawFd;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
-use crate::macos::sys::SockAddrLl;
+use crate::macos::sys::SockAddrDl;
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::packet::Packet;
 
@@ -37,15 +37,15 @@ impl Capture {
         todo!()
     }
 
-    pub fn recv(&self) -> io::Result<(SockAddrLl, Packet)> { //i32 should be the socket address
+    pub fn recv(&self) -> io::Result<(SockAddrDl, Packet)> { //i32 should be the socket address
         self.recv_with_flags(0)
     }
 
-    pub fn try_recv(&self) -> io::Result<(SockAddrLl, Packet)> { //i32 should be the socket address
+    pub fn try_recv(&self) -> io::Result<(SockAddrDl, Packet)> { //i32 should be the socket address
         self.recv_with_flags(0) //0 SHOULD BE RECEIVE ALL FLAG
     }
 
-    fn recv_with_flags(&self, flags: i64) -> io::Result<(SockAddrLl, Packet)> { //i32 should be the socket address
+    fn recv_with_flags(&self, flags: i64) -> io::Result<(SockAddrDl, Packet)> { //i32 should be the socket address
         todo!()
     }
 

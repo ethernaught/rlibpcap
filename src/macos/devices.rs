@@ -81,11 +81,13 @@ impl Device {
             // Check if it's an RTM_IFINFO2 message
             if hdr.ifm_type == RTM_IFINFO2 as u8 {
                 let msg_len = hdr.ifm_msglen as usize;
-                offset += mem::size_of::<IfMsghdr>();
+                //offset += mem::size_of::<IfMsghdr>()-20;
+                offset += msg_len;
+
 
                 // Get sockaddr_dl for interface name
                 let sdl: &SockAddrDl = unsafe {
-                    &*(buffer.as_ptr().add(offset) as *const SockAddrDl)
+                    &*(buffer.as_ptr().add(offset-20) as *const SockAddrDl)
                 };
 
                 if sdl.sdl_family == AF_LINK as u8 {
@@ -97,8 +99,7 @@ impl Device {
 
                 println!("{:?}", hdr.ifm_data);
 
-                // ✅ Correctly skip to next message (aligned)
-                offset += ((sdl.sdl_len as usize + 3) & !3);
+                //offset += ((sdl.sdl_len as usize + 3) & !3);
             } else {
                 offset += hdr.ifm_msglen as usize;
             }
