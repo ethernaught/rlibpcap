@@ -94,10 +94,11 @@ impl Device {
                     let name_len = sdl.sdl_nlen as usize;
                     let name_bytes = &sdl.sdl_data[0..name_len];
                     let if_name = String::from_utf8_lossy(name_bytes);
-                    println!("Interface Name: {} {}", hdr.ifm_index, if_name);
+                    //println!("Interface Name: {} {}", hdr.ifm_index, if_name);
+                    println!("{}  {:?}", if_name, sdl);
                 }
 
-                println!("{:?}", hdr.ifm_data);
+                //println!("{:?}", hdr.ifm_data);
 
                 //offset += ((sdl.sdl_len as usize + 3) & !3);
             } else {
