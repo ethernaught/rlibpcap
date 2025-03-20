@@ -1,5 +1,6 @@
 use std::{io, mem};
 use std::net::IpAddr;
+use crate::interface_flags::InterfaceFlags;
 use crate::macos::sys::{ioctl, socket, IfConf, IfreqAddr, AF_INET, SOCK_DGRAM};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
@@ -11,7 +12,7 @@ pub struct Device {
     index: i32,
     data_link_type: DataLinkTypes,
     mac: EthernetAddress,
-    //flags: Vec<InterfaceFlags>
+    flags: Vec<InterfaceFlags>
 }
 
 impl Device {
@@ -135,9 +136,7 @@ impl Device {
         self.mac
     }
 
-    /*
     pub fn get_flags(&self) -> Vec<InterfaceFlags> {
         self.flags.clone()
     }
-    */
 }

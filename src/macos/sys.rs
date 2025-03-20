@@ -54,6 +54,29 @@ pub struct IfConf {
 }
 
 
+
+
+
+
+
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SockAddrLl {
+    pub sll_family: u16,
+    pub sll_protocol: u16,
+    pub sll_ifindex: i32,
+    pub sll_hatype: u16,
+    pub sll_pkttype: u8,
+    pub sll_halen: u8,
+    pub sll_addr: [u8; 8]
+}
+
+
+
+
+
+
 pub unsafe fn socket(domain: i64, _type: i64, protocol: i64) -> RawFd {
     syscall(SYS_SOCKET, domain, _type, protocol, 0, 0) as RawFd
 }
