@@ -21,7 +21,7 @@ impl Device {
     pub fn list() -> io::Result<Vec<Self>> {
         let fd = unsafe { socket(AF_INET, SOCK_DGRAM, 0) };
         if fd < 0 {
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "Failed to create socket"));
+            return Err(io::Error::last_os_error());
         }
 
         let mut ifreqs: [IfreqAddr; 32] = unsafe { mem::zeroed() };
@@ -35,7 +35,7 @@ impl Device {
 
         if res < 0 {
             unsafe { close(fd) };
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "ioctl SIOCGIFCONF failed"));
+            return Err(io::Error::last_os_error());
         }
 
         let mut devices = Vec::new();
@@ -69,7 +69,7 @@ impl Device {
             };
 
             if unsafe { ioctl(fd, SIOCGIFHWADDR as i64, &mut ifreq_hwaddr as *mut _ as i64) } < 0 {
-                return Err(io::Error::new(io::ErrorKind::Other, "Failed to get hardware address"));
+                return Err(io::Error::last_os_error());
             }
 
             let data_link_type = Some(unsafe { DataLinkTypes::from_code(ifreq_hwaddr.ifr_hwaddr.sa_family as u32)

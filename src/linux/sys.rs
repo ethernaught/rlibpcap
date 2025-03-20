@@ -3,11 +3,11 @@ use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::fd::RawFd;
 
-pub const SYS_SOCKET: i64 = 41;
 pub const AF_PACKET: i64 = 17;
 pub const SOCK_RAW: i64 = 3;
 pub const ETH_P_ALL: u16 = 0x0003;
-pub const SOL_SOCKET: i64 = 1;
+//pub const SOL_SOCKET: i64 = 1;
+pub const SYS_SOCKET: i64 = 41;
 pub const SYS_CLOSE: i64 = 3;
 pub const SYS_IOCTL: i64 = 16;
 pub const SYS_BIND: i64 = 49;
