@@ -120,9 +120,74 @@ fn main() {
 
     println!("{:x?}", buffer);
 
+    let mut offset = 0;
+
+    while offset < buffer.len() {
+        if buffer.len() < offset + mem::size_of::<IfMsghdr>() {
+            break;
+        }
+
+        let ifm: &IfMsghdr = unsafe {
+            &*(buffer.as_ptr().add(offset) as *const IfMsghdr)
+        };
+
+        println!("Interface Message: {:?}", ifm);
+
+        offset += ifm.ifm_msglen as usize;
+    }
 
 
 
 
+
+}
+
+
+
+#[repr(C)]
+#[derive(Debug)]
+struct IfMsghdr {
+    ifm_msglen: u16, // Length of the message
+    ifm_version: u8, // Message version
+    ifm_type: u8,    // Message type (RTM_IFINFO, RTM_NEWADDR, etc.)
+    ifm_addrs: i32,  // Bitmask of addresses
+    ifm_flags: i32,  // Interface flags
+    ifm_index: u16,  // Interface index
+    ifm_snd_len: u32,
+    ifm_snd_maxlen: u32,
+    ifm_snd_drops: u32,
+    ifm_timer: u32,
+    ifm_data: IfData,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+struct IfData {
+    ifi_type: u8,   // Interface type
+    ifi_typelen: u8,
+    ifi_physical: u8,
+    ifi_addrlen: u8,
+    ifi_hdrlen: u8,
+    ifi_recvquota: u8,
+    ifi_xmitquota: u8,
+    ifi_unused1: u8,
+    ifi_mtu: u32,
+    ifi_metric: u32,
+    ifi_baudrate: u64,
+    ifi_ipackets: u32,
+    ifi_ierrors: u32,
+    ifi_opackets: u32,
+    ifi_oerrors: u32,
+    ifi_collisions: u32,
+    ifi_ibytes: u32,
+    ifi_obytes: u32,
+    ifi_imcasts: u32,
+    ifi_omcasts: u32,
+    ifi_iqdrops: u32,
+    ifi_noproto: u32,
+    ifi_recvtiming: u32,
+    ifi_xmittiming: u32,
+    ifi_lastchange_sec: i32,
+    ifi_lastchange_usec: i32,
 }
 */
