@@ -93,16 +93,29 @@ impl Device {
                 if sdl.sdl_family == AF_LINK as u8 {
                     let name_len = sdl.sdl_nlen as usize;
                     let name_bytes = &sdl.sdl_data[0..name_len];
-                    let if_name = String::from_utf8_lossy(name_bytes);
+                    let name = String::from_utf8_lossy(name_bytes).to_string();
                     //println!("Interface Name: {} {}", hdr.ifm_index, if_name);
-                    println!("{}  {:?}", if_name, sdl);
+                    println!("{} {}  {:?}", hdr.ifm_type, name, sdl);
+
+                    let device = Device {
+                        name,
+                        address: None,
+                        index: hdr.ifm_index as i32,
+                        data_link_type: DataLinkTypes::Null,
+                        mac: EthernetAddress::new(0, 0, 0, 0, 0, 0),
+                        flags: vec![],
+                    };
+
+
                 }
 
                 //println!("{:?}", hdr.ifm_data);
+                //println!("{:x?}", &buffer[offset..offset + hdr.ifm_msglen as usize]);
 
                 //offset += ((sdl.sdl_len as usize + 3) & !3);
             } else {
                 offset += hdr.ifm_msglen as usize;
+                println!("{} {:x?}", hdr.ifm_type, &buffer[offset..offset + hdr.ifm_msglen as usize]);
             }
         }
 

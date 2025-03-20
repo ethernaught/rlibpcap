@@ -28,7 +28,11 @@ pub const SOCK_DGRAM: i64 = 2;
 pub const CTL_NET: c_int = 4;
 pub const AF_ROUTE: c_int = 17;
 pub const NET_RT_IFLIST2: c_int = 6; // 3 ???
+
+
+pub const RTM_NEWADDR: c_int = 0xc;
 pub const RTM_IFINFO2: c_int = 0x12;
+pub const RTM_NEWMADDR2: c_int = 0x13;
 
 
 pub const AF_LINK: c_int = 18;
