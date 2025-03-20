@@ -2,7 +2,7 @@ use std::{io, mem, ptr};
 use std::ffi::{c_int, c_void};
 use std::net::IpAddr;
 use crate::interface_flags::InterfaceFlags;
-use crate::macos::sys::{ioctl, socket, sysctl, IfMsghdr, SockAddrDl, AF_INET, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_IFINFO2, SOCK_DGRAM};
+use crate::macos::sys::{ioctl, socket, sysctl, IfData64, IfMsghdr, SockAddr, SockAddrDl, SockAddrInet, SockAddrInet6, AF_INET, AF_INET6, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_NEWADDR, RTM_IFINFO2, RTM_NEWMADDR2, SOCK_DGRAM};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 
@@ -77,8 +77,42 @@ impl Device {
             let hdr: &IfMsghdr = unsafe {
                 &*(buffer.as_ptr().add(offset) as *const IfMsghdr)
             };
+            offset += hdr.ifm_msglen as usize;
+
+
+            match hdr.ifm_type {
+                RTM_NEWADDR => {
+                    println!("NEW_ADDR {:?}", hdr);
+
+                }
+                RTM_IFINFO2 => {
+                    let data: &IfData64 = unsafe {
+                        &*(buffer.as_ptr().add(offset+28) as *const IfData64)
+                    };
+
+                    let sdl: &SockAddrDl = unsafe {
+                        &*(buffer.as_ptr().add(offset-20) as *const SockAddrDl)
+                    };
+
+                    if sdl.sdl_family == AF_LINK as u8 {
+                        let name_len = sdl.sdl_nlen as usize;
+                        let name_bytes = &sdl.sdl_data[0..name_len];
+                        let name = String::from_utf8_lossy(name_bytes).to_string();
+                        //println!("Interface Name: {} {}", hdr.ifm_index, if_name);
+                        println!("INFO {} {}  {:?}", hdr.ifm_type, name, sdl);
+                    }
+                }
+                RTM_NEWMADDR2 => {
+                    println!("NEW_MADDR");
+
+                }
+                _ => {}
+            }
 
             // Check if it's an RTM_IFINFO2 message
+
+
+            /*
             if hdr.ifm_type == RTM_IFINFO2 as u8 {
                 let msg_len = hdr.ifm_msglen as usize;
                 //offset += mem::size_of::<IfMsghdr>()-20;
@@ -113,10 +147,12 @@ impl Device {
                 //println!("{:x?}", &buffer[offset..offset + hdr.ifm_msglen as usize]);
 
                 //offset += ((sdl.sdl_len as usize + 3) & !3);
+
             } else {
                 offset += hdr.ifm_msglen as usize;
                 println!("{} {:x?}", hdr.ifm_type, &buffer[offset..offset + hdr.ifm_msglen as usize]);
             }
+            */
         }
 
 

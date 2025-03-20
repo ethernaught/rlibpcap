@@ -22,6 +22,7 @@ pub const IFNAMSIZ: usize = 16;
 
 
 pub const AF_INET: i64 = 2;
+pub const AF_INET6: i64 = 30;
 pub const SOCK_DGRAM: i64 = 2;
 
 
@@ -30,9 +31,9 @@ pub const AF_ROUTE: c_int = 17;
 pub const NET_RT_IFLIST2: c_int = 6; // 3 ???
 
 
-pub const RTM_NEWADDR: c_int = 0xc;
-pub const RTM_IFINFO2: c_int = 0x12;
-pub const RTM_NEWMADDR2: c_int = 0x13;
+pub const RTM_NEWADDR: u8 = 0xc;
+pub const RTM_IFINFO2: u8 = 0x12;
+pub const RTM_NEWMADDR2: u8 = 0x13;
 
 
 pub const AF_LINK: c_int = 18;
@@ -55,6 +56,46 @@ unsafe extern "C" {
 
 
 
+
+
+
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct SockAddr {
+    pub sa_len: u8,
+    pub sa_family: u8,
+    pub sa_data: [u8; 14],
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct SockAddrInet {
+    pub sin_len: u8,
+    pub sin_family: u8,
+    pub sin_port: u16,
+    pub sin_addr: u32,
+    pub sin_zero: [u8; 8],
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct SockAddrInet6 {
+    pub sin6_len: u8,
+    pub sin6_family: u8,
+    pub sin6_port: u16,
+    pub sin6_flowinfo: u32,
+    pub sin6_addr: [u8; 16],
+    pub sin6_scope_id: u32,
+}
+
+
+
+
+
+
+
+
 #[repr(C)]
 #[derive(Debug)]
 pub struct IfMsghdr {
@@ -68,8 +109,8 @@ pub struct IfMsghdr {
     pub ifm_snd_maxlen: u16,
     pub ifm_snd_drops: u16,
     pub ifm_timer: u32,
-    _padding: u32,
-    pub ifm_data: IfData64,    // Interface data (e.g., RX/TX bytes, MTU)
+    //_padding: u32,
+    //pub ifm_data: IfData64,    // Interface data (e.g., RX/TX bytes, MTU)
 }
 
 #[repr(C)]
