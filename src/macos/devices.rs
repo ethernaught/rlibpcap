@@ -77,12 +77,13 @@ impl Device {
             let hdr: &IfMsghdr = unsafe {
                 &*(buffer.as_ptr().add(offset) as *const IfMsghdr)
             };
-            offset += hdr.ifm_msglen as usize;
+
+            //println!("{}  {}", offset, hdr.ifm_msglen);
 
 
             match hdr.ifm_type {
                 RTM_NEWADDR => {
-                    println!("NEW_ADDR {:?}", hdr);
+                    println!("NEW_ADDR {:x?}", &buffer[offset+28..offset+hdr.ifm_msglen as usize-28]);
 
                 }
                 RTM_IFINFO2 => {
@@ -91,7 +92,7 @@ impl Device {
                     };
 
                     let sdl: &SockAddrDl = unsafe {
-                        &*(buffer.as_ptr().add(offset-20) as *const SockAddrDl)
+                        &*(buffer.as_ptr().add(offset+hdr.ifm_msglen as usize-20) as *const SockAddrDl)
                     };
 
                     if sdl.sdl_family == AF_LINK as u8 {
@@ -103,11 +104,14 @@ impl Device {
                     }
                 }
                 RTM_NEWMADDR2 => {
-                    println!("NEW_MADDR");
+                    println!("NEW_MADDR   {:x?}", &buffer[offset+28..offset+hdr.ifm_msglen as usize-28]);
 
                 }
                 _ => {}
             }
+
+
+            offset += hdr.ifm_msglen as usize;
 
             // Check if it's an RTM_IFINFO2 message
 
