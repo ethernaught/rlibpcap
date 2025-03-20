@@ -1,7 +1,8 @@
-use std::{io, mem};
+use std::{io, mem, ptr};
+use std::ffi::{c_int, c_void};
 use std::net::IpAddr;
 use crate::interface_flags::InterfaceFlags;
-use crate::macos::sys::{ioctl, socket, IfConf, IfreqAddr, AF_INET, SOCK_DGRAM};
+use crate::macos::sys::{ioctl, socket, sysctl, IfMsghdr, SockAddrDl, AF_INET, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_IFINFO2, SOCK_DGRAM};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 
@@ -21,6 +22,88 @@ impl Device {
 
 
         let devices = Vec::new();
+
+
+
+
+
+        let mib: [c_int; 6] = [CTL_NET, AF_ROUTE, 0, 0, NET_RT_IFLIST2, 0];
+        let mut size: usize = 0;
+
+        // First sysctl to get the size
+        unsafe {
+            if sysctl(
+                mib.as_ptr(),
+                mib.len() as u32,
+                ptr::null_mut(),
+                &mut size,
+                ptr::null_mut(),
+                0,
+            ) != 0
+            {
+                eprintln!("sysctl failed to get size");
+                return Err(io::Error::last_os_error());
+            }
+        }
+
+        println!("sysctl returned {} entries", size);
+
+
+
+
+        // Allocate memory for the interface list
+        let mut buffer: Vec<u8> = vec![0; size];
+
+        // Second sysctl to get the actual data
+        unsafe {
+            if sysctl(
+                mib.as_ptr(),
+                mib.len() as u32,
+                buffer.as_mut_ptr() as *mut c_void,
+                &mut size,
+                ptr::null_mut(),
+                0,
+            ) != 0
+            {
+                eprintln!("sysctl failed to get interface data");
+                return Err(io::Error::last_os_error());
+            }
+        }
+
+
+        // Decode the buffer
+        let mut offset = 0;
+        while offset < size {
+            let hdr: &IfMsghdr = unsafe {
+                &*(buffer.as_ptr().add(offset) as *const IfMsghdr)
+            };
+
+            // Check if it's an RTM_IFINFO2 message
+            if hdr.ifm_type == RTM_IFINFO2 as u8 {
+                let msg_len = hdr.ifm_msglen as usize;
+                offset += mem::size_of::<IfMsghdr>();
+
+                // Get sockaddr_dl for interface name
+                let sdl: &SockAddrDl = unsafe {
+                    &*(buffer.as_ptr().add(offset) as *const SockAddrDl)
+                };
+
+                if sdl.sdl_family == AF_LINK as u8 {
+                    let name_len = sdl.sdl_nlen as usize;
+                    let name_bytes = &sdl.sdl_data[0..name_len];
+                    let if_name = String::from_utf8_lossy(name_bytes);
+                    println!("Interface Name: {} {}", hdr.ifm_index, if_name);
+                }
+
+                println!("{:?}", hdr.ifm_data);
+
+                // ✅ Correctly skip to next message (aligned)
+                offset += ((sdl.sdl_len as usize + 3) & !3);
+            } else {
+                offset += hdr.ifm_msglen as usize;
+            }
+        }
+
 
 
         Ok(devices)

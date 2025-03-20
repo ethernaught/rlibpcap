@@ -1,6 +1,7 @@
 use std::arch::asm;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::fd::RawFd;
+use std::os::raw::{c_int, c_void};
 
 pub const SYS_SOCKET: i64 = 0x2000061; // 97
 pub const SYS_CLOSE: i64 = 0x2000006;  // 6
@@ -9,13 +10,13 @@ pub const SYS_BIND: i64 = 0x2000068;   // 104
 pub const SYS_SENDTO: i64 = 0x200006e; // 110
 
 
-pub const SYS_FCNTL: i64 = 0x200005c; // Correct value for `fcntl` on macOS
+//pub const SYS_FCNTL: i64 = 0x200005c; // Correct value for `fcntl` on macOS
 
 
 
 pub const IFNAMSIZ: usize = 16;
 
-pub const SIOCGIFCONF: u64 = 0xc0086914;
+//pub const SIOCGIFCONF: u64 = 0xc0086914;
 
 
 
@@ -24,53 +25,93 @@ pub const AF_INET: i64 = 2;
 pub const SOCK_DGRAM: i64 = 2;
 
 
+pub const CTL_NET: c_int = 4;
+pub const AF_ROUTE: c_int = 17;
+pub const NET_RT_IFLIST2: c_int = 6; // 3 ???
+pub const RTM_IFINFO2: c_int = 0x12;
 
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct IfreqName {
-    pub ifr_name: [u8; IFNAMSIZ]
-}
 
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct IfreqAddr {
-    pub ifr_name: [u8; IFNAMSIZ],
-    pub ifr_addr: [u8; 16]
-}
+pub const AF_LINK: c_int = 18;
 
-/*
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct IfreqHwAddr {
-    pub ifr_name: [u8; IFNAMSIZ],
-    pub ifr_hwaddr: SockAddr
-}
-*/
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct IfConf {
-    pub ifc_len: i32,
-    pub ifc_buf: *mut IfreqAddr,
+
+
+
+unsafe extern "C" {
+    pub fn sysctl(
+        name: *const c_int,
+        namelen: u32,
+        oldp: *mut c_void,
+        oldlenp: *mut usize,
+        newp: *mut c_void,
+        newlen: usize,
+    ) -> c_int;
 }
 
 
 
 
 
-
-
+#[repr(C)]
+#[derive(Debug)]
+pub struct IfMsghdr {
+    pub ifm_msglen: u16, // Message length
+    pub ifm_version: u8, // Version (should be 5)
+    pub ifm_type: u8,    // Message type (RTM_IFINFO2 = 0x12)
+    pub ifm_addrs: u32,  // Bitmap of included address
+    pub ifm_flags: u32,  // Interface flags
+    pub ifm_index: u16,  // Interface index
+    pub ifm_snd_len: u16, // Length of send queue
+    pub ifm_snd_maxlen: u16,
+    pub ifm_snd_drops: u16,
+    pub ifm_timer: u32,
+    pub ifm_data: IfData64,    // Interface data (e.g., RX/TX bytes, MTU)
+}
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SockAddrLl {
-    pub sll_family: u16,
-    pub sll_protocol: u16,
-    pub sll_ifindex: i32,
-    pub sll_hatype: u16,
-    pub sll_pkttype: u8,
-    pub sll_halen: u8,
-    pub sll_addr: [u8; 8]
+#[derive(Debug)]
+pub struct IfData64 {
+    pub ifi_type: u8,
+    pub ifi_typelen: u8,
+    pub ifi_physical: u8,
+    pub ifi_addrlen: u8,
+    pub ifi_hdrlen: u8,
+    pub ifi_recvquota: u8,
+    pub ifi_xmitquota: u8,
+    pub ifi_unused1: u8,
+    pub ifi_mtu: u32,
+    pub ifi_metric: u32,
+    pub ifi_baudrate: u64,
+    pub ifi_ipackets: u64,
+    pub ifi_ierrors: u64,
+    pub ifi_opackets: u64,
+    pub ifi_oerrors: u64,
+    pub ifi_collisions: u64,
+    pub ifi_ibytes: u64,
+    pub ifi_obytes: u64,
+    pub ifi_imcasts: u64,
+    pub ifi_omcasts: u64,
+    pub ifi_iqdrops: u64,
+    pub ifi_noproto: u64,
+    pub ifi_recvtiming: u32,
+    pub ifi_xmittiming: u32,
+    pub ifi_lastchange_sec: u64,
+    pub ifi_lastchange_usec: u64,
 }
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct SockAddrDl {
+    pub sdl_len: u8,
+    pub sdl_family: u8,
+    pub sdl_index: u16,
+    pub sdl_type: u8,
+    pub sdl_nlen: u8, // Name length
+    pub sdl_alen: u8,
+    pub sdl_slen: u8,
+    pub sdl_data: [u8; 12], // Name stored here
+}
+
+
 
 
 
