@@ -38,20 +38,30 @@ pub const RTM_NEWMADDR2: u8 = 0x13;
 
 pub const AF_LINK: c_int = 18;
 
+const SYS_SYSCTL: usize = 202;
 
+//#[inline(always)]
+pub fn sysctl(name: &[i32], oldp: *mut u8, oldlenp: *mut usize, newp: *const u8, newlen: usize) -> isize {
+    let name_ptr = name.as_ptr();
+    let namelen = name.len() as u32;
 
-
-unsafe extern "C" {
-    pub fn sysctl(
-        name: *const c_int,
-        namelen: u32,
-        oldp: *mut c_void,
-        oldlenp: *mut usize,
-        newp: *mut c_void,
-        newlen: usize,
-    ) -> c_int;
+    let result: isize;
+    unsafe {
+        asm!(
+            "mov x16, {}",
+            "svc 0",
+            in(reg) SYS_SYSCTL,
+            inout("x0") name_ptr as usize => result,
+            in("x1") namelen,
+            in("x2") oldp as usize,
+            in("x3") oldlenp as usize,
+            in("x4") newp as usize,
+            in("x5") newlen,
+            options(nostack)
+        );
+    }
+    result
 }
-
 
 
 

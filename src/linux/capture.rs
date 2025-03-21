@@ -128,7 +128,7 @@ impl Capture {
                 .expect("Time went backwards")
                 .as_millis();
 
-            let data_link_type = DataLinkTypes::from_code(sockaddr.sll_hatype as u32)
+            let data_link_type = DataLinkTypes::from_arphrd(sockaddr.sll_hatype)
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
             return Ok((sockaddr, Packet::new(data_link_type, now, &buffer[..len as usize])));

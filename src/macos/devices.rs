@@ -21,7 +21,6 @@ impl Device {
     pub fn list() -> io::Result<Vec<Self>> {
 
 
-        let devices = Vec::new();
 
 
 
@@ -30,16 +29,8 @@ impl Device {
         let mib: [c_int; 6] = [CTL_NET, AF_ROUTE, 0, 0, NET_RT_IFLIST2, 0];
         let mut size: usize = 0;
 
-        // First sysctl to get the size
         unsafe {
-            if sysctl(
-                mib.as_ptr(),
-                mib.len() as u32,
-                ptr::null_mut(),
-                &mut size,
-                ptr::null_mut(),
-                0,
-            ) != 0
+            if sysctl(&mib, ptr::null_mut(), &mut size, ptr::null_mut(), 0) != 0
             {
                 eprintln!("sysctl failed to get size");
                 return Err(io::Error::last_os_error());
@@ -56,20 +47,14 @@ impl Device {
 
         // Second sysctl to get the actual data
         unsafe {
-            if sysctl(
-                mib.as_ptr(),
-                mib.len() as u32,
-                buffer.as_mut_ptr() as *mut c_void,
-                &mut size,
-                ptr::null_mut(),
-                0,
-            ) != 0
+            if sysctl(&mib, buffer.as_mut_ptr(), &mut size, ptr::null_mut(), 0) != 0
             {
                 eprintln!("sysctl failed to get interface data");
                 return Err(io::Error::last_os_error());
             }
         }
 
+        let mut devices = Vec::new();
 
         // Decode the buffer
         let mut offset = 0;
@@ -83,7 +68,7 @@ impl Device {
 
             match hdr.ifm_type {
                 RTM_NEWADDR => {
-                    println!("NEW_ADDR {:x?}", &buffer[offset+28..offset+hdr.ifm_msglen as usize-28]);
+                    //println!("NEW_ADDR {:x?}", &buffer[offset+28..offset+hdr.ifm_msglen as usize-28]);
 
                 }
                 RTM_IFINFO2 => {
@@ -101,10 +86,29 @@ impl Device {
                         let name = String::from_utf8_lossy(name_bytes).to_string();
                         //println!("Interface Name: {} {}", hdr.ifm_index, if_name);
                         println!("INFO {} {}  {:?}", hdr.ifm_type, name, sdl);
+
+                        devices.push(Self {
+                            name,
+                            address: None,
+                            index: hdr.ifm_index as i32,
+                            data_link_type: DataLinkTypes::Null,
+                            mac: EthernetAddress::new(0, 0, 0, 0, 0, 0),
+                            flags: vec![],
+                        });
+
                     }
                 }
                 RTM_NEWMADDR2 => {
-                    println!("NEW_MADDR   {:x?}", &buffer[offset+28..offset+hdr.ifm_msglen as usize-28]);
+                    //println!("NEW_MADDR   {:x?}", &buffer[offset+28..offset+hdr.ifm_msglen as usize-28]);
+
+                    /*
+                    let sdl: &SockAddr = unsafe {
+                        &*(buffer.as_ptr().add(offset+28) as *const SockAddr)
+                    };
+
+                    println!("{:?}", sdl);
+                    */
+
 
                 }
                 _ => {}
@@ -112,51 +116,6 @@ impl Device {
 
 
             offset += hdr.ifm_msglen as usize;
-
-            // Check if it's an RTM_IFINFO2 message
-
-
-            /*
-            if hdr.ifm_type == RTM_IFINFO2 as u8 {
-                let msg_len = hdr.ifm_msglen as usize;
-                //offset += mem::size_of::<IfMsghdr>()-20;
-                offset += msg_len;
-
-
-                // Get sockaddr_dl for interface name
-                let sdl: &SockAddrDl = unsafe {
-                    &*(buffer.as_ptr().add(offset-20) as *const SockAddrDl)
-                };
-
-                if sdl.sdl_family == AF_LINK as u8 {
-                    let name_len = sdl.sdl_nlen as usize;
-                    let name_bytes = &sdl.sdl_data[0..name_len];
-                    let name = String::from_utf8_lossy(name_bytes).to_string();
-                    //println!("Interface Name: {} {}", hdr.ifm_index, if_name);
-                    println!("{} {}  {:?}", hdr.ifm_type, name, sdl);
-
-                    let device = Device {
-                        name,
-                        address: None,
-                        index: hdr.ifm_index as i32,
-                        data_link_type: DataLinkTypes::Null,
-                        mac: EthernetAddress::new(0, 0, 0, 0, 0, 0),
-                        flags: vec![],
-                    };
-
-
-                }
-
-                //println!("{:?}", hdr.ifm_data);
-                //println!("{:x?}", &buffer[offset..offset + hdr.ifm_msglen as usize]);
-
-                //offset += ((sdl.sdl_len as usize + 3) & !3);
-
-            } else {
-                offset += hdr.ifm_msglen as usize;
-                println!("{} {:x?}", hdr.ifm_type, &buffer[offset..offset + hdr.ifm_msglen as usize]);
-            }
-            */
         }
 
 

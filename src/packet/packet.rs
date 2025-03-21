@@ -17,10 +17,10 @@ impl Packet {
 
     pub fn new(data_link_type: DataLinkTypes, frame_time: u128, data: &[u8]) -> Self {
         let frame = match data_link_type {
-            DataLinkTypes::Ethernet | DataLinkTypes::Loopback => {
+            DataLinkTypes::En10mb => {
                 EthernetFrame::from_bytes(data).unwrap().dyn_clone()
             }
-            DataLinkTypes::Raw | DataLinkTypes::Tun => {
+            DataLinkTypes::Raw => {
                 match (data[0] >> 4) & 0x0F {
                     4 => {
                         Ipv4Layer::from_bytes(data).unwrap().dyn_clone()
