@@ -85,13 +85,16 @@ impl Device {
                         let name_bytes = &sdl.sdl_data[0..name_len];
                         let name = String::from_utf8_lossy(name_bytes).to_string();
                         //println!("Interface Name: {} {}", hdr.ifm_index, if_name);
-                        println!("INFO {} {}  {:?}", hdr.ifm_type, name, sdl);
+                        //println!("INFO {} {}  {:?}", hdr.ifm_type, name, sdl);
+
+                        let data_link_type = DataLinkTypes::from_sdl_code(hdr.ifm_type)
+                            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
                         devices.push(Self {
                             name,
                             address: None,
                             index: hdr.ifm_index as i32,
-                            data_link_type: DataLinkTypes::Null,
+                            data_link_type,
                             mac: EthernetAddress::new(0, 0, 0, 0, 0, 0),
                             flags: vec![],
                         });

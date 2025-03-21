@@ -72,7 +72,7 @@ impl Device {
                 return Err(io::Error::last_os_error());
             }
 
-            let data_link_type = Some(unsafe { DataLinkTypes::from_arphrd(ifreq_hwaddr.ifr_hwaddr.sa_family)
+            let data_link_type = Some(unsafe { DataLinkTypes::from_sll2_code(ifreq_hwaddr.ifr_hwaddr.sa_family)
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))? }).unwrap();
 
             let mac_bytes = unsafe { ifreq_hwaddr.ifr_hwaddr.sa_data };
