@@ -28,7 +28,7 @@ impl Device {
             return Err(io::Error::last_os_error());
         }
 
-        let mut buffer: Vec<u8> = [0u8; size];
+        let mut buffer: Vec<u8> = vec![0u8; size];
 
         let res = unsafe { sysctl(&mib, buffer.as_mut_ptr(), &mut size, ptr::null_mut(), 0) };
         if res != 0 {
