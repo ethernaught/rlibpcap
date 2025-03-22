@@ -19,52 +19,27 @@ pub struct Device {
 impl Device {
 
     pub fn list() -> io::Result<Vec<Self>> {
-
-
-
-
-
-
-
         let mib: [c_int; 6] = [CTL_NET, AF_ROUTE, 0, 0, NET_RT_IFLIST2, 0];
         let mut size: usize = 0;
 
-        unsafe {
-            if sysctl(&mib, ptr::null_mut(), &mut size, ptr::null_mut(), 0) != 0
-            {
-                eprintln!("sysctl failed to get size");
-                return Err(io::Error::last_os_error());
-            }
+        let res = unsafe { sysctl(&mib, ptr::null_mut(), &mut size, ptr::null_mut(), 0) };
+
+        if res != 0 {
+            return Err(io::Error::last_os_error());
         }
 
-        println!("sysctl returned {} entries", size);
+        let mut buffer: Vec<u8> = [0u8; size];
 
-
-
-
-        // Allocate memory for the interface list
-        let mut buffer: Vec<u8> = vec![0; size];
-
-        // Second sysctl to get the actual data
-        unsafe {
-            if sysctl(&mib, buffer.as_mut_ptr(), &mut size, ptr::null_mut(), 0) != 0
-            {
-                eprintln!("sysctl failed to get interface data");
-                return Err(io::Error::last_os_error());
-            }
+        let res = unsafe { sysctl(&mib, buffer.as_mut_ptr(), &mut size, ptr::null_mut(), 0) };
+        if res != 0 {
+            return Err(io::Error::last_os_error());
         }
 
         let mut devices = Vec::new();
 
-        // Decode the buffer
         let mut offset = 0;
         while offset < size {
-            let hdr: &IfMsghdr = unsafe {
-                &*(buffer.as_ptr().add(offset) as *const IfMsghdr)
-            };
-
-            //println!("{}  {}", offset, hdr.ifm_msglen);
-
+            let hdr: &IfMsghdr = unsafe { &*(buffer.as_ptr().add(offset) as *const IfMsghdr) };
 
             match hdr.ifm_type {
                 RTM_NEWADDR => {
@@ -112,16 +87,12 @@ impl Device {
                     println!("{:?}", sdl);
                     */
 
-
                 }
                 _ => {}
             }
 
-
             offset += hdr.ifm_msglen as usize;
         }
-
-
 
         Ok(devices)
     }
