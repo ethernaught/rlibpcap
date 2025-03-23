@@ -1,15 +1,14 @@
 use std::{io, mem};
 use std::fs::{File, OpenOptions};
 use std::io::Read;
-use std::os::fd::{AsRawFd, FromRawFd, RawFd};
+use std::os::fd::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use crate::devices::Device;
 use crate::macos::sys::{ioctl, recvfrom, Ifreq, SockAddrDl, BIOCGBLEN, BIOCIMMEDIATE, BIOCSETIF, IFNAMSIZ};
 use crate::packet::packet::Packet;
 
-//#[derive(Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct Capture {
     fd: RawFd,
-    file: File,
     device: Option<Device>
 }
 
@@ -24,11 +23,10 @@ impl Capture {
             .unwrap();
             //.map_err(|e| io::Error(format!("Failed to open {}: {}", bpf_path, e)))?;
 
-        let fd = file.as_raw_fd();
+        let fd = file.into_raw_fd();
 
         Ok(Self {
             fd,
-            file,
             device: None,
         })
     }
@@ -104,12 +102,10 @@ impl Capture {
 
 
 
-        //let mut file = unsafe { File::from_raw_fd(self.fd) };
         let mut buffer = vec![0u8; buf_len as usize];
 
         loop {
-            //let n = unsafe{ recvfrom(self.fd, buffer.as_mut_slice()) } as usize;
-            let n = self.file.read(buffer.as_mut_slice())?;
+            let n = unsafe { recvfrom(self.fd, buffer.as_mut_slice()) } as usize;
             if n == 0 {
                 continue;
             }
