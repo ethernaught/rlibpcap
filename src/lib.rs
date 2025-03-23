@@ -32,8 +32,8 @@ mod tests {
     use crate::pcap::pcap::Pcap;
     use crate::pcap::pcapng::PcapNg;
 
-    #[test]
-    fn pcap() {
+    //#[test]
+    //fn pcap() {
         //let pcap = Pcap::from_file("/home/brad/Downloads/sll2.pcap").expect("Failed to open pcap file");
 
 
@@ -45,7 +45,7 @@ mod tests {
         */
 
         //println!("{:?}", pcap);
-    }
+    //}
 
     #[test]
     fn devices() {
@@ -58,6 +58,9 @@ mod tests {
     #[test]
     fn capture() {
         //NOT TESTABLE WITHOUT ROOT...
+        let mut cap = Capture::any().unwrap();
+        cap.open().unwrap();
+        println!("{:?}", cap.recv().unwrap());
         /*
         let devices = Device::list().unwrap();
         println!("{:?}", devices);

@@ -1,11 +1,10 @@
 use std::arch::asm;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::fd::RawFd;
-use std::os::raw::{c_int, c_void};
 
 pub const SYS_SOCKET: i64 = 0x2000061; // 97
 pub const SYS_CLOSE: i64 = 0x2000006;  // 6
-pub const SYS_IOCTL: i64 = 0x2000062;  // 98
+pub const SYS_IOCTL: i64 = 54;  // 98
 pub const SYS_BIND: i64 = 0x2000068;   // 104
 pub const SYS_SENDTO: i64 = 0x200006e; // 110
 
@@ -26,9 +25,9 @@ pub const AF_INET6: i64 = 30;
 pub const SOCK_DGRAM: i64 = 2;
 
 
-pub const CTL_NET: c_int = 4;
-pub const AF_ROUTE: c_int = 17;
-pub const NET_RT_IFLIST2: c_int = 6; // 3 ???
+pub const CTL_NET: i32 = 4;
+pub const AF_ROUTE: i32 = 17;
+pub const NET_RT_IFLIST2: i32 = 6; // 3 ???
 
 
 pub const RTM_NEWADDR: u8 = 0xc;
@@ -36,39 +35,29 @@ pub const RTM_IFINFO2: u8 = 0x12;
 pub const RTM_NEWMADDR2: u8 = 0x13;
 
 
-pub const AF_LINK: c_int = 18;
+pub const AF_LINK: i32 = 18;
 
-const SYS_SYSCTL: usize = 202;
+pub const SYS_SYSCTL: usize = 202;
 
-//#[inline(always)]
-pub fn sysctl(name: &[i32], oldp: *mut u8, oldlenp: *mut usize, newp: *const u8, newlen: usize) -> isize {
-    let name_ptr = name.as_ptr();
-    let namelen = name.len() as u32;
+pub const BIOCSETIF: i64 = 0x8020426c;
+pub const BIOCIMMEDIATE: i64 = 0x80044270;
+pub const BIOCGBLEN: i64 = 0x40044266;
+pub const DEFAULT_BPF_BUFFER_SIZE: usize = 4096;
 
-    let result: isize;
-    unsafe {
-        asm!(
-            "mov x16, {}",
-            "svc 0",
-            in(reg) SYS_SYSCTL,
-            inout("x0") name_ptr as usize => result,
-            in("x1") namelen,
-            in("x2") oldp as usize,
-            in("x3") oldlenp as usize,
-            in("x4") newp as usize,
-            in("x5") newlen,
-            options(nostack)
-        );
-    }
-    result
+
+
+
+
+
+
+
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct Ifreq {
+    pub ifr_name: [u8; 16],
+    pub ifr_ifindex: i32,
 }
-
-
-
-
-
-
-
 
 #[repr(C)]
 #[derive(Debug)]
@@ -168,6 +157,15 @@ pub struct SockAddrDl {
 }
 
 
+//TODO
+#[derive(Debug)]
+struct BpfHdr {
+    tstamp_sec: u32,     // Seconds from epoch
+    tstamp_usec: u32,    // Microseconds
+    caplen: u32,         // Length of captured portion
+    datalen: u32,        // Original length of packet
+    hdrlen: u16,         // Length of BPF header
+}
 
 
 
@@ -185,7 +183,15 @@ pub unsafe fn bind(fd: RawFd, address: i64, address_len: i64) -> i64 {
 pub unsafe fn ioctl(fd: RawFd, request: i64, arg: i64) -> i64 {
     //syscall(SYS_IOCTL, fd as i64, request, arg, 0, 0)
     let ret: i64;
-    asm!("svc 0", in("x8") SYS_IOCTL, in("x0") fd as i64, in("x1") request, in("x2") arg, lateout("x0") ret);
+    asm!(
+        "mov x16, {num}",
+        "svc #0x80",
+        in("x0") fd as u64,
+        in("x1") request,
+        in("x2") arg,
+        num = const SYS_IOCTL,
+        lateout("x0") ret,
+    );
     ret
 }
 
@@ -202,6 +208,29 @@ pub unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) 
     let ret: i64;
     asm!("svc 0", in("x8") number, in("x0") a1, in("x1") a2, in("x2") a3, in("x3") a4, in("x4") a5, lateout("x0") ret);
     ret
+}
+
+//#[inline(always)]
+pub fn sysctl(name: &[i32], oldp: *mut u8, oldlenp: *mut usize, newp: *const u8, newlen: usize) -> isize {
+    let name_ptr = name.as_ptr();
+    let namelen = name.len() as u32;
+
+    let result: isize;
+    unsafe {
+        asm!(
+        "mov x16, {}",
+        "svc #0x80", // System call on macOS (Apple Silicon)
+        in(reg) SYS_SYSCTL,
+        inout("x0") name_ptr as usize => result,
+        in("x1") namelen,
+        in("x2") oldp as usize,
+        in("x3") oldlenp as usize,
+        in("x4") newp as usize,
+        in("x5") newlen,
+        options(nostack)
+        );
+    }
+    result
 }
 
 pub fn parse_ip(buf: &[u8]) -> Option<IpAddr> {
