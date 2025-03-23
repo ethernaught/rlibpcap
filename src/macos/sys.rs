@@ -1,4 +1,5 @@
 use std::arch::asm;
+use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::fd::RawFd;
 
@@ -197,6 +198,21 @@ pub unsafe fn ioctl(fd: RawFd, request: i64, arg: i64) -> i64 {
 
 pub unsafe fn sendto(fd: RawFd, buffer: &mut [u8]) -> i64 {
     syscall(SYS_SENDTO, fd as i64, buffer.as_mut_ptr() as *mut _ as i64, buffer.len() as i64, 0, 0)
+}
+
+pub unsafe fn recvfrom(fd: RawFd, buffer: &mut [u8]) -> i64 {
+    let ret: i64;
+    asm!(
+        "movz x16, #({num} & 0xFFFF)",     // Load lower 16 bits
+        "movk x16, #({num} >> 16), lsl #16", // Load upper 16 bits
+        "svc #0",                         // Trigger syscall
+        in("x0") fd as u64,               // FD in x0
+        in("x1") buffer.as_mut_ptr(),        // Buffer pointer in x1
+        in("x2") buffer.len(),               // Buffer length in x2
+        num = const 0x2000003,            // 0x2000003 = SYS_read on macOS
+        lateout("x0") ret,                // Return value in x0
+    );
+    ret
 }
 
 pub unsafe fn close(fd: RawFd) {

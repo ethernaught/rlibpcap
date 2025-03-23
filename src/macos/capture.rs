@@ -3,7 +3,7 @@ use std::fs::{File, OpenOptions};
 use std::io::Read;
 use std::os::fd::{AsRawFd, FromRawFd, RawFd};
 use crate::devices::Device;
-use crate::macos::sys::{ioctl, Ifreq, SockAddrDl, BIOCGBLEN, BIOCIMMEDIATE, BIOCSETIF, IFNAMSIZ};
+use crate::macos::sys::{ioctl, recvfrom, Ifreq, SockAddrDl, BIOCGBLEN, BIOCIMMEDIATE, BIOCSETIF, IFNAMSIZ};
 use crate::packet::packet::Packet;
 
 //#[derive(Debug, Clone)]
@@ -44,8 +44,6 @@ impl Capture {
     }
 
     pub fn open(&self) -> io::Result<()> {
-        let fd = self.file.as_raw_fd();
-
         let interface_name = "en0";
 
         let mut ifreq = Ifreq {
@@ -61,7 +59,7 @@ impl Capture {
 
         ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
 
-        let res = unsafe { ioctl(fd, BIOCSETIF, &ifreq as *const _ as i64) };
+        let res = unsafe { ioctl(self.fd, BIOCSETIF, &ifreq as *const _ as i64) };
         if res < 0 {
             return Err(io::Error::last_os_error());
         }
@@ -74,7 +72,7 @@ impl Capture {
 
     pub fn set_immediate_mode(&self, immediate: bool) -> io::Result<()> {
         let enable: i64 = 1;
-        let res = unsafe { ioctl(self.file.as_raw_fd(), BIOCIMMEDIATE, &enable as *const _ as i64) };
+        let res = unsafe { ioctl(self.fd, BIOCIMMEDIATE, &enable as *const _ as i64) };
         if res < 0 {
             return Err(io::Error::last_os_error());
         }
@@ -106,11 +104,12 @@ impl Capture {
 
 
 
+        //let mut file = unsafe { File::from_raw_fd(self.fd) };
         let mut buffer = vec![0u8; buf_len as usize];
 
         loop {
-            //let mut file = unsafe { File::from_raw_fd(self.fd) };
-            let n = self.file.read(&mut buffer).unwrap();
+            //let n = unsafe{ recvfrom(self.fd, buffer.as_mut_slice()) } as usize;
+            let n = self.file.read(buffer.as_mut_slice())?;
             if n == 0 {
                 continue;
             }
