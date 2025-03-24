@@ -262,29 +262,3 @@ pub fn parse_ip(buf: &[u8]) -> Option<IpAddr> {
         _ => None
     }
 }
-
-
-
-/*
-
-pub const SYS_READ: i64 = 0x2000003;
-pub const SYS_FCNTL: i64 = 0x200000D;
-pub const F_GETFL: i64 = 3;
-pub const F_SETFL: i64 = 4;
-pub const O_NONBLOCK: i64 = 0x800;
-
-pub unsafe fn fcntl(fd: RawFd, cmd: i64, arg: i64) -> i64 {
-    let ret: i64;
-    asm!(
-        "movz x16, #({num} & 0xFFFF)",    // Load lower 16 bits
-        "movk x16, #({num} >> 16), lsl #16", // Load upper 16 bits
-        "svc #0",                         // Trigger syscall
-        in("x0") fd as u64,               // FD in x0
-        in("x1") cmd,                     // Command in x1
-        in("x2") arg,                     // Argument in x2
-        lateout("x0") ret,                // Return value in x0
-        num = const SYS_FCNTL,            // 0x200000D = SYS_fcntl on macOS
-    );
-    ret
-}
-*/
