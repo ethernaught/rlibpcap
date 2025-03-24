@@ -116,7 +116,7 @@ impl Capture {
 
         let mut buffer = vec![0u8; self.buffer_len];
 
-        let len = unsafe { recvfrom(self.fd, buffer.as_mut_slice()) } as isize;
+        let len = unsafe { recvfrom(self.fd, buffer.as_mut_slice()) };
         if len > 0 {
             let mut offset = 0 as usize;
 

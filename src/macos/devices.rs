@@ -2,7 +2,7 @@ use std::{io, mem, ptr};
 use std::ffi::{c_int, c_void};
 use std::net::IpAddr;
 use crate::interface_flags::InterfaceFlags;
-use crate::macos::sys::{ioctl, socket, sysctl, IfData64, IfMsghdr, SockAddr, SockAddrDl, SockAddrInet, SockAddrInet6, AF_INET, AF_INET6, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_NEWADDR, RTM_IFINFO2, RTM_NEWMADDR2, SOCK_DGRAM};
+use crate::macos::sys::{ioctl, sysctl, IfData64, IfMsghdr, SockAddr, SockAddrDl, SockAddrInet, SockAddrInet6, AF_INET, AF_INET6, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_NEWADDR, RTM_IFINFO2, RTM_NEWMADDR2, SOCK_DGRAM};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 

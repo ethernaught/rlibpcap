@@ -160,7 +160,7 @@ pub struct SockAddrDl {
 
 
 
-
+/*
 pub unsafe fn socket(domain: i64, _type: i64, protocol: i64) -> RawFd {
     syscall(SYS_SOCKET, domain, _type, protocol, 0, 0) as RawFd
 }
@@ -168,7 +168,7 @@ pub unsafe fn socket(domain: i64, _type: i64, protocol: i64) -> RawFd {
 pub unsafe fn bind(fd: RawFd, address: i64, address_len: i64) -> i64 {
     syscall(SYS_BIND, fd as i64, address, address_len, 0, 0)
 }
-
+*/
 pub unsafe fn ioctl(fd: RawFd, request: i64, arg: i64) -> i64 {
     //syscall(SYS_IOCTL, fd as i64, request, arg, 0, 0)
     let ret: i64;
@@ -183,13 +183,13 @@ pub unsafe fn ioctl(fd: RawFd, request: i64, arg: i64) -> i64 {
     );
     ret
 }
-
+/*
 pub unsafe fn sendto(fd: RawFd, buffer: &mut [u8]) -> i64 {
     syscall(SYS_SENDTO, fd as i64, buffer.as_mut_ptr() as *mut _ as i64, buffer.len() as i64, 0, 0)
 }
-
-pub unsafe fn recvfrom(fd: RawFd, buffer: &mut [u8]) -> i64 {
-    let ret: i64;
+*/
+pub unsafe fn recvfrom(fd: RawFd, buffer: &mut [u8]) -> isize {
+    let ret: isize;
     asm!(
         "movz x16, #({num} & 0xFFFF)",     // Load lower 16 bits
         "movk x16, #({num} >> 16), lsl #16", // Load upper 16 bits
@@ -202,11 +202,11 @@ pub unsafe fn recvfrom(fd: RawFd, buffer: &mut [u8]) -> i64 {
     );
     ret
 }
-
+/*
 pub unsafe fn close(fd: RawFd) {
     syscall(SYS_CLOSE, fd as i64, 0, 0, 0, 0);
 }
-
+*/
 //for APPLE CHIPS
 pub unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {
     let ret: i64;
@@ -215,13 +215,12 @@ pub unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) 
 }
 
 //#[inline(always)]
-pub fn sysctl(name: &[i32], oldp: *mut u8, oldlenp: *mut usize, newp: *const u8, newlen: usize) -> isize {
+pub unsafe fn sysctl(name: &[i32], oldp: *mut u8, oldlenp: *mut usize, newp: *const u8, newlen: usize) -> isize {
     let name_ptr = name.as_ptr();
     let namelen = name.len() as u32;
 
     let result: isize;
-    unsafe {
-        asm!(
+    asm!(
         "mov x16, {}",
         "svc #0x80", // System call on macOS (Apple Silicon)
         in(reg) SYS_SYSCTL,
@@ -232,8 +231,7 @@ pub fn sysctl(name: &[i32], oldp: *mut u8, oldlenp: *mut usize, newp: *const u8,
         in("x4") newp as usize,
         in("x5") newlen,
         options(nostack)
-        );
-    }
+    );
     result
 }
 
