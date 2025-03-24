@@ -4,15 +4,13 @@ use std::io::Read;
 use std::os::fd::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use crate::devices::Device;
 use crate::macos::sys::{ioctl, recvfrom, Ifreq, SockAddrDl, BIOCGBLEN, BIOCIMMEDIATE, BIOCSETIF, IFNAMSIZ};
+use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::packet::Packet;
 
 #[derive(Debug, Clone)]
 pub struct Capture {
     fd: RawFd,
-    device: Option<Device>,
-    buffer: Vec<u8>,
-    buf_len: usize,
-    offset: usize
+    device: Option<Device>
 }
 
 impl Capture {
@@ -36,10 +34,7 @@ impl Capture {
 
         Ok(Self {
             fd,
-            device: None,
-            buffer: vec![0u8; buf_len as usize],
-            buf_len: buf_len as usize,
-            offset: 0
+            device: None
         })
     }
 
@@ -95,70 +90,16 @@ impl Capture {
         todo!()
     }
 
-    pub fn recv(&mut self) -> io::Result<(SockAddrDl, Packet)> { //i32 should be the socket address
+    pub fn recv(&self) -> io::Result<(i32, Packet)> { //i32 should be the socket address
         self.recv_with_flags(0)
     }
 
-    pub fn try_recv(&mut self) -> io::Result<(SockAddrDl, Packet)> { //i32 should be the socket address
+    pub fn try_recv(&self) -> io::Result<(i32, Packet)> { //i32 should be the socket address
         self.recv_with_flags(0) //0 SHOULD BE RECEIVE ALL FLAG
     }
 
-    fn recv_with_flags(&mut self, flags: i64) -> io::Result<(SockAddrDl, Packet)> { //i32 should be the socket address
+    fn recv_with_flags(&self, flags: i64) -> io::Result<(i32, Packet)> { //i32 should be the socket address
         //let buf_len = get_buffer_len(self.fd).unwrap_or(DEFAULT_BPF_BUFFER_SIZE);
-
-        if self.offset >= self.buf_len {
-            // Refill the buffer with new data
-            let n = unsafe { recvfrom(self.fd, self.buffer.as_mut_slice()) } as usize;
-            if n == 0 {
-                return Err(io::Error::new(io::ErrorKind::Other, "No packet received"));
-            }
-            self.offset = 0;  // Reset the offset after receiving new data
-        }
-
-        // Process the next packet in the buffer
-        let n = self.buf_len;  // The size of the buffer we have to process
-
-        // We process one packet at a time
-        let mut packet_found = false;
-        while self.offset + 18 <= n {
-            let tstamp_sec = i32::from_ne_bytes(self.buffer[self.offset..self.offset + 4].try_into().unwrap());
-            let tstamp_usec = i32::from_ne_bytes(self.buffer[self.offset + 4..self.offset + 8].try_into().unwrap());
-            let caplen = u32::from_ne_bytes(self.buffer[self.offset + 8..self.offset + 12].try_into().unwrap());
-            let datalen = u32::from_ne_bytes(self.buffer[self.offset + 12..self.offset + 16].try_into().unwrap());
-            let hdrlen = u16::from_ne_bytes(self.buffer[self.offset + 16..self.offset + 18].try_into().unwrap());
-
-            println!(
-                "BpfHdr: tstamp_sec = {}, tstamp_usec = {}, caplen = {}, datalen = {}, hdrlen = {}",
-                tstamp_sec, tstamp_usec, caplen, datalen, hdrlen
-            );
-
-            let data_offset = self.offset + hdrlen as usize;
-            let packet_data = &self.buffer[data_offset..(data_offset + caplen as usize)];
-
-            println!("Packet Data (first 10 bytes): {:02X?}", &packet_data);
-
-            // Update offset for the next packet, ensuring the boundary alignment
-            let total_len = hdrlen as usize + caplen as usize;
-            self.offset += (total_len + 3) & !3; // Align to the next 4-byte boundary
-
-            // Return the first valid packet and stop processing
-            packet_found = true;
-            let packet = Packet::new(packet_data.to_vec());
-            let addr = SockAddrDl::default();  // Replace with actual address if needed
-            return Ok((addr, packet));
-        }
-
-        // If no valid packet found, return an error
-        if !packet_found {
-            return Err(io::Error::new(io::ErrorKind::Other, "No valid packet found"));
-        }
-
-        // If we reach here, no valid packet was available
-        Err(io::Error::new(io::ErrorKind::Other, "No valid packet found"))
-
-
-
-        /*
         let mut buf_len: i64 = 0;
         let res = unsafe { ioctl(self.fd, BIOCGBLEN, &mut buf_len as *mut _ as i64) };
         if res < 0 {
@@ -196,7 +137,6 @@ impl Capture {
                 offset += (total_len + 3) & !3;
             }
         }
-        */
     }
 
     pub fn close(&self) {
