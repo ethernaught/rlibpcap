@@ -149,4 +149,8 @@ impl Capture {
     pub fn close(&self) {
         unsafe { close(self.fd) };
     }
+
+    pub fn get_device(&self) -> Option<&Device> {
+        self.device.as_ref()
+    }
 }
