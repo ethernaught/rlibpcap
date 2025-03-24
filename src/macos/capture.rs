@@ -19,14 +19,23 @@ pub struct Capture {
 impl Capture {
 
     pub fn from_device(device: &Device) -> io::Result<Self> {
-        let bpf_path = "/dev/bpf0";
-        let mut file = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .open(bpf_path)
-            .unwrap();
 
-        let fd = file.into_raw_fd();
+        //DYNAMICALLY KNOW MAX BPF DEVICES...
+
+        let mut file = None;
+        for i in 0..256 {
+            let f = OpenOptions::new()
+                .read(true)
+                .write(true)
+                .open(format!("/dev/bpf{}", i));
+
+            if f.is_ok() {
+                file = Some(f.unwrap());
+                break;
+            }
+        }
+
+        let fd = file.unwrap().into_raw_fd();
 
         let mut buf_len: i64 = 0;
         let res = unsafe { ioctl(fd, BIOCGBLEN, &mut buf_len as *mut _ as i64) };
