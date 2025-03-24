@@ -10,7 +10,8 @@ use crate::packet::packet::Packet;
 #[derive(Debug, Clone)]
 pub struct Capture {
     fd: RawFd,
-    device: Option<Device>
+    device: Option<Device>,
+    packet_buffer: Vec<Packet>
 }
 
 impl Capture {
@@ -34,7 +35,8 @@ impl Capture {
 
         Ok(Self {
             fd,
-            device: None
+            device: None,
+            packet_buffer: Vec::new()
         })
     }
 
@@ -90,16 +92,20 @@ impl Capture {
         todo!()
     }
 
-    pub fn recv(&self) -> io::Result<(i32, Packet)> { //i32 should be the socket address
+    pub fn recv(&mut self) -> io::Result<(i32, Packet)> { //i32 should be the socket address
         self.recv_with_flags(0)
     }
 
-    pub fn try_recv(&self) -> io::Result<(i32, Packet)> { //i32 should be the socket address
+    pub fn try_recv(&mut self) -> io::Result<(i32, Packet)> { //i32 should be the socket address
         self.recv_with_flags(0) //0 SHOULD BE RECEIVE ALL FLAG
     }
 
-    fn recv_with_flags(&self, flags: i64) -> io::Result<(i32, Packet)> { //i32 should be the socket address
+    fn recv_with_flags(&mut self, flags: i64) -> io::Result<(i32, Packet)> { //i32 should be the socket address
         //let buf_len = get_buffer_len(self.fd).unwrap_or(DEFAULT_BPF_BUFFER_SIZE);
+        if !self.packet_buffer.is_empty() {
+            return Ok((0, self.packet_buffer.remove(0)));
+        }
+
         let mut buf_len: i64 = 0;
         let res = unsafe { ioctl(self.fd, BIOCGBLEN, &mut buf_len as *mut _ as i64) };
         if res < 0 {
@@ -108,15 +114,11 @@ impl Capture {
 
         let mut buffer = vec![0u8; buf_len as usize];
 
-        loop {
-            let n = unsafe { recvfrom(self.fd, buffer.as_mut_slice()) } as usize;
-            if n == 0 {
-                continue;
-            }
+        let len = unsafe { recvfrom(self.fd, buffer.as_mut_slice()) } as isize;
+        if len > 0 {
+            let mut offset = 0 as usize;
 
-            let mut offset = 0;
-
-            while offset + 18 <= n {
+            while offset + 18 <= len as usize {
                 let tstamp_sec = i32::from_ne_bytes(buffer[offset..offset + 4].try_into().unwrap());
                 let tstamp_usec = i32::from_ne_bytes(buffer[offset + 4..offset + 8].try_into().unwrap());
                 let caplen = u32::from_ne_bytes(buffer[offset + 8..offset + 12].try_into().unwrap());
@@ -131,12 +133,30 @@ impl Capture {
                 let data_offset = offset + hdrlen as usize;
 
                 let packet_data = &buffer[data_offset..(data_offset + caplen as usize)];
-                println!("Packet Data (first 10 bytes): {:02X?}", &packet_data);
+                //println!("Packet Data (first 10 bytes): {:02X?}", &packet_data);
+
+                let packet = Packet::new(DataLinkTypes::En10mb, 0, packet_data);
+
+                self.packet_buffer.push(packet);
+
 
                 let total_len = hdrlen as usize + caplen as usize;
                 offset += (total_len + 3) & !3;
             }
+
+            return Ok((0, self.packet_buffer.remove(0)));
+
+        } else if len == -1 {
+            let err = io::Error::last_os_error();
+
+            if err.kind() == io::ErrorKind::WouldBlock {
+                return Err(io::Error::new(io::ErrorKind::WouldBlock, "No data available"));
+            }
+
+            return Err(err);
         }
+
+        Err(io::Error::last_os_error())
     }
 
     pub fn close(&self) {
