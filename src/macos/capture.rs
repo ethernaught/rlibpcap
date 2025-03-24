@@ -71,7 +71,6 @@ impl Capture {
                     return Err(io::Error::last_os_error());
                 }
 
-                self.set_immediate_mode(true)?;
                 Ok(())
             }
             None => {

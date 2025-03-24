@@ -60,6 +60,7 @@ mod tests {
         let devices = Device::list().unwrap();
         let device = devices.into_iter().find(|d| d.get_name().eq("en0")).unwrap();
         let cap = Capture::from_device(&device).unwrap();
+        cap.set_immediate_mode(true).unwrap();
         cap.open().unwrap();
 
         for i in 0..10 {
