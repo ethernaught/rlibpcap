@@ -158,18 +158,6 @@ pub struct SockAddrDl {
 }
 
 
-//TODO
-#[derive(Debug)]
-struct BpfHdr {
-    tstamp_sec: u32,     // Seconds from epoch
-    tstamp_usec: u32,    // Microseconds
-    caplen: u32,         // Length of captured portion
-    datalen: u32,        // Original length of packet
-    hdrlen: u16,         // Length of BPF header
-}
-
-
-
 
 
 

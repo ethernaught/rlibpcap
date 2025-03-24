@@ -57,24 +57,18 @@ mod tests {
 
     #[test]
     fn capture() {
-        //NOT TESTABLE WITHOUT ROOT...
-        let mut cap = Capture::any().unwrap();
-        cap.open().unwrap();
-        println!("{:?}", cap.recv().unwrap());
-        /*
         let devices = Device::list().unwrap();
-        println!("{:?}", devices);
-
-        let device = devices.into_iter().find(|d| d.get_name().contains("Ethernet adapter Ethernet:")).unwrap();
-        println!("{:?}", device);
-
-        let mut cap = Capture::from_device(&device).unwrap();
+        let device = devices.into_iter().find(|d| d.get_name().eq("en0")).unwrap();
+        let cap = Capture::from_device(&device).unwrap();
         cap.open().unwrap();
 
-
-        while let Ok(packet) = cap.next_packet() {
-            println!("{:x?}", packet);
+        for i in 0..10 {
+            match cap.recv() {
+                Ok((_, packet)) => {
+                    println!("{:?}", packet);
+                }
+                _ => {}
+            }
         }
-        */
     }
 }
