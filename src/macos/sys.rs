@@ -3,11 +3,12 @@ use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::fd::RawFd;
 
-pub const SYS_SOCKET: i64 = 0x2000061; // 97
-pub const SYS_CLOSE: i64 = 0x2000006;  // 6
+//pub const SYS_SOCKET: i64 = 0x2000061; // 97
+//pub const SYS_CLOSE: i64 = 0x2000006;  // 6
 pub const SYS_IOCTL: i64 = 54;  // 98
-pub const SYS_BIND: i64 = 0x2000068;   // 104
-pub const SYS_SENDTO: i64 = 0x200006e; // 110
+//pub const SYS_BIND: i64 = 0x2000068;   // 104
+//pub const SYS_SENDTO: i64 = 0x200006e; // 110
+pub const SYS_READ: i64 = 0x2000003;
 
 
 //pub const SYS_FCNTL: i64 = 0x200005c; // Correct value for `fcntl` on macOS
@@ -197,7 +198,7 @@ pub unsafe fn recvfrom(fd: RawFd, buffer: &mut [u8]) -> isize {
         in("x0") fd as u64,               // FD in x0
         in("x1") buffer.as_mut_ptr(),        // Buffer pointer in x1
         in("x2") buffer.len(),               // Buffer length in x2
-        num = const 0x2000003,            // 0x2000003 = SYS_read on macOS
+        num = const SYS_READ,            // 0x2000003 = SYS_read on macOS
         lateout("x0") ret,                // Return value in x0
     );
     ret
