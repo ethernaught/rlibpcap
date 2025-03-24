@@ -37,12 +37,6 @@ impl Capture {
 
         let fd = file.unwrap().into_raw_fd();
 
-        let mut buf_len: i64 = 0;
-        let res = unsafe { ioctl(fd, BIOCGBLEN, &mut buf_len as *mut _ as i64) };
-        if res < 0 {
-            return Err(io::Error::last_os_error());
-        }
-
         let mut buf_len = 0;
         let res = unsafe { ioctl(fd, BIOCGBLEN, &mut buf_len as *mut _ as i64) };
         if res < 0 {
