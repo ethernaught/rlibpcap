@@ -70,7 +70,7 @@ mod tests {
         //for i in 0..10 {
             match cap.try_recv() {
                 Ok((_, packet)) => {
-                    println!("{:?}", packet);
+                    //println!("{:?}", packet);
                 }
                 Err(e) => {
                     //println!("{}", e.kind());

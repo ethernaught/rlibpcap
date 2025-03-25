@@ -62,10 +62,12 @@ impl Device {
                         let name = String::from_utf8_lossy(name_bytes).to_string();
                         //println!("INFO {} {}  {:?}", hdr.ifm_type, name, sdl);
 
+                        //OBVIOUSLY INACCURATE - SHOULD HAVE SEEN THIS BEFORE - TYPE IS USED FOR INTERFACE
+                        //RESPONSE TYPE...
                         let data_link_type = DataLinkTypes::from_sdl_code(hdr.ifm_type)
                             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
-                        println!("{} {:?}", name, data);
+                        println!("{} {:?}", name, hdr);
 
                         devices.push(Self {
                             name,
