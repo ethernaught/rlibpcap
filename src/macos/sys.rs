@@ -219,23 +219,20 @@ pub unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) 
 
 //#[inline(always)]
 pub unsafe fn sysctl(name: &[i32], oldp: *mut u8, oldlenp: *mut usize, newp: *const u8, newlen: usize) -> isize {
-    let name_ptr = name.as_ptr();
-    let namelen = name.len() as u32;
-
-    let result: isize;
+    let ret: isize;
     asm!(
         "mov x16, {}",
-        "svc #0x80", // System call on macOS (Apple Silicon)
+        "svc #0x80",
         in(reg) SYS_SYSCTL,
-        inout("x0") name_ptr as usize => result,
-        in("x1") namelen,
+        inout("x0") name.as_ptr() as usize => ret,
+        in("x1") name.len(),
         in("x2") oldp as usize,
         in("x3") oldlenp as usize,
         in("x4") newp as usize,
         in("x5") newlen,
         options(nostack)
     );
-    result
+    ret
 }
 
 pub fn parse_ip(buf: &[u8]) -> Option<IpAddr> {
