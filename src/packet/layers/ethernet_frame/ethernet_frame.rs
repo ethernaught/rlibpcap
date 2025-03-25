@@ -77,13 +77,13 @@ impl Layer for EthernetFrame {
         let _type = EthernetTypes::from_code(u16::from_be_bytes([buf[12], buf[13]])).unwrap();
 
         let data = match _type {
-            EthernetTypes::IPv4 => {
+            EthernetTypes::Ipv4 => {
                 Some(Ipv4Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
             }
             EthernetTypes::Arp => {
                 Some(ArpExtension::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
             }
-            EthernetTypes::IPv6 => {
+            EthernetTypes::Ipv6 => {
                 Some(Ipv6Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
             }
             EthernetTypes::Broadcast => {

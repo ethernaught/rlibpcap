@@ -110,13 +110,13 @@ impl Layer for Sll2Frame {
         let protocol = EthernetTypes::from_code(u16::from_be_bytes(buf[0..2].try_into().unwrap())).unwrap();
 
         let data = match protocol {
-            EthernetTypes::IPv4 => {
+            EthernetTypes::Ipv4 => {
                 Some(Ipv4Layer::from_bytes(&buf[SLL2_FRAME_LEN..])?.dyn_clone())
             }
             EthernetTypes::Arp => {
                 Some(ArpExtension::from_bytes(&buf[SLL2_FRAME_LEN..])?.dyn_clone())
             }
-            EthernetTypes::IPv6 => {
+            EthernetTypes::Ipv6 => {
                 Some(Ipv6Layer::from_bytes(&buf[SLL2_FRAME_LEN..])?.dyn_clone())
             }
             EthernetTypes::Broadcast => {

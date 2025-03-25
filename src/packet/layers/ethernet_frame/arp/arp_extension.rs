@@ -26,7 +26,7 @@ impl ArpExtension {
     pub fn new(opcode: ArpOperations, sender_mac: EthernetAddress, sender_address: Ipv4Addr, target_mac: EthernetAddress, target_address: Ipv4Addr) -> Self {
         Self {
             hardware_type: 1,
-            protocol_type: EthernetTypes::IPv4,
+            protocol_type: EthernetTypes::Ipv4,
             hardware_size: 6,
             protocol_size: 4,
             opcode,
