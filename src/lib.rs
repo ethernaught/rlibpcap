@@ -6,7 +6,7 @@ pub mod linux;
 pub use linux::*;
 #[cfg(target_os = "macos")]
 pub mod macos;
-mod utils;
+pub mod utils;
 
 #[cfg(target_os = "macos")]
 pub use macos::*;
