@@ -6,17 +6,27 @@ use crate::packet::layers::ethernet_frame::ip::inter::ip_versions::IpVersions;
 
 #[derive(Clone, Debug)]
 pub struct RawFrame {
+    _type: IpVersions,
     data: Option<Box<dyn Layer>>,
     length: usize
 }
 
 impl RawFrame {
 
-    pub fn new() -> Self {
+    pub fn new(_type: IpVersions) -> Self {
         Self {
+            _type,
             data: None,
             length: 0
         }
+    }
+
+    pub fn get_type(&self) -> IpVersions {
+        self._type
+    }
+
+    pub fn set_type(&mut self, _type: IpVersions) {
+        self._type = _type;
     }
 
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
@@ -52,6 +62,7 @@ impl Layer for RawFrame {
         };
 
         Some(Self {
+            _type,
             data,
             length: buf.len()
         })
