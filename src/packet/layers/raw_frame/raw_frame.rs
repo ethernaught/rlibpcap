@@ -1,13 +1,8 @@
 use std::any::Any;
-use crate::utils::data_link_types::DataLinkTypes;
-use crate::packet::layers::ethernet_frame::arp::arp_extension::ArpExtension;
-use crate::packet::layers::ethernet_frame::inter::ethernet_types::EthernetTypes;
 use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
 use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::loop_frame::inter::loop_types::LoopTypes;
-use crate::packet::layers::ethernet_frame::ip::inter::ip_versions::{IpVersions, RawTypes};
-use crate::packet::layers::sll2_frame::inter::packet_types::PacketTypes;
+use crate::packet::layers::ethernet_frame::ip::inter::ip_versions::IpVersions;
 
 #[derive(Clone, Debug)]
 pub struct RawFrame {
