@@ -3,7 +3,7 @@ use std::ffi::{c_int, c_void};
 use std::net::IpAddr;
 use crate::utils::interface_flags::InterfaceFlags;
 use crate::macos::sys::{ioctl, sysctl, IfData64, SockAddrDl, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_NEWADDR, RTM_IFINFO2, RTM_NEWMADDR2, SOCK_DGRAM, IfMsghdr2};
-use crate::packet::inter::data_link_types::DataLinkTypes;
+use crate::utils::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 
 #[derive(Clone, Debug)]

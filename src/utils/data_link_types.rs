@@ -12,6 +12,7 @@ pub enum DataLinkTypes {
     Ppp,
     Fddi,
     Raw,
+    Loop,
     Ipv4,
     Ipv6,
     Sll2
@@ -33,6 +34,7 @@ impl DataLinkTypes {
             Self::Ppp,
             Self::Fddi,
             Self::Raw,
+            Self::Loop,
             Self::Ipv4,
             Self::Ipv6,
             Self::Sll2
@@ -59,6 +61,7 @@ impl DataLinkTypes {
             Self::Ppp => 9,
             Self::Fddi => 10,
             Self::Raw => 101, //14 for BSD  - 12???
+            Self::Loop => 108,
             Self::Ipv4 => 228,
             Self::Ipv6 => 229,
             Self::Sll2 => 276
@@ -79,6 +82,7 @@ impl DataLinkTypes {
             Self::Ppp => "",
             Self::Fddi => "",
             Self::Raw => "",
+            Self::Loop => "",
             Self::Ipv4 => "",
             Self::Ipv6 => "",
             Self::Sll2 => ""

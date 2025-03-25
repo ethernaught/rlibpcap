@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io;
 use std::io::{Read, Write};
 use std::vec::IntoIter;
-use crate::packet::inter::data_link_types::DataLinkTypes;
+use crate::utils::data_link_types::DataLinkTypes;
 use crate::packet::packet::Packet;
 
 pub const PCAP_HEADER_LEN: usize = 24;

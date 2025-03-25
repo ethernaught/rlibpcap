@@ -3,7 +3,7 @@ use std::net::IpAddr;
 use crate::utils::interface_flags::InterfaceFlags;
 use crate::linux::sys::{IfreqAddr, IfreqHwAddr, IfreqIndex, SockAddr, AF_INET, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_DGRAM};
 use crate::linux::sys::{close, ioctl, parse_ip, socket, IfConf, IfreqFlags, SIOCGIFCONF, SIOCGIFFLAGS};
-use crate::packet::inter::data_link_types::DataLinkTypes;
+use crate::utils::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 
 #[derive(Clone, Debug)]

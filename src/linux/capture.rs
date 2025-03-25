@@ -5,7 +5,7 @@ use crate::devices::Device;
 use crate::linux::sys::{bind, close, recvfrom, sendto, setsockopt, socket, syscall, IfreqName, MSG_DONTWAIT};
 use crate::packet::packet::Packet;
 use crate::linux::sys::{SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
-use crate::packet::inter::data_link_types::DataLinkTypes;
+use crate::utils::data_link_types::DataLinkTypes;
 
 #[derive(Debug, Clone)]
 pub struct Capture {

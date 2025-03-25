@@ -1,4 +1,4 @@
-use crate::packet::inter::data_link_types::DataLinkTypes;
+use crate::utils::data_link_types::DataLinkTypes;
 
 impl DataLinkTypes {
 

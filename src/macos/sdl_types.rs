@@ -1,4 +1,4 @@
-use crate::packet::inter::data_link_types::DataLinkTypes;
+use crate::utils::data_link_types::DataLinkTypes;
 
 impl DataLinkTypes {
 
@@ -8,7 +8,7 @@ impl DataLinkTypes {
             (6, Self::En10mb),
             (18, Self::Slip), //Slip
             (28, Self::Ppp), //PPP
-            (24, Self::Raw),
+            (24, Self::Loop),
             (55, Self::Raw), //IPSec VPN
             (57, Self::Raw), //IP TUNNEL
             (108, Self::Ieee802), //WiFi

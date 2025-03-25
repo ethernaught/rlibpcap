@@ -1,5 +1,5 @@
 use std::any::Any;
-use crate::packet::inter::data_link_types::DataLinkTypes;
+use crate::utils::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::arp::arp_extension::ArpExtension;
 use crate::packet::layers::ethernet_frame::inter::ethernet_types::EthernetTypes;
 use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;

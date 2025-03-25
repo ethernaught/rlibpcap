@@ -1,0 +1,121 @@
+use std::any::Any;
+use crate::utils::data_link_types::DataLinkTypes;
+use crate::packet::layers::ethernet_frame::arp::arp_extension::ArpExtension;
+use crate::packet::layers::ethernet_frame::inter::ethernet_types::EthernetTypes;
+use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
+use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
+use crate::packet::layers::inter::layer::Layer;
+use crate::packet::layers::loop_frame::inter::loop_types::LoopTypes;
+use crate::packet::layers::sll2_frame::inter::packet_types::PacketTypes;
+
+const LOOP_FRAME_LENGTH: usize = 4;
+
+#[derive(Clone, Debug)]
+pub struct LoopFrame {
+    _type: LoopTypes,
+    data: Option<Box<dyn Layer>>,
+    length: usize
+}
+
+impl LoopFrame {
+
+    pub fn new(_type: [u8; 8]) -> Self {
+        Self {
+            _type: LoopTypes::Ipv4,
+            data: None,
+            length: LOOP_FRAME_LENGTH
+        }
+    }
+
+    pub fn set_data(&mut self, data: Box<dyn Layer>) {
+        self.length = data.len();
+        self.data = Some(data);
+    }
+
+    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
+        self.data.as_ref()
+    }
+
+    pub fn get_data_mut(&mut self) -> Option<&mut Box<dyn Layer>> {
+        self.data.as_mut()
+    }
+}
+
+impl Layer for LoopFrame {
+
+    fn from_bytes(buf: &[u8]) -> Option<Self> {
+        if buf.len() < LOOP_FRAME_LENGTH {
+            return None;
+        }
+
+        let _type = LoopTypes::from_code(u32::from_ne_bytes([buf[0], buf[1], buf[2], buf[3]])).unwrap();
+
+        let data = match _type {
+            LoopTypes::Ipv4 => {
+                Some(Ipv4Layer::from_bytes(&buf[4..]).unwrap().dyn_clone())
+            }
+            LoopTypes::Ipv6 | LoopTypes::Ipv6e2 | LoopTypes::Ipv6e3 => {
+                Some(Ipv6Layer::from_bytes(&buf[4..]).unwrap().dyn_clone())
+            }
+            _ => {
+                None
+            }
+        };
+
+        Some(Self {
+            _type,
+            data,
+            length: buf.len()
+        })
+    }
+
+    fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = vec![0; LOOP_FRAME_LENGTH];
+        buf.splice(0..4, self._type.get_code().to_be_bytes());
+
+        match &self.data {
+            Some(data) => {
+                buf.extend(data.to_bytes());
+            }
+            None => {}
+        }
+
+        match &self.data {
+            Some(data) => {
+                buf.extend(data.to_bytes());
+            }
+            None => {}
+        }
+
+        buf
+    }
+
+    fn len(&self) -> usize {
+        self.length
+    }
+
+    fn compute_length(&mut self) -> usize {
+        self.length = match &self.data {
+            Some(layer) => {
+                layer.len() + LOOP_FRAME_LENGTH
+            }
+            None => {
+                LOOP_FRAME_LENGTH
+            }
+        };
+
+        self.length
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn dyn_clone(&self) -> Box<dyn Layer> {
+        Box::new(self.clone())
+    }
+}
