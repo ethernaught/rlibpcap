@@ -61,7 +61,6 @@ impl Device {
                         let name_len = sdl.sdl_nlen as usize;
                         let name_bytes = &sdl.sdl_data[0..name_len];
                         let name = String::from_utf8_lossy(name_bytes).to_string();
-                        println!("Interface Name: {:?}", hdr);
                         //println!("INFO {} {}  {:?}", hdr.ifm_type, name, sdl);
 
                         let data_link_type = DataLinkTypes::from_sdl_code(hdr.ifm_type)

@@ -144,6 +144,8 @@ impl Capture {
                 let datalen = u32::from_ne_bytes(buffer[offset + 12..offset + 16].try_into().unwrap());
                 let hdrlen = u16::from_ne_bytes(buffer[offset + 16..offset + 18].try_into().unwrap());
 
+                println!("ts {} {}  caplen {} datalen {} hdrlen {}", tstamp_sec, tstamp_usec, caplen, datalen, hdrlen);
+
                 let data_offset = offset + hdrlen as usize;
 
                 let packet_data = &buffer[data_offset..(data_offset + caplen as usize)];
