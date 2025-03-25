@@ -2,6 +2,7 @@ use std::any::Any;
 use std::net::Ipv6Addr;
 use crate::packet::layers::ethernet_frame::ip::icmpv6::icmpv6_layer::Icmpv6Layer;
 use crate::packet::layers::ethernet_frame::ip::inter::ip_protocols::IpProtocols;
+use crate::packet::layers::ethernet_frame::ip::inter::ip_versions::IpVersions;
 use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
@@ -10,7 +11,7 @@ const IPV6_HEADER_LEN: usize = 40;
 
 #[derive(Clone, Debug)]
 pub struct Ipv6Layer {
-    version: u8,
+    version: IpVersions,
     traffic_class: u8,
     flow_label: u32,
     payload_length: u16,
@@ -23,7 +24,7 @@ pub struct Ipv6Layer {
 
 impl Ipv6Layer {
 
-    pub fn get_version(&self) -> u8 {
+    pub fn get_version(&self) -> IpVersions {
         self.version
     }
 
@@ -107,7 +108,7 @@ impl Layer for Ipv6Layer {
         };
 
         Some(Self {
-            version: buf[0] >> 4,//) & 0x0F,
+            version: IpVersions::from_code((buf[0] >> 4) & 0x0F).unwrap(),
             traffic_class: ((buf[0] & 0x0F) << 4) | (buf[1] >> 4),
             flow_label: ((buf[1] as u32 & 0x0F) << 16) | ((buf[2] as u32) << 8) | (buf[3] as u32),
             payload_length: u16::from_be_bytes([buf[4], buf[5]]),
@@ -122,7 +123,7 @@ impl Layer for Ipv6Layer {
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; IPV6_HEADER_LEN];
 
-        buf[0] = (self.version << 4) | ((self.traffic_class >> 4) & 0x0F);
+        buf[0] = (self.version.get_code() << 4) | ((self.traffic_class >> 4) & 0x0F);
         buf[1] = ((self.traffic_class & 0x0F) << 4) | ((self.flow_label >> 16) as u8 & 0x0F);
         buf[2] = ((self.flow_label >> 8) & 0xFF) as u8;
         buf[3] = (self.flow_label & 0xFF) as u8;

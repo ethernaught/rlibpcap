@@ -4,6 +4,7 @@ use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
 use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::loop_frame::loop_frame::LoopFrame;
+use crate::packet::layers::raw_frame::raw_frame::RawFrame;
 use crate::packet::layers::sll2_frame::sll2_frame::Sll2Frame;
 
 #[derive(Debug, Clone)]
@@ -25,18 +26,7 @@ impl Packet {
                 LoopFrame::from_bytes(data).unwrap().dyn_clone()
             }
             DataLinkTypes::Raw => {
-                //MOVE THIS TO A RAW FRAME...
-                match (data[0] >> 4) & 0x0F {
-                    4 => {
-                        Ipv4Layer::from_bytes(data).unwrap().dyn_clone()
-                    }
-                    6 => {
-                        Ipv6Layer::from_bytes(data).unwrap().dyn_clone()
-                    }
-                    _ => {
-                        unimplemented!()
-                    }
-                }
+                RawFrame::from_bytes(data).unwrap().dyn_clone()
             }
             DataLinkTypes::Sll2 => {
                 Sll2Frame::from_bytes(data).unwrap().dyn_clone()

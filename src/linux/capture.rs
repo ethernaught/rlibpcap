@@ -92,8 +92,8 @@ impl Capture {
         Ok(())
     }
 
-    pub fn set_immediate_mode(&self, immediate: bool) {
-        println!("Setting capture to immediate mode");
+    pub fn set_immediate_mode(&self, immediate: bool) ->  io::Result<()> {
+        Ok(())
     }
 
     pub fn send(&self, packet: Packet) -> io::Result<usize> {

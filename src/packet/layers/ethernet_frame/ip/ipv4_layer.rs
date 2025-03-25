@@ -3,6 +3,7 @@ use std::net::Ipv4Addr;
 use crate::packet::layers::ethernet_frame::ip::icmp::icmp_layer::IcmpLayer;
 use crate::packet::layers::ethernet_frame::ip::inter::ip_protocols::IpProtocols;
 use crate::packet::layers::ethernet_frame::ip::inter::ip_utils::calculate_checksum;
+use crate::packet::layers::ethernet_frame::ip::inter::ip_versions::IpVersions;
 use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
@@ -18,7 +19,7 @@ if ihl < IPV4_HEADER_SIZE || ihl > packet.len() {
 
 #[derive(Clone, Debug)]
 pub struct Ipv4Layer {
-    version: u8,
+    version: IpVersions,
     ihl: u8,
     tos: u8,
     total_length: u16,
@@ -37,7 +38,7 @@ impl Ipv4Layer {
 
     pub fn new(source_address: Ipv4Addr, destination_address: Ipv4Addr, protocol: IpProtocols) -> Self {
         Self {
-            version: 4,
+            version: IpVersions::Ipv4,
             ihl: 5,
             tos: 0,
             total_length: IPV4_HEADER_LEN as u16,
@@ -53,11 +54,11 @@ impl Ipv4Layer {
         }
     }
 
-    pub fn set_version(&mut self, version: u8) {
+    pub fn set_version(&mut self, version: IpVersions) {
         self.version = version;
     }
 
-    pub fn get_version(&self) -> u8 {
+    pub fn get_version(&self) -> IpVersions {
         self.version
     }
 
@@ -124,7 +125,7 @@ impl Ipv4Layer {
     fn calculate_checksum(&self) -> u16 {
         let mut buf = vec![0; IPV4_HEADER_LEN];
 
-        buf[0] = (self.version << 4) | (self.ihl & 0x0F);
+        buf[0] = (self.version.get_code() << 4) | (self.ihl & 0x0F);
         buf[1] = self.tos;
         buf.splice(2..4, self.total_length.to_be_bytes());
         buf.splice(4..6, self.identification.to_be_bytes());
@@ -225,7 +226,7 @@ impl Layer for Ipv4Layer {
         };
 
         Some(Self {
-            version: buf[0] >> 4,
+            version: IpVersions::from_code((buf[0] >> 4) & 0x0F).unwrap(),
             ihl: buf[0] & 0x0F,
             tos: buf[1],
             total_length: u16::from_be_bytes([buf[2], buf[3]]),
@@ -244,7 +245,7 @@ impl Layer for Ipv4Layer {
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; IPV4_HEADER_LEN];
 
-        buf[0] = (self.version << 4) | (self.ihl & 0x0F);
+        buf[0] = (self.version.get_code() << 4) | (self.ihl & 0x0F);
         buf[1] = self.tos;
         buf.splice(2..4, self.total_length.to_be_bytes());
         buf.splice(4..6, self.identification.to_be_bytes());

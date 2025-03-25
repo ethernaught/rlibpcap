@@ -6,33 +6,22 @@ use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
 use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::loop_frame::inter::loop_types::LoopTypes;
+use crate::packet::layers::ethernet_frame::ip::inter::ip_versions::{IpVersions, RawTypes};
 use crate::packet::layers::sll2_frame::inter::packet_types::PacketTypes;
 
-const LOOP_FRAME_LENGTH: usize = 4;
-
 #[derive(Clone, Debug)]
-pub struct LoopFrame {
-    _type: LoopTypes,
+pub struct RawFrame {
     data: Option<Box<dyn Layer>>,
     length: usize
 }
 
-impl LoopFrame {
+impl RawFrame {
 
-    pub fn new(_type: LoopTypes) -> Self {
+    pub fn new() -> Self {
         Self {
-            _type,
             data: None,
-            length: LOOP_FRAME_LENGTH
+            length: 0
         }
-    }
-
-    pub fn get_type(&self) -> LoopTypes {
-        self._type
-    }
-
-    pub fn set_type(&mut self, _type: LoopTypes) {
-        self._type = _type;
     }
 
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
@@ -49,46 +38,39 @@ impl LoopFrame {
     }
 }
 
-impl Layer for LoopFrame {
+impl Layer for RawFrame {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < LOOP_FRAME_LENGTH {
+        if buf.len() < 1 {
             return None;
         }
 
-        let _type = LoopTypes::from_code(u32::from_ne_bytes([buf[0], buf[1], buf[2], buf[3]])).unwrap();
+        let _type = IpVersions::from_code((buf[0] >> 4) & 0x0F).unwrap();
 
         let data = match _type {
-            LoopTypes::Ipv4 => {
-                Some(Ipv4Layer::from_bytes(&buf[4..]).unwrap().dyn_clone())
+            IpVersions::Ipv4 => {
+                Some(Ipv4Layer::from_bytes(buf).unwrap().dyn_clone())
             }
-            LoopTypes::Ipv6 | LoopTypes::Ipv6e2 | LoopTypes::Ipv6e3 => {
-                Some(Ipv6Layer::from_bytes(&buf[4..]).unwrap().dyn_clone())
-            }
-            _ => {
-                None
+            IpVersions::Ipv6 => {
+                Some(Ipv6Layer::from_bytes(buf).unwrap().dyn_clone())
             }
         };
 
         Some(Self {
-            _type,
             data,
             length: buf.len()
         })
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; LOOP_FRAME_LENGTH];
-        buf.splice(0..4, self._type.get_code().to_be_bytes());
-
         match &self.data {
             Some(data) => {
-                buf.extend(data.to_bytes());
+                data.to_bytes()
             }
-            None => {}
+            None => {
+                Vec::new()
+            }
         }
-
-        buf
     }
 
     fn len(&self) -> usize {
@@ -98,10 +80,10 @@ impl Layer for LoopFrame {
     fn compute_length(&mut self) -> usize {
         self.length = match &self.data {
             Some(layer) => {
-                layer.len() + LOOP_FRAME_LENGTH
+                layer.len()
             }
             None => {
-                LOOP_FRAME_LENGTH
+                0
             }
         };
 
