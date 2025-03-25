@@ -1,5 +1,4 @@
 use std::arch::asm;
-use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::fd::RawFd;
 
@@ -40,6 +39,8 @@ pub const RTM_NEWMADDR2: u8 = 0x13;
 pub const AF_LINK: i32 = 18;
 
 pub const SYS_SYSCTL: usize = 202;
+
+const SYS_SELECT: i64 = 93;
 
 pub const BIOCSETIF: i64 = 0x8020426c;
 pub const BIOCIMMEDIATE: i64 = 0x80044270;
@@ -158,6 +159,12 @@ pub struct SockAddrDl {
     pub sdl_data: [u8; 12], // Name stored here
 }
 
+#[repr(C)]
+pub struct TimeVal {
+    pub tv_sec: i64,
+    pub tv_usec: i64,
+}
+
 
 
 
@@ -189,6 +196,24 @@ pub unsafe fn sendto(fd: RawFd, buffer: &mut [u8]) -> i64 {
     syscall(SYS_SENDTO, fd as i64, buffer.as_mut_ptr() as *mut _ as i64, buffer.len() as i64, 0, 0)
 }
 */
+
+pub unsafe fn select(nfds: i32, readfds: *mut i32, writefds: *mut i32, exceptfds: *mut i32, timeout: *mut TimeVal) -> i64 {
+    let ret: i64;
+    asm!(
+        "movz x16, #({num} & 0xFFFF)",    // Load lower 16 bits
+        "movk x16, #({num} >> 16), lsl #16", // Load upper 16 bits
+        "svc #0",                         // Trigger syscall
+        in("x0") nfds,                    // nfds in x0
+        in("x1") readfds,                 // readfds in x1
+        in("x2") writefds,                // writefds in x2
+        in("x3") exceptfds,               // exceptfds in x3
+        in("x4") timeout,                 // timeout in x4
+        lateout("x0") ret,                // Return value in x0
+        num = const SYS_SELECT,           // 0x200000C = SYS_select on macOS
+    );
+    ret
+}
+
 pub unsafe fn recvfrom(fd: RawFd, buffer: &mut [u8]) -> isize {
     let ret: isize;
     asm!(

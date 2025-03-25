@@ -52,7 +52,7 @@ mod tests {
         let devices = Device::list().unwrap();
 
 
-        println!("{:?}", devices);
+        //println!("{:?}", devices);
     }
 
     #[test]
@@ -63,12 +63,15 @@ mod tests {
         cap.set_immediate_mode(true).unwrap();
         cap.open().unwrap();
 
-        for i in 0..10 {
-            match cap.recv() {
+        loop {
+        //for i in 0..10 {
+            match cap.try_recv() {
                 Ok((_, packet)) => {
                     println!("{:?}", packet);
                 }
-                _ => {}
+                Err(e) => {
+                    //println!("{}", e.kind());
+                }
             }
         }
     }

@@ -1,10 +1,10 @@
-use std::{io, mem};
+use std::{io, ptr};
 use std::cell::RefCell;
-use std::fs::{File, OpenOptions};
+use std::fs::OpenOptions;
 use std::io::Read;
 use std::os::fd::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use crate::devices::Device;
-use crate::macos::sys::{ioctl, recvfrom, Ifreq, SockAddrDl, BIOCGBLEN, BIOCIMMEDIATE, BIOCSETIF, IFNAMSIZ};
+use crate::macos::sys::{ioctl, recvfrom, select, TimeVal, Ifreq, BIOCGBLEN, BIOCIMMEDIATE, BIOCSETIF, IFNAMSIZ};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::packet::Packet;
 
@@ -99,7 +99,29 @@ impl Capture {
     }
 
     pub fn try_recv(&self) -> io::Result<(i32, Packet)> { //i32 should be the socket address
-        self.recv_with_flags(0) //0 SHOULD BE RECEIVE ALL FLAG
+        if !self.packet_buffer.borrow().is_empty() {
+            return Ok((0, self.packet_buffer.borrow_mut().remove(0)));
+        }
+
+        let mut readfds: i32 = 0;
+        readfds |= 1 << self.fd;
+
+        let mut timeout = TimeVal {
+            tv_sec: 0,
+            tv_usec: 0
+        };
+
+        let result = unsafe { select(self.fd+1, &mut readfds, ptr::null_mut(), ptr::null_mut(), &mut timeout as *mut TimeVal) };
+
+        if result == -1 {
+            return Err(io::Error::last_os_error());
+        }
+
+        if (readfds & (1 << self.fd)) != 0 {
+            return self.recv_with_flags(0);
+        }
+
+        Err(io::Error::new(io::ErrorKind::WouldBlock, "No data available"))
     }
 
     fn recv_with_flags(&self, flags: i64) -> io::Result<(i32, Packet)> {
