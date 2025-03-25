@@ -53,8 +53,6 @@ impl Device {
                 ifm_timer: u32::from_ne_bytes([buf[offset + 26], buf[offset + 27], buf[offset + 28], buf[offset + 29]]),
             };
 
-            println!("{:?}", hdr);
-
             match hdr.ifm_type {
                 RTM_NEWADDR => {
                     //println!("NEW_ADDR {:x?}", &buffer[offset+28..offset+hdr.ifm_msglen as usize-28]);
