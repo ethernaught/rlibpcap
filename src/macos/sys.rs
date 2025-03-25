@@ -96,6 +96,64 @@ pub struct SockAddrInet6 {
 
 
 
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct RtMsghdr2 {
+    rtm_msglen: u16,
+    rtm_version: u8,
+    rtm_type: u8,
+    rtm_index: u16,
+    rtm_flags: i32,
+    rtm_addrs: i32,
+    rtm_refcnt: i32,
+    rtm_use: i32,
+    rtm_inits: u32,
+    rtm_rmx: RtMetrics,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct IfMsghdr2 {
+    pub ifm_msglen: u16,
+    pub ifm_version: u8,
+    pub ifm_type: u8,
+    pub ifm_addrs: i32,
+    pub ifm_flags: u32,
+    pub ifm_index: u16,
+    pub ifm_snd_len: i32,
+    pub ifm_snd_maxlen: i32,
+    pub ifm_snd_drops: i32,
+    pub ifm_timer: i32
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Timeval {
+    tv_sec: i64,
+    tv_usec: i32,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct RtMetrics {
+    rmx_locks: u64,
+    rmx_mtu: u64,
+    rmx_hopcount: u64,
+    rmx_expire: u64,
+    rmx_recvpipe: u64,
+    rmx_sendpipe: u64,
+    rmx_ssthresh: u64,
+    rmx_rtt: u64,
+    rmx_rttvar: u64,
+    rmx_pksent: u64,
+    rmx_filler: [u64; 3],
+}
+
+
+
+
+
+
 
 
 #[repr(C)]
@@ -116,7 +174,7 @@ pub struct IfMsghdr {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct IfData64 {
     pub ifi_type: u8,
     pub ifi_typelen: u8,

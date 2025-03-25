@@ -2,7 +2,7 @@ use std::{io, mem, ptr};
 use std::ffi::{c_int, c_void};
 use std::net::IpAddr;
 use crate::utils::interface_flags::InterfaceFlags;
-use crate::macos::sys::{ioctl, sysctl, IfData64, IfMsghdr, SockAddr, SockAddrDl, SockAddrInet, SockAddrInet6, AF_INET, AF_INET6, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_NEWADDR, RTM_IFINFO2, RTM_NEWMADDR2, SOCK_DGRAM};
+use crate::macos::sys::{ioctl, sysctl, IfData64, IfMsghdr, SockAddr, SockAddrDl, SockAddrInet, SockAddrInet6, AF_INET, AF_INET6, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_NEWADDR, RTM_IFINFO2, RTM_NEWMADDR2, SOCK_DGRAM, IfMsghdr2};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 
@@ -39,7 +39,7 @@ impl Device {
 
         let mut offset = 0;
         while offset < size {
-            let hdr: &IfMsghdr = unsafe { &*(buffer.as_ptr().add(offset) as *const IfMsghdr) };
+            let hdr: &IfMsghdr2 = unsafe { &*(buffer.as_ptr().add(offset) as *const IfMsghdr2) };
 
             match hdr.ifm_type {
                 RTM_NEWADDR => {
@@ -47,9 +47,8 @@ impl Device {
 
                 }
                 RTM_IFINFO2 => {
-                    //DATA IS NOT CORRECT - KNOWN VIA MTU VALUE...
                     let data: &IfData64 = unsafe {
-                        &*(buffer.as_ptr().add(offset+28) as *const IfData64)
+                        &*(buffer.as_ptr().add(offset+32) as *const IfData64)
                     };
 
                     let sdl: &SockAddrDl = unsafe {
@@ -60,14 +59,9 @@ impl Device {
                         let name_len = sdl.sdl_nlen as usize;
                         let name_bytes = &sdl.sdl_data[0..name_len];
                         let name = String::from_utf8_lossy(name_bytes).to_string();
-                        //println!("INFO {} {}  {:?}", hdr.ifm_type, name, sdl);
 
-                        //OBVIOUSLY INACCURATE - SHOULD HAVE SEEN THIS BEFORE - TYPE IS USED FOR INTERFACE
-                        //RESPONSE TYPE...
-                        let data_link_type = DataLinkTypes::from_sdl_code(hdr.ifm_type)
+                        let data_link_type = DataLinkTypes::from_sdl_code(data.ifi_type)
                             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-
-                        println!("{} {:?}", name, hdr);
 
                         devices.push(Self {
                             name,
