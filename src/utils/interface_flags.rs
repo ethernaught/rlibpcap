@@ -8,7 +8,7 @@ pub enum InterfaceFlags {
     NoTrailers,
     Running,
     NoArp,
-    Promisc,
+    Promiscuous,
     AllMulti,
     Master,
     Slave,
@@ -20,7 +20,7 @@ pub enum InterfaceFlags {
 
 impl InterfaceFlags {
 
-    pub fn from_code(code: u16) -> Vec<Self> {
+    pub fn from_code(code: u32) -> Vec<Self> {
         let mut flags = Vec::new();
 
         for c in [
@@ -32,7 +32,7 @@ impl InterfaceFlags {
             Self::NoTrailers,
             Self::Running,
             Self::NoArp,
-            Self::Promisc,
+            Self::Promiscuous,
             Self::AllMulti,
             Self::Master,
             Self::Slave,
@@ -49,7 +49,7 @@ impl InterfaceFlags {
         flags
     }
 
-    pub fn get_code(&self) -> u16 {
+    pub fn get_code(&self) -> u32 {
         match self {
             Self::Up => 0x1,
             Self::Broadcast => 0x2,
@@ -59,7 +59,7 @@ impl InterfaceFlags {
             Self::NoTrailers => 0x20,
             Self::Running => 0x40,
             Self::NoArp => 0x80,
-            Self::Promisc => 0x100,
+            Self::Promiscuous => 0x100,
             Self::AllMulti => 0x200,
             Self::Master => 0x400,
             Self::Slave => 0x800,
@@ -80,7 +80,7 @@ impl InterfaceFlags {
             Self::NoTrailers => "No Trailers",
             Self::Running => "Running",
             Self::NoArp => "No Arp",
-            Self::Promisc => "Promisc",
+            Self::Promiscuous => "Promiscuous",
             Self::AllMulti => "All Multi",
             Self::Master => "Master",
             Self::Slave => "Slave",

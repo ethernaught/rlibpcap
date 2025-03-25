@@ -1,6 +1,6 @@
 use std::{io, mem};
 use std::net::IpAddr;
-use crate::interface_flags::InterfaceFlags;
+use crate::utils::interface_flags::InterfaceFlags;
 use crate::linux::sys::{IfreqAddr, IfreqHwAddr, IfreqIndex, SockAddr, AF_INET, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_DGRAM};
 use crate::linux::sys::{close, ioctl, parse_ip, socket, IfConf, IfreqFlags, SIOCGIFCONF, SIOCGIFFLAGS};
 use crate::packet::inter::data_link_types::DataLinkTypes;

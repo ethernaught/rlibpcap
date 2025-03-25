@@ -1,7 +1,7 @@
 use std::{io, mem, ptr};
 use std::ffi::{c_int, c_void};
 use std::net::IpAddr;
-use crate::interface_flags::InterfaceFlags;
+use crate::utils::interface_flags::InterfaceFlags;
 use crate::macos::sys::{ioctl, sysctl, IfData64, IfMsghdr, SockAddr, SockAddrDl, SockAddrInet, SockAddrInet6, AF_INET, AF_INET6, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_NEWADDR, RTM_IFINFO2, RTM_NEWMADDR2, SOCK_DGRAM};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
@@ -47,9 +47,11 @@ impl Device {
 
                 }
                 RTM_IFINFO2 => {
+                    /*
                     let data: &IfData64 = unsafe {
                         &*(buffer.as_ptr().add(offset+28) as *const IfData64)
                     };
+                    */
 
                     let sdl: &SockAddrDl = unsafe {
                         &*(buffer.as_ptr().add(offset+hdr.ifm_msglen as usize-20) as *const SockAddrDl)
@@ -59,7 +61,7 @@ impl Device {
                         let name_len = sdl.sdl_nlen as usize;
                         let name_bytes = &sdl.sdl_data[0..name_len];
                         let name = String::from_utf8_lossy(name_bytes).to_string();
-                        //println!("Interface Name: {} {}", hdr.ifm_index, if_name);
+                        println!("Interface Name: {:?}", hdr);
                         //println!("INFO {} {}  {:?}", hdr.ifm_type, name, sdl);
 
                         let data_link_type = DataLinkTypes::from_sdl_code(hdr.ifm_type)
@@ -71,9 +73,8 @@ impl Device {
                             index: hdr.ifm_index as i32,
                             data_link_type,
                             mac: EthernetAddress::new(0, 0, 0, 0, 0, 0),
-                            flags: vec![],
+                            flags: InterfaceFlags::from_code(hdr.ifm_flags)
                         });
-
                     }
                 }
                 RTM_NEWMADDR2 => {
