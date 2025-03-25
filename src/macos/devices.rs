@@ -2,7 +2,7 @@ use std::{io, mem, ptr};
 use std::ffi::{c_int, c_void};
 use std::net::IpAddr;
 use crate::utils::interface_flags::InterfaceFlags;
-use crate::macos::sys::{ioctl, sysctl, IfData64, IfMsghdr, SockAddr, SockAddrDl, SockAddrInet, SockAddrInet6, AF_INET, AF_INET6, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_NEWADDR, RTM_IFINFO2, RTM_NEWMADDR2, SOCK_DGRAM, IfMsghdr2};
+use crate::macos::sys::{ioctl, sysctl, IfData64, SockAddrDl, AF_LINK, AF_ROUTE, CTL_NET, NET_RT_IFLIST2, RTM_NEWADDR, RTM_IFINFO2, RTM_NEWMADDR2, SOCK_DGRAM, IfMsghdr2};
 use crate::packet::inter::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 
@@ -28,9 +28,9 @@ impl Device {
             return Err(io::Error::last_os_error());
         }
 
-        let mut buffer: Vec<u8> = vec![0u8; size];
+        let mut buf: Vec<u8> = vec![0u8; size];
 
-        let res = unsafe { sysctl(&mib, buffer.as_mut_ptr(), &mut size, ptr::null_mut(), 0) };
+        let res = unsafe { sysctl(&mib, buf.as_mut_ptr(), &mut size, ptr::null_mut(), 0) };
         if res != 0 {
             return Err(io::Error::last_os_error());
         }
@@ -39,7 +39,7 @@ impl Device {
 
         let mut offset = 0;
         while offset < size {
-            let hdr: &IfMsghdr2 = unsafe { &*(buffer.as_ptr().add(offset) as *const IfMsghdr2) };
+            let hdr: &IfMsghdr2 = unsafe { &*(buf.as_ptr().add(offset) as *const IfMsghdr2) };
 
             match hdr.ifm_type {
                 RTM_NEWADDR => {
@@ -47,12 +47,44 @@ impl Device {
 
                 }
                 RTM_IFINFO2 => {
-                    let data: &IfData64 = unsafe {
-                        &*(buffer.as_ptr().add(offset+32) as *const IfData64)
+                    let data = IfData64 {
+                        ifi_type: buf[offset + 32],
+                        ifi_typelen: buf[offset + 33],
+                        ifi_physical: buf[offset + 34],
+                        ifi_addrlen: buf[offset + 35],
+                        ifi_hdrlen: buf[offset + 36],
+                        ifi_recvquota: buf[offset + 37],
+                        ifi_xmitquota: buf[offset + 38],
+                        ifi_unused1: buf[offset + 39],
+                        ifi_mtu: u32::from_ne_bytes(buf[offset + 40..offset + 44].try_into().unwrap()),
+                        ifi_metric: u32::from_ne_bytes(buf[offset + 44..offset + 48].try_into().unwrap()),
+                        ifi_baudrate: u64::from_ne_bytes(buf[offset + 48..offset + 56].try_into().unwrap()),
+                        ifi_ipackets: u64::from_ne_bytes(buf[offset + 56..offset + 64].try_into().unwrap()),
+                        ifi_ierrors: u64::from_ne_bytes(buf[offset + 64..offset + 72].try_into().unwrap()),
+                        ifi_opackets: u64::from_ne_bytes(buf[offset + 72..offset + 80].try_into().unwrap()),
+                        ifi_oerrors: u64::from_ne_bytes(buf[offset + 80..offset + 88].try_into().unwrap()),
+                        ifi_collisions: u64::from_ne_bytes(buf[offset + 88..offset + 96].try_into().unwrap()),
+                        ifi_ibytes: u64::from_ne_bytes(buf[offset + 96..offset + 104].try_into().unwrap()),
+                        ifi_obytes: u64::from_ne_bytes(buf[offset + 104..offset + 112].try_into().unwrap()),
+                        ifi_imcasts: u64::from_ne_bytes(buf[offset + 112..offset + 120].try_into().unwrap()),
+                        ifi_omcasts: u64::from_ne_bytes(buf[offset + 120..offset + 128].try_into().unwrap()),
+                        ifi_iqdrops: u64::from_ne_bytes(buf[offset + 128..offset + 136].try_into().unwrap()),
+                        ifi_noproto: u64::from_ne_bytes(buf[offset + 136..offset + 144].try_into().unwrap()),
+                        ifi_recvtiming: u32::from_ne_bytes(buf[offset + 144..offset + 148].try_into().unwrap()),
+                        ifi_xmittiming: u32::from_ne_bytes(buf[offset + 148..offset + 152].try_into().unwrap()),
+                        ifi_lastchange_sec: u64::from_ne_bytes(buf[offset + 152..offset + 160].try_into().unwrap()),
+                        ifi_lastchange_usec: u64::from_ne_bytes(buf[offset + 160..offset + 168].try_into().unwrap()),
                     };
 
-                    let sdl: &SockAddrDl = unsafe {
-                        &*(buffer.as_ptr().add(offset+hdr.ifm_msglen as usize-20) as *const SockAddrDl)
+                    let sdl = SockAddrDl {
+                        sdl_len: buf[offset+hdr.ifm_msglen as usize - 20],
+                        sdl_family: buf[offset+hdr.ifm_msglen as usize - 19],
+                        sdl_index: u16::from_be_bytes([buf[offset+hdr.ifm_msglen as usize - 18], buf[offset+hdr.ifm_msglen as usize - 17]]),
+                        sdl_type: buf[offset+hdr.ifm_msglen as usize - 16],
+                        sdl_nlen: buf[offset+hdr.ifm_msglen as usize - 15],
+                        sdl_alen: buf[offset+hdr.ifm_msglen as usize - 14],
+                        sdl_slen: buf[offset+hdr.ifm_msglen as usize - 13],
+                        sdl_data: buf[offset+hdr.ifm_msglen as usize - 12..offset+hdr.ifm_msglen as usize].try_into().unwrap()
                     };
 
                     if sdl.sdl_family == AF_LINK as u8 {

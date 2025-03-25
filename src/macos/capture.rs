@@ -129,27 +129,27 @@ impl Capture {
             return Ok((0, self.packet_buffer.borrow_mut().remove(0)));
         }
 
-        let mut buffer = vec![0u8; self.buffer_len];
+        let mut buf = vec![0u8; self.buffer_len];
 
-        let len = unsafe { recvfrom(self.fd, buffer.as_mut_slice()) };
+        let len = unsafe { recvfrom(self.fd, buf.as_mut_slice()) };
         if len > 0 {
             let mut offset = 0 as usize;
 
             let mut ret = None;
 
             while offset + 18 <= len as usize {
-                let tstamp_sec = i32::from_ne_bytes(buffer[offset..offset + 4].try_into().unwrap());
-                let tstamp_usec = i32::from_ne_bytes(buffer[offset + 4..offset + 8].try_into().unwrap());
-                let caplen = u32::from_ne_bytes(buffer[offset + 8..offset + 12].try_into().unwrap());
-                let datalen = u32::from_ne_bytes(buffer[offset + 12..offset + 16].try_into().unwrap());
-                let hdrlen = u16::from_ne_bytes(buffer[offset + 16..offset + 18].try_into().unwrap());
+                let tstamp_sec = i32::from_ne_bytes(buf[offset..offset + 4].try_into().unwrap());
+                let tstamp_usec = i32::from_ne_bytes(buf[offset + 4..offset + 8].try_into().unwrap());
+                let caplen = u32::from_ne_bytes(buf[offset + 8..offset + 12].try_into().unwrap());
+                let datalen = u32::from_ne_bytes(buf[offset + 12..offset + 16].try_into().unwrap());
+                let hdrlen = u16::from_ne_bytes(buf[offset + 16..offset + 18].try_into().unwrap());
 
                 //WITH LOOP BACK ITS A RAW TYPE... - NO ETHERNET TYPE
                 //MAYBE THESE NEXT 4 BYTES ARE USED TO DETERMINE IF ITS IPv4 OR IPv6... - OR MAYBE ETH TYPE...
 
                 let data_offset = offset + hdrlen as usize + 4;
 
-                let packet_data = &buffer[data_offset..(data_offset + caplen as usize)];
+                let packet_data = &buf[data_offset..(data_offset + caplen as usize)];
 
                 let packet = Packet::new(DataLinkTypes::Raw, 0, packet_data);
 

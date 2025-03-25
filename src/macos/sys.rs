@@ -21,8 +21,8 @@ pub const IFNAMSIZ: usize = 16;
 
 
 
-pub const AF_INET: i64 = 2;
-pub const AF_INET6: i64 = 30;
+//pub const AF_INET: i64 = 2;
+//pub const AF_INET6: i64 = 30;
 pub const SOCK_DGRAM: i64 = 2;
 
 
@@ -62,6 +62,7 @@ pub struct Ifreq {
     pub ifr_ifindex: i32,
 }
 
+/*
 #[repr(C)]
 #[derive(Debug)]
 pub struct SockAddr {
@@ -90,26 +91,12 @@ pub struct SockAddrInet6 {
     pub sin6_addr: [u8; 16],
     pub sin6_scope_id: u32,
 }
+*/
 
 
 
 
 
-
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub struct RtMsghdr2 {
-    rtm_msglen: u16,
-    rtm_version: u8,
-    rtm_type: u8,
-    rtm_index: u16,
-    rtm_flags: i32,
-    rtm_addrs: i32,
-    rtm_refcnt: i32,
-    rtm_use: i32,
-    rtm_inits: u32,
-    rtm_rmx: RtMetrics,
-}
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -126,28 +113,6 @@ pub struct IfMsghdr2 {
     pub ifm_timer: i32
 }
 
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub struct Timeval {
-    tv_sec: i64,
-    tv_usec: i32,
-}
-
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub struct RtMetrics {
-    rmx_locks: u64,
-    rmx_mtu: u64,
-    rmx_hopcount: u64,
-    rmx_expire: u64,
-    rmx_recvpipe: u64,
-    rmx_sendpipe: u64,
-    rmx_ssthresh: u64,
-    rmx_rtt: u64,
-    rmx_rttvar: u64,
-    rmx_pksent: u64,
-    rmx_filler: [u64; 3],
-}
 
 
 
@@ -155,23 +120,6 @@ pub struct RtMetrics {
 
 
 
-
-#[repr(C)]
-#[derive(Debug)]
-pub struct IfMsghdr {
-    pub ifm_msglen: u16, // Message length
-    pub ifm_version: u8, // Version (should be 5)
-    pub ifm_type: u8,    // Message type (RTM_IFINFO2 = 0x12)
-    pub ifm_addrs: u32,  // Bitmap of included address
-    pub ifm_flags: u32,  // Interface flags
-    pub ifm_index: u16,  // Interface index
-    pub ifm_snd_len: u16, // Length of send queue
-    pub ifm_snd_maxlen: u16,
-    pub ifm_snd_drops: u16,
-    pub ifm_timer: u32,
-    //_padding: u32,
-    //pub ifm_data: IfData64,    // Interface data (e.g., RX/TX bytes, MTU)
-}
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
