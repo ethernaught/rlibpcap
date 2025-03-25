@@ -27,6 +27,14 @@ impl LoopFrame {
         }
     }
 
+    pub fn get_type(&self) -> LoopTypes {
+        self._type
+    }
+
+    pub fn set_type(&mut self, _type: LoopTypes) {
+        self._type = _type;
+    }
+
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
         self.length = data.len();
         self.data = Some(data);
