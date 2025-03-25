@@ -39,7 +39,21 @@ impl Device {
 
         let mut offset = 0;
         while offset < size {
-            let hdr: &IfMsghdr2 = unsafe { &*(buf.as_ptr().add(offset) as *const IfMsghdr2) };
+            //let hdr: &IfMsghdr2 = unsafe { &*(buf.as_ptr().add(offset) as *const IfMsghdr2) };
+            let hdr = IfMsghdr2 {
+                ifm_msglen: u16::from_ne_bytes([buf[offset], buf[offset + 1]]),
+                ifm_version: buf[offset + 2],
+                ifm_type: buf[offset + 3],
+                ifm_addrs: u32::from_ne_bytes([buf[offset + 4], buf[offset + 5], buf[offset + 6], buf[offset + 7]]),
+                ifm_flags: u32::from_ne_bytes([buf[offset + 8], buf[offset + 9], buf[offset + 10], buf[offset + 11]]),
+                ifm_index: u16::from_ne_bytes([buf[offset + 12], buf[offset + 13]]),
+                ifm_snd_len: u32::from_ne_bytes([buf[offset + 14], buf[offset + 15], buf[offset + 16], buf[offset + 17]]),
+                ifm_snd_maxlen: u32::from_ne_bytes([buf[offset + 18], buf[offset + 19], buf[offset + 20], buf[offset + 21]]),
+                ifm_snd_drops: u32::from_ne_bytes([buf[offset + 22], buf[offset + 23], buf[offset + 24], buf[offset + 25]]),
+                ifm_timer: u32::from_ne_bytes([buf[offset + 26], buf[offset + 27], buf[offset + 28], buf[offset + 29]]),
+            };
+
+            println!("{:?}", hdr);
 
             match hdr.ifm_type {
                 RTM_NEWADDR => {
@@ -79,7 +93,7 @@ impl Device {
                     let sdl = SockAddrDl {
                         sdl_len: buf[offset+hdr.ifm_msglen as usize - 20],
                         sdl_family: buf[offset+hdr.ifm_msglen as usize - 19],
-                        sdl_index: u16::from_be_bytes([buf[offset+hdr.ifm_msglen as usize - 18], buf[offset+hdr.ifm_msglen as usize - 17]]),
+                        sdl_index: u16::from_ne_bytes([buf[offset+hdr.ifm_msglen as usize - 18], buf[offset+hdr.ifm_msglen as usize - 17]]),
                         sdl_type: buf[offset+hdr.ifm_msglen as usize - 16],
                         sdl_nlen: buf[offset+hdr.ifm_msglen as usize - 15],
                         sdl_alen: buf[offset+hdr.ifm_msglen as usize - 14],

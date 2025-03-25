@@ -104,13 +104,13 @@ pub struct IfMsghdr2 {
     pub ifm_msglen: u16,
     pub ifm_version: u8,
     pub ifm_type: u8,
-    pub ifm_addrs: i32,
+    pub ifm_addrs: u32,
     pub ifm_flags: u32,
     pub ifm_index: u16,
-    pub ifm_snd_len: i32,
-    pub ifm_snd_maxlen: i32,
-    pub ifm_snd_drops: i32,
-    pub ifm_timer: i32
+    pub ifm_snd_len: u32,
+    pub ifm_snd_maxlen: u32,
+    pub ifm_snd_drops: u32,
+    pub ifm_timer: u32
 }
 
 
