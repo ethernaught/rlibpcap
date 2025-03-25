@@ -87,7 +87,7 @@ impl Device {
                 continue;
             }
 
-            let flags = InterfaceFlags::from_code(ifr_flags.ifr_flags as u16);
+            let flags = InterfaceFlags::from_code(ifr_flags.ifr_flags as u32);
 
             devices.push(Self {
                 name,
