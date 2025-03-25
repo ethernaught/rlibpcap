@@ -47,11 +47,10 @@ impl Device {
 
                 }
                 RTM_IFINFO2 => {
-                    /*
+                    //DATA IS NOT CORRECT - KNOWN VIA MTU VALUE...
                     let data: &IfData64 = unsafe {
                         &*(buffer.as_ptr().add(offset+28) as *const IfData64)
                     };
-                    */
 
                     let sdl: &SockAddrDl = unsafe {
                         &*(buffer.as_ptr().add(offset+hdr.ifm_msglen as usize-20) as *const SockAddrDl)
@@ -65,6 +64,8 @@ impl Device {
 
                         let data_link_type = DataLinkTypes::from_sdl_code(hdr.ifm_type)
                             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+
+                        println!("{} {:?}", name, data);
 
                         devices.push(Self {
                             name,

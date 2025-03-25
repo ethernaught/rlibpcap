@@ -144,13 +144,14 @@ impl Capture {
                 let datalen = u32::from_ne_bytes(buffer[offset + 12..offset + 16].try_into().unwrap());
                 let hdrlen = u16::from_ne_bytes(buffer[offset + 16..offset + 18].try_into().unwrap());
 
-                println!("ts {} {}  caplen {} datalen {} hdrlen {}", tstamp_sec, tstamp_usec, caplen, datalen, hdrlen);
+                //WITH LOOP BACK ITS A RAW TYPE... - NO ETHERNET TYPE
+                //MAYBE THESE NEXT 4 BYTES ARE USED TO DETERMINE IF ITS IPv4 OR IPv6... - OR MAYBE ETH TYPE...
 
-                let data_offset = offset + hdrlen as usize;
+                let data_offset = offset + hdrlen as usize + 4;
 
                 let packet_data = &buffer[data_offset..(data_offset + caplen as usize)];
 
-                let packet = Packet::new(DataLinkTypes::En10mb, 0, packet_data);
+                let packet = Packet::new(DataLinkTypes::Raw, 0, packet_data);
 
                 match ret {
                     Some(_) => {

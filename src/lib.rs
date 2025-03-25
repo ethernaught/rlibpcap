@@ -63,6 +63,9 @@ mod tests {
         cap.set_immediate_mode(true).unwrap();
         cap.open().unwrap();
 
+        //en0 ts 1742876847 259787  caplen 67 datalen 67 hdrlen 18
+        //lo0 ts 1742876808 748519  caplen 88 datalen 88 hdrlen 20
+
         loop {
         //for i in 0..10 {
             match cap.try_recv() {
