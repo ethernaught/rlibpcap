@@ -60,7 +60,7 @@ impl DataLinkTypes {
             Self::Slip => 8,
             Self::Ppp => 9,
             Self::Fddi => 10,
-            Self::Raw => 101, //14 for BSD  - 12???
+            Self::Raw => 101,
             Self::Loop => 108,
             Self::Ipv4 => 228,
             Self::Ipv6 => 229,
@@ -72,30 +72,20 @@ impl DataLinkTypes {
         match self {
             Self::Null => "Null",
             Self::En10mb => "Ethernet",
-            Self::En3mb => "",
-            Self::Ax25 => "",
-            Self::ProNet => "",
-            Self::Chaos => "",
-            Self::Ieee802 => "",
-            Self::ArcNet => "",
-            Self::Slip => "",
-            Self::Ppp => "",
-            Self::Fddi => "",
-            Self::Raw => "",
-            Self::Loop => "",
-            Self::Ipv4 => "",
-            Self::Ipv6 => "",
-            Self::Sll2 => ""
-            /*
-            Self::Ethernet => "Ethernet",
-            Self::Raw => "Raw IP packets",
+            Self::En3mb => "Experimental Ethernet",
+            Self::Ax25 => "AX.25",
+            Self::ProNet => "ProNET Token Ring",
+            Self::Chaos => "Chaosnet",
+            Self::Ieee802 => "IEEE802",
+            Self::ArcNet => "ARCNET",
+            Self::Slip => "SLIP",
+            Self::Ppp => "PPP",
+            Self::Fddi => "FDDI",
+            Self::Raw => "Raw",
+            Self::Loop => "Loop",
             Self::Ipv4 => "IPv4",
             Self::Ipv6 => "IPv6",
-            Self::BluetoothHciH4 => "Bluetooth HCI",
-            Self::Sll2 => "Linux SLL2",
-            Self::Loopback => "Loopback",
-            Self::Tun => "Tunnel"
-            */
+            Self::Sll2 => "SLL2"
         }.to_string()
     }
 }
