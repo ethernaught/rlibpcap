@@ -52,7 +52,7 @@ impl Capture {
                     ifr_name: [0; IFNAMSIZ],
                 };
 
-                let if_name_bytes = device.get_name().into_bytes();
+                let if_name_bytes = device.name.as_bytes();//.into_bytes();
                 if if_name_bytes.len() >= IFNAMSIZ {
                     unsafe { close(self.fd) };
                     return Err(io::Error::new(io::ErrorKind::InvalidInput, "Interface name too long"));
@@ -63,7 +63,7 @@ impl Capture {
                 let sockaddr = SockAddrLl {
                     sll_family: AF_PACKET as u16,
                     sll_protocol: ETH_P_ALL.to_be(),
-                    sll_ifindex: device.get_index(),
+                    sll_ifindex: device.index,
                     sll_hatype: 0,
                     sll_pkttype: 0,
                     sll_halen: 0,
