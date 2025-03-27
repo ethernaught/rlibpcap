@@ -4,7 +4,7 @@ use std::fs::OpenOptions;
 use std::io::Read;
 use std::os::fd::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 use crate::devices::Device;
-use crate::macos::sys::{ioctl, recvfrom, select, TimeVal, Ifreq, BIOCGBLEN, BIOCIMMEDIATE, BIOCSETIF, IFNAMSIZ};
+use crate::macos::sys::{ioctl, recvfrom, select, TimeVal, Ifreq, BIOCGBLEN, BIOCIMMEDIATE, BIOCSETIF, IFNAMSIZ, close};
 use crate::utils::data_link_types::DataLinkTypes;
 use crate::packet::packet::Packet;
 

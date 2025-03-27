@@ -234,11 +234,11 @@ pub unsafe fn recvfrom(fd: RawFd, buffer: &mut [u8]) -> isize {
     );
     ret
 }
-/*
+
 pub unsafe fn close(fd: RawFd) {
-    syscall(SYS_CLOSE, fd as i64, 0, 0, 0, 0);
+    //syscall(SYS_CLOSE, fd as i64, 0, 0, 0, 0);
 }
-*/
+
 //for APPLE CHIPS
 /*
 pub unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) -> i64 {
