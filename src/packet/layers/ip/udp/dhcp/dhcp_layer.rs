@@ -1,5 +1,5 @@
 use std::any::Any;
-use crate::packet::layers::ethernet_frame::ip::udp::dhcp::inter::dhcp_operations::DhcpOperations;
+use crate::packet::layers::ip::udp::dhcp::inter::dhcp_operations::DhcpOperations;
 use crate::packet::layers::inter::layer::Layer;
 
 pub const DHCP_COOKIE: u32 = 0x63825363;

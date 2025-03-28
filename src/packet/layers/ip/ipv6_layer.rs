@@ -1,10 +1,10 @@
 use std::any::Any;
 use std::net::Ipv6Addr;
-use crate::packet::layers::ethernet_frame::ip::icmpv6::icmpv6_layer::Icmpv6Layer;
-use crate::packet::layers::ethernet_frame::ip::inter::ip_protocols::IpProtocols;
-use crate::packet::layers::ethernet_frame::ip::inter::ip_versions::IpVersions;
-use crate::packet::layers::ethernet_frame::ip::tcp::tcp_layer::TcpLayer;
-use crate::packet::layers::ethernet_frame::ip::udp::udp_layer::UdpLayer;
+use crate::packet::layers::ip::icmpv6::icmpv6_layer::Icmpv6Layer;
+use crate::packet::layers::ip::inter::ip_protocols::IpProtocols;
+use crate::packet::layers::ip::inter::ip_versions::IpVersions;
+use crate::packet::layers::ip::tcp::tcp_layer::TcpLayer;
+use crate::packet::layers::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
 
 const IPV6_HEADER_LEN: usize = 40;

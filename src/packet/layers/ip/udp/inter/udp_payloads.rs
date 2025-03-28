@@ -1,5 +1,5 @@
-use crate::packet::layers::ethernet_frame::ip::udp::dhcp::dhcp_layer::DhcpLayer;
-use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes;
+use crate::packet::layers::ip::udp::dhcp::dhcp_layer::DhcpLayer;
+use crate::packet::layers::ip::udp::inter::udp_types::UdpTypes;
 use crate::packet::layers::inter::layer::Layer;
 
 #[derive(Clone, Debug)]

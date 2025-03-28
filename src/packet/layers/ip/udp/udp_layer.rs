@@ -1,9 +1,9 @@
 use std::any::Any;
 use std::net::IpAddr;
-use crate::packet::layers::ethernet_frame::ip::inter::ip_protocols::IpProtocols;
-use crate::packet::layers::ethernet_frame::ip::inter::ip_utils::calculate_checksum;
-use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_payloads::UdpPayloads;
-use crate::packet::layers::ethernet_frame::ip::udp::inter::udp_types::UdpTypes;
+use crate::packet::layers::ip::inter::ip_protocols::IpProtocols;
+use crate::packet::layers::ip::inter::ip_utils::calculate_checksum;
+use crate::packet::layers::ip::udp::inter::udp_payloads::UdpPayloads;
+use crate::packet::layers::ip::udp::inter::udp_types::UdpTypes;
 use crate::packet::layers::inter::layer::Layer;
 
 const UDP_HEADER_LEN: usize = 8;

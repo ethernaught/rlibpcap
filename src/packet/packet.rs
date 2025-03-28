@@ -1,7 +1,7 @@
 use crate::utils::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::ethernet_frame::EthernetFrame;
-use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
-use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
+use crate::packet::layers::ip::ipv4_layer::Ipv4Layer;
+use crate::packet::layers::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::loop_frame::loop_frame::LoopFrame;
 use crate::packet::layers::raw_frame::raw_frame::RawFrame;

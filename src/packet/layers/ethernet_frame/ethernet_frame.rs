@@ -2,8 +2,8 @@ use std::any::Any;
 use crate::packet::layers::ethernet_frame::arp::arp_extension::ArpExtension;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 use crate::packet::layers::ethernet_frame::inter::ethernet_types::EthernetTypes;
-use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
-use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
+use crate::packet::layers::ip::ipv4_layer::Ipv4Layer;
+use crate::packet::layers::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
 
 const ETHERNET_FRAME_LEN: usize = 14;

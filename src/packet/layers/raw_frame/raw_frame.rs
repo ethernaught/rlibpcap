@@ -1,8 +1,8 @@
 use std::any::Any;
-use crate::packet::layers::ethernet_frame::ip::ipv4_layer::Ipv4Layer;
-use crate::packet::layers::ethernet_frame::ip::ipv6_layer::Ipv6Layer;
+use crate::packet::layers::ip::ipv4_layer::Ipv4Layer;
+use crate::packet::layers::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::ethernet_frame::ip::inter::ip_versions::IpVersions;
+use crate::packet::layers::ip::inter::ip_versions::IpVersions;
 
 #[derive(Clone, Debug)]
 pub struct RawFrame {
