@@ -10,13 +10,13 @@ pub const MAGIC_NUMBER: u32 = 0xA1B2C3D4;
 
 #[derive(Debug, Clone)]
 pub struct Pcap {
-    version_major: u16,
-    version_minor: u16,
-    zone: i32,
-    accuracy: u32,
-    payload_length: u32,
-    data_link_type: DataLinkTypes,
-    packets: Vec<Packet>
+    pub version_major: u16,
+    pub version_minor: u16,
+    pub zone: i32,
+    pub accuracy: u32,
+    pub payload_length: u32,
+    pub data_link_type: DataLinkTypes,
+    pub packets: Vec<Packet>
 }
 
 impl Pcap {
