@@ -18,6 +18,17 @@ pub struct Device {
 
 impl Device {
 
+    pub fn new(name: String, address: Option<IpAddr>, index: i32, data_link_type: DataLinkTypes, mac: EthernetAddress, flags: Vec<InterfaceFlags>) -> Self {
+        Self {
+            name,
+            address,
+            index,
+            data_link_type,
+            mac,
+            flags
+        }
+    }
+
     pub fn list() -> io::Result<Vec<Self>> {
         let mib: [c_int; 6] = [CTL_NET, AF_ROUTE, 0, 0, NET_RT_IFLIST2, 0];
         let mut size: usize = 0;

@@ -18,6 +18,17 @@ pub struct Device {
 
 impl Device {
 
+    pub fn new(name: String, address: Option<IpAddr>, index: i32, data_link_type: DataLinkTypes, mac: EthernetAddress, flags: Vec<InterfaceFlags>) -> Self {
+        Self {
+            name,
+            address,
+            index,
+            data_link_type,
+            mac,
+            flags
+        }
+    }
+
     pub fn list() -> io::Result<Vec<Self>> {
         let fd = unsafe { socket(AF_INET, SOCK_DGRAM, 0) };
         if fd < 0 {
