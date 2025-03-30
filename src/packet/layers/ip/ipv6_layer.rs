@@ -7,7 +7,7 @@ use crate::packet::layers::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
 
-const IPV6_HEADER_LEN: usize = 40;
+pub const IPV6_HEADER_LEN: usize = 40;
 
 #[derive(Clone, Debug)]
 pub struct Ipv6Layer {

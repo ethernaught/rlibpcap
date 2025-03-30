@@ -6,7 +6,7 @@ use crate::packet::layers::ip::udp::inter::udp_payloads::UdpPayloads;
 use crate::packet::layers::ip::udp::inter::udp_types::UdpTypes;
 use crate::packet::layers::inter::layer::Layer;
 
-const UDP_HEADER_LEN: usize = 8;
+pub const UDP_HEADER_LEN: usize = 8;
 
 #[derive(Clone, Debug)]
 pub struct UdpLayer {

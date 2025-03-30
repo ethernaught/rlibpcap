@@ -8,7 +8,7 @@ use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::loop_frame::inter::loop_types::LoopTypes;
 use crate::packet::layers::sll2_frame::inter::packet_types::PacketTypes;
 
-const LOOP_FRAME_LENGTH: usize = 4;
+pub const LOOP_FRAME_LENGTH: usize = 4;
 
 #[derive(Clone, Debug)]
 pub struct LoopFrame {

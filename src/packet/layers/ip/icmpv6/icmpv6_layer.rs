@@ -1,7 +1,7 @@
 use std::any::Any;
 use crate::packet::layers::inter::layer::Layer;
 
-const ICMPV6_HEADER_LEN: usize = 8;
+pub const ICMPV6_HEADER_LEN: usize = 8;
 
 #[derive(Clone, Debug)]
 pub struct Icmpv6Layer {

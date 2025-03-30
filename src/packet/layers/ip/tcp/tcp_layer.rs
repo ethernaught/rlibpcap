@@ -1,7 +1,7 @@
 use std::any::Any;
 use crate::packet::layers::inter::layer::Layer;
 
-const TCP_HEADER_LEN: usize = 20;
+pub const TCP_HEADER_LEN: usize = 20;
 
 #[derive(Clone, Debug)]
 pub struct TcpLayer {

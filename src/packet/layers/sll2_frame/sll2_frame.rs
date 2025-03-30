@@ -7,7 +7,7 @@ use crate::packet::layers::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
 use crate::packet::layers::sll2_frame::inter::packet_types::PacketTypes;
 
-const SLL2_FRAME_LEN: usize = 20;
+pub const SLL2_FRAME_LEN: usize = 20;
 
 #[derive(Clone, Debug)]
 pub struct Sll2Frame {

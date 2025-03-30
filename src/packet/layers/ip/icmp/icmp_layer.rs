@@ -1,7 +1,7 @@
 use std::any::Any;
 use crate::packet::layers::inter::layer::Layer;
 
-const ICMP_PAYLOAD_LEN: usize = 8;
+pub const ICMP_PAYLOAD_LEN: usize = 8;
 
 #[derive(Clone, Debug)]
 pub struct IcmpLayer {

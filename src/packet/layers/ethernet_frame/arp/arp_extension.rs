@@ -6,7 +6,7 @@ use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddr
 use crate::packet::layers::ethernet_frame::inter::ethernet_types::EthernetTypes;
 use crate::packet::layers::inter::layer::Layer;
 
-const ARP_HEADER_LEN: usize = 28;
+pub const ARP_HEADER_LEN: usize = 28;
 
 #[derive(Clone, Debug)]
 pub struct ArpExtension {

@@ -6,7 +6,7 @@ use crate::packet::layers::ip::ipv4_layer::Ipv4Layer;
 use crate::packet::layers::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
 
-const ETHERNET_FRAME_LEN: usize = 14;
+pub const ETHERNET_FRAME_LEN: usize = 14;
 
 #[derive(Clone, Debug)]
 pub struct EthernetFrame {

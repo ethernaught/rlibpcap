@@ -8,7 +8,7 @@ use crate::packet::layers::ip::tcp::tcp_layer::TcpLayer;
 use crate::packet::layers::ip::udp::udp_layer::UdpLayer;
 use crate::packet::layers::inter::layer::Layer;
 
-const IPV4_HEADER_LEN: usize = 20;
+pub const IPV4_HEADER_LEN: usize = 20;
 
 /*
 let ihl = (packet[0] & 0x0F) as usize * 4; // Internet Header Length (IHL)
