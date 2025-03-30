@@ -59,7 +59,7 @@ impl Capture {
                     ifr_ifindex: 0,
                 };
 
-                let if_name_bytes = device.name.as_bytes();//.into_bytes();
+                let if_name_bytes = device.get_name().into_bytes();
                 if if_name_bytes.len() >= IFNAMSIZ {
                     unsafe { close(self.fd) };
                     return Err(io::Error::new(io::ErrorKind::InvalidInput, "Interface name too long"));

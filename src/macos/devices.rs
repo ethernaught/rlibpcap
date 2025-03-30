@@ -8,12 +8,12 @@ use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddr
 
 #[derive(Clone, Debug)]
 pub struct Device {
-    pub name: String,
-    pub address: Option<IpAddr>,
-    pub index: i32,
-    pub data_link_type: DataLinkTypes,
-    pub mac: EthernetAddress,
-    pub flags: Vec<InterfaceFlags>
+    name: String,
+    address: Option<IpAddr>,
+    index: i32,
+    data_link_type: DataLinkTypes,
+    mac: EthernetAddress,
+    flags: Vec<InterfaceFlags>
 }
 
 impl Device {
@@ -136,5 +136,29 @@ impl Device {
         }
 
         Ok(devices)
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn get_address(&self) -> Option<IpAddr> {
+        self.address
+    }
+
+    pub fn get_index(&self) -> i32 {
+        self.index
+    }
+
+    pub fn get_data_link_type(&self) -> DataLinkTypes {
+        self.data_link_type
+    }
+
+    pub fn get_mac(&self) -> EthernetAddress {
+        self.mac
+    }
+
+    pub fn get_flags(&self) -> Vec<InterfaceFlags> {
+        self.flags.clone()
     }
 }
