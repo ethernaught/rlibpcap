@@ -145,7 +145,7 @@ impl Capture {
                 let datalen = u32::from_ne_bytes(buf[offset + 12..offset + 16].try_into().unwrap());
                 let hdrlen = u16::from_ne_bytes(buf[offset + 16..offset + 18].try_into().unwrap());
 
-                let packet = Packet::new(self.device.as_ref().unwrap().data_link_type, 0, &buf[offset + hdrlen as usize..(offset + hdrlen as usize + caplen as usize)]);
+                let packet = Packet::new(self.device.as_ref().unwrap().get_data_link_type(), 0, &buf[offset + hdrlen as usize..(offset + hdrlen as usize + caplen as usize)]);
 
                 match ret {
                     Some(_) => {
