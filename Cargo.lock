@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "pcap"
+name = "rlibpcap"
 version = "0.1.0"

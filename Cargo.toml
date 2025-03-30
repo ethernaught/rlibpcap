@@ -1,5 +1,5 @@
 [package]
-name = "pcap"
+name = "rlibpcap"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,5 +8,5 @@ edition = "2021"
 #winapi = { version = "0.3.9", features = ["winsock2", "ws2tcpip", "winnt", "iphlpapi"] }
 
 [lib]
-name = "pcap"
+name = "rlibpcap"
 path = "src/lib.rs"
