@@ -145,6 +145,7 @@ impl Layer for Sll2Frame {
         buf.splice(8..10, self.data_link_type.get_code().to_be_bytes());
         buf[10] = self.packet_type.get_code();
         buf[11] = self.address_length;
+        buf.splice(12..20, self.address);
 
         match &self.data {
             Some(data) => {
