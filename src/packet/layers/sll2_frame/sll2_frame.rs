@@ -139,6 +139,7 @@ impl Layer for Sll2Frame {
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; SLL2_FRAME_LEN];
+
         buf.splice(0..2, self.protocol.get_code().to_be_bytes());
         buf.splice(4..8, self.if_index.to_be_bytes());
         buf.splice(8..10, self.data_link_type.get_code().to_be_bytes());

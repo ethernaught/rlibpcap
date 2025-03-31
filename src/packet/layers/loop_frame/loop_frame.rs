@@ -79,6 +79,7 @@ impl Layer for LoopFrame {
 
     fn to_bytes(&self) -> Vec<u8> {
         let mut buf = vec![0; LOOP_FRAME_LENGTH];
+
         buf.splice(0..4, self._type.get_code().to_be_bytes());
 
         match &self.data {
