@@ -40,7 +40,7 @@ impl IcmpLayer {
 impl Layer for IcmpLayer {
     
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < ICMP_PAYLOAD_LEN {
+        if buf.len() < ICMP_HEADER_LEN {
             return None;
         }
 
@@ -56,7 +56,7 @@ impl Layer for IcmpLayer {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; ICMP_PAYLOAD_LEN];
+        let mut buf = vec![0; ICMP_HEADER_LEN];
 
         buf[0] = self._type;
         buf[1] = self.code;
@@ -73,7 +73,7 @@ impl Layer for IcmpLayer {
     }
 
     fn compute_length(&mut self) -> usize {
-        self.length = ICMP_PAYLOAD_LEN + self.data.len();
+        self.length = ICMP_HEADER_LEN + self.data.len();
         self.length
     }
 
