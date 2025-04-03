@@ -134,16 +134,10 @@ impl Capture {
             return Ok((sockaddr, Packet::new(data_link_type, now, &buffer[..len as usize])));
 
         } else if len == -1 {
-            let err = io::Error::last_os_error();
-
-            if err.kind() == io::ErrorKind::WouldBlock {
-                return Err(io::Error::new(io::ErrorKind::WouldBlock, "No data available"));
-            }
-
-            return Err(err);
+            return Err(io::Error::last_os_error());
         }
 
-        Err(io::Error::last_os_error())
+        Err(io::Error::new(io::ErrorKind::WouldBlock, "No data available"))
     }
 
     pub fn close(&self) {
