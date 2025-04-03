@@ -29,17 +29,17 @@ impl RawFrame {
         self.version = version;
     }
 
+    pub fn get_data<T: 'static>(&self) -> Option<&T> {
+        self.data.as_ref()?.as_any().downcast_ref::<T>()
+    }
+
+    pub fn get_data_mut<T: 'static>(&mut self) -> Option<&mut T> {
+        self.data.as_mut()?.as_any_mut().downcast_mut::<T>()
+    }
+
     pub fn set_data(&mut self, data: Box<dyn Layer>) {
         self.length = data.len();
         self.data = Some(data);
-    }
-
-    pub fn get_data(&self) -> Option<&Box<dyn Layer>> {
-        self.data.as_ref()
-    }
-
-    pub fn get_data_mut(&mut self) -> Option<&mut Box<dyn Layer>> {
-        self.data.as_mut()
     }
 }
 

@@ -57,12 +57,12 @@ impl Packet {
         self.frame = frame;
     }
 
-    pub fn get_frame(&self) -> &Box<dyn Layer> {
-        &self.frame
+    pub fn get_frame<T: 'static>(&self) -> &T {
+        self.frame.as_any().downcast_ref::<T>().unwrap()
     }
 
-    pub fn get_frame_mut(&mut self) -> &mut Box<dyn Layer> {
-        &mut self.frame
+    pub fn get_frame_mut<T: 'static>(&mut self) -> &mut T {
+        self.frame.as_any_mut().downcast_mut::<T>().unwrap()
     }
 
     pub fn set_frame_time(&mut self, frame_time: u128) {
