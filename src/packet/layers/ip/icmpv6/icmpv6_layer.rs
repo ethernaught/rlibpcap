@@ -77,15 +77,15 @@ impl Layer for Icmpv6Layer {
         self.length
     }
 
+    fn dyn_clone(&self) -> Box<dyn Layer> {
+        Box::new(self.clone())
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
-    }
-
-    fn dyn_clone(&self) -> Box<dyn Layer> {
-        Box::new(self.clone())
     }
 }

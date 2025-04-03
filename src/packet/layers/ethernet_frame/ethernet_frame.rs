@@ -78,13 +78,13 @@ impl Layer for EthernetFrame {
 
         let data = match _type {
             EthernetTypes::Ipv4 => {
-                Some(Ipv4Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
+                Some(Ipv4Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
             }
             EthernetTypes::Arp => {
-                Some(ArpExtension::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
+                Some(ArpExtension::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
             }
             EthernetTypes::Ipv6 => {
-                Some(Ipv6Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.dyn_clone())
+                Some(Ipv6Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
             }
             EthernetTypes::Broadcast => {
                 None
@@ -134,15 +134,15 @@ impl Layer for EthernetFrame {
         self.length
     }
 
+    fn dyn_clone(&self) -> Box<dyn Layer> {
+        Box::new(self.clone())
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
-    }
-
-    fn dyn_clone(&self) -> Box<dyn Layer> {
-        Box::new(self.clone())
     }
 }

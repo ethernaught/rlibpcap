@@ -85,10 +85,10 @@ impl Layer for Ipv6Layer {
                 None
             }
             IpProtocols::Tcp => {
-                Some(TcpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.dyn_clone())
+                Some(TcpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.upcast())
             }
             IpProtocols::Udp => {
-                Some(UdpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.dyn_clone())
+                Some(UdpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.upcast())
             }
             IpProtocols::Ipv6 => {
                 None
@@ -97,7 +97,7 @@ impl Layer for Ipv6Layer {
                 None
             }
             IpProtocols::Icmpv6 => {
-                Some(Icmpv6Layer::from_bytes(&buf[IPV6_HEADER_LEN..])?.dyn_clone())
+                Some(Icmpv6Layer::from_bytes(&buf[IPV6_HEADER_LEN..])?.upcast())
             }
             IpProtocols::Ospf => {
                 None
@@ -161,15 +161,15 @@ impl Layer for Ipv6Layer {
         payload_length + IPV6_HEADER_LEN
     }
 
+    fn dyn_clone(&self) -> Box<dyn Layer> {
+        Box::new(self.clone())
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
-    }
-
-    fn dyn_clone(&self) -> Box<dyn Layer> {
-        Box::new(self.clone())
     }
 }

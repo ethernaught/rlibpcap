@@ -20,16 +20,16 @@ impl Packet {
     pub fn new(data_link_type: DataLinkTypes, frame_time: u128, data: &[u8]) -> Self {
         let frame = match data_link_type {
             DataLinkTypes::En10mb => {
-                EthernetFrame::from_bytes(data).unwrap().dyn_clone()
+                EthernetFrame::from_bytes(data).unwrap().upcast()
             }
             DataLinkTypes::Loop => {
-                LoopFrame::from_bytes(data).unwrap().dyn_clone()
+                LoopFrame::from_bytes(data).unwrap().upcast()
             }
             DataLinkTypes::Raw => {
-                RawFrame::from_bytes(data).unwrap().dyn_clone()
+                RawFrame::from_bytes(data).unwrap().upcast()
             }
             DataLinkTypes::Sll2 => {
-                Sll2Frame::from_bytes(data).unwrap().dyn_clone()
+                Sll2Frame::from_bytes(data).unwrap().upcast()
             }
             _ => {
                 todo!()

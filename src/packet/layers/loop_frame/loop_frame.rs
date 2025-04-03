@@ -60,10 +60,10 @@ impl Layer for LoopFrame {
 
         let data = match _type {
             LoopTypes::Ipv4 => {
-                Some(Ipv4Layer::from_bytes(&buf[4..]).unwrap().dyn_clone())
+                Some(Ipv4Layer::from_bytes(&buf[4..]).unwrap().upcast())
             }
             LoopTypes::Ipv6 | LoopTypes::Ipv6e2 | LoopTypes::Ipv6e3 => {
-                Some(Ipv6Layer::from_bytes(&buf[4..]).unwrap().dyn_clone())
+                Some(Ipv6Layer::from_bytes(&buf[4..]).unwrap().upcast())
             }
             _ => {
                 None
@@ -109,15 +109,15 @@ impl Layer for LoopFrame {
         self.length
     }
 
+    fn dyn_clone(&self) -> Box<dyn Layer> {
+        Box::new(self.clone())
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
-    }
-
-    fn dyn_clone(&self) -> Box<dyn Layer> {
-        Box::new(self.clone())
     }
 }

@@ -197,16 +197,16 @@ impl Layer for Ipv4Layer {
                 None
             }
             IpProtocols::Icmp => {
-                Some(IcmpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.dyn_clone())
+                Some(IcmpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.upcast())
             }
             IpProtocols::Igmp => {
                 None
             }
             IpProtocols::Tcp => {
-                Some(TcpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.dyn_clone())
+                Some(TcpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.upcast())
             }
             IpProtocols::Udp => {
-                Some(UdpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.dyn_clone())
+                Some(UdpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.upcast())
             }
             IpProtocols::Ipv6 => {
                 None
@@ -284,15 +284,15 @@ impl Layer for Ipv4Layer {
         self.total_length as usize
     }
 
+    fn dyn_clone(&self) -> Box<dyn Layer> {
+        Box::new(self.clone())
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
-    }
-
-    fn dyn_clone(&self) -> Box<dyn Layer> {
-        Box::new(self.clone())
     }
 }

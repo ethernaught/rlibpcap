@@ -54,10 +54,10 @@ impl Layer for RawFrame {
 
         let data = match version {
             IpVersions::Ipv4 => {
-                Some(Ipv4Layer::from_bytes(buf).unwrap().dyn_clone())
+                Some(Ipv4Layer::from_bytes(buf).unwrap().upcast())
             }
             IpVersions::Ipv6 => {
-                Some(Ipv6Layer::from_bytes(buf).unwrap().dyn_clone())
+                Some(Ipv6Layer::from_bytes(buf).unwrap().upcast())
             }
         };
 
@@ -96,15 +96,15 @@ impl Layer for RawFrame {
         self.length
     }
 
+    fn dyn_clone(&self) -> Box<dyn Layer> {
+        Box::new(self.clone())
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
-    }
-
-    fn dyn_clone(&self) -> Box<dyn Layer> {
-        Box::new(self.clone())
     }
 }
