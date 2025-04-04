@@ -1,8 +1,6 @@
 use std::any::Any;
 use crate::utils::data_link_types::DataLinkTypes;
-use crate::packet::layers::ethernet_frame::arp::arp_extension::ArpExtension;
 use crate::packet::layers::ethernet_frame::inter::ethernet_types::EthernetTypes;
-use crate::packet::layers::ethernet_frame::llc::llc_extension::LlcExtension;
 use crate::packet::layers::ip::ipv4_layer::Ipv4Layer;
 use crate::packet::layers::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
@@ -114,17 +112,11 @@ impl Layer for Sll2Frame {
             EthernetTypes::Ipv4 => {
                 Some(Ipv4Layer::from_bytes(&buf[SLL2_FRAME_LEN..])?.upcast())
             }
-            EthernetTypes::Arp => {
-                Some(ArpExtension::from_bytes(&buf[SLL2_FRAME_LEN..])?.upcast())
-            }
             EthernetTypes::Ipv6 => {
                 Some(Ipv6Layer::from_bytes(&buf[SLL2_FRAME_LEN..])?.upcast())
             }
-            EthernetTypes::Broadcast => {
+            _ => {
                 None
-            }
-            EthernetTypes::Length(_) => {
-                Some(LlcExtension::from_bytes(&buf[SLL2_FRAME_LEN..])?.upcast())
             }
         };
 

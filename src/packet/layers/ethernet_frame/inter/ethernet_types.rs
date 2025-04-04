@@ -33,7 +33,7 @@ impl EthernetTypes {
             Self::Arp => 2054,
             Self::Ipv6 => 34525,
             Self::Broadcast => 34969,
-            Self::Length(n) => *n
+            Length(n) => *n
         }
     }
 
@@ -43,7 +43,7 @@ impl EthernetTypes {
             Self::Arp => "ARP",
             Self::Ipv6 => "IPv6",
             Self::Broadcast => "Broadcast",
-            _ => ""
+            Length(_) => "Length"
         }.to_string()
     }
 }

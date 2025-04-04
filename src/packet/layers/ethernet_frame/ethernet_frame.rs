@@ -6,7 +6,6 @@ use crate::packet::layers::ethernet_frame::llc::llc_extension::LlcExtension;
 use crate::packet::layers::ip::ipv4_layer::Ipv4Layer;
 use crate::packet::layers::ip::ipv6_layer::Ipv6Layer;
 use crate::packet::layers::inter::layer::Layer;
-use crate::packet::layers::sll2_frame::sll2_frame::SLL2_FRAME_LEN;
 
 pub const ETHERNET_FRAME_LEN: usize = 14;
 
@@ -91,7 +90,7 @@ impl Layer for EthernetFrame {
                 None
             }
             EthernetTypes::Length(_) => {
-                Some(LlcExtension::from_bytes(&buf[SLL2_FRAME_LEN..])?.upcast())
+                Some(LlcExtension::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
             }
         };
 

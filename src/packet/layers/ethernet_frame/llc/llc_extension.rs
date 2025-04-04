@@ -1,5 +1,6 @@
 use std::any::Any;
 use std::fmt::Debug;
+use crate::packet::layers::ethernet_frame::llc::inter::llc_types::LlcTypes;
 use crate::packet::layers::inter::layer::Layer;
 
 pub const LLC_EXTENSION_LEN: usize = 3;
@@ -8,13 +9,13 @@ pub const LLC_EXTENSION_LEN: usize = 3;
 pub struct LlcExtension {
     dsap: u8,
     ssap: u8,
-    control: u8, //CHANGE TO ENUM TYPE LATER...
+    control: LlcTypes, //CHANGE TO ENUM TYPE LATER...
     //snap: Option<>
 }
 
 impl LlcExtension {
 
-    pub fn new(dsap: u8, ssap: u8, control: u8) -> Self {
+    pub fn new(dsap: u8, ssap: u8, control: LlcTypes) -> Self {
         Self {
             dsap,
             ssap,
@@ -38,11 +39,11 @@ impl LlcExtension {
         self.ssap
     }
 
-    pub fn set_control(&mut self, control: u8) {
+    pub fn set_control(&mut self, control: LlcTypes) {
         self.control = control;
     }
 
-    pub fn get_control(&self) -> u8 {
+    pub fn get_control(&self) -> LlcTypes {
         self.control
     }
 }
@@ -54,10 +55,12 @@ impl Layer for LlcExtension {
             return None;
         }
 
+        println!("{:?}", buf);
+
         Some(Self {
             dsap: buf[0],
             ssap: buf[1],
-            control: buf[2]
+            control: LlcTypes::from_code(buf[2]).unwrap()
         })
     }
 
@@ -66,7 +69,7 @@ impl Layer for LlcExtension {
 
         buf[0] = self.dsap;
         buf[1] = self.ssap;
-        buf[2] = self.control;
+        buf[2] = self.control.get_code();
 
         buf
     }
