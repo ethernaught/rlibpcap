@@ -74,8 +74,7 @@ impl Layer for EthernetFrame {
             return None;
         }
 
-        let _type = EthernetTypes::from_code(u16::from_be_bytes([buf[12], buf[13]])).unwrap();
-
+        let _type = EthernetTypes::from_code(u16::from_be_bytes([buf[12], buf[13]])).expect("Unsupported Ethernet Type");
         let data = match _type {
             EthernetTypes::Ipv4 => {
                 Some(Ipv4Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
@@ -87,6 +86,9 @@ impl Layer for EthernetFrame {
                 Some(Ipv6Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
             }
             EthernetTypes::Broadcast => {
+                None
+            }
+            EthernetTypes::Length(len) => {
                 None
             }
         };
