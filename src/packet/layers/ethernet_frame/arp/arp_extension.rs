@@ -6,7 +6,7 @@ use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddr
 use crate::packet::layers::ethernet_frame::inter::ethernet_types::EthernetTypes;
 use crate::packet::layers::inter::layer::Layer;
 
-pub const ARP_HEADER_LEN: usize = 28;
+pub const ARP_EXTENSION_LEN: usize = 28;
 
 #[derive(Clone, Debug)]
 pub struct ArpExtension {
@@ -113,7 +113,7 @@ impl ArpExtension {
 impl Layer for ArpExtension {
 
     fn from_bytes(buf: &[u8]) -> Option<Self> {
-        if buf.len() < ARP_HEADER_LEN {
+        if buf.len() < ARP_EXTENSION_LEN {
             return None;
         }
 
@@ -131,7 +131,7 @@ impl Layer for ArpExtension {
     }
 
     fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = vec![0; ARP_HEADER_LEN];
+        let mut buf = vec![0; ARP_EXTENSION_LEN];
 
         buf.splice(0..2, self.hardware_type.to_be_bytes());
         buf.splice(2..4, self.protocol_type.get_code().to_be_bytes());
@@ -147,11 +147,11 @@ impl Layer for ArpExtension {
     }
 
     fn len(&self) -> usize {
-        ARP_HEADER_LEN
+        ARP_EXTENSION_LEN
     }
 
     fn compute_length(&mut self) -> usize {
-        ARP_HEADER_LEN
+        ARP_EXTENSION_LEN
     }
 
     fn dyn_clone(&self) -> Box<dyn Layer> {
