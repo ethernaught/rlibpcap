@@ -1,8 +1,5 @@
-use std::ffi::{CStr};
-use std::os::raw::{c_char, c_ulong};
 use std::ptr::{null_mut};
 use std::{io, slice};
-use std::mem::{size_of, zeroed};
 use std::os::windows::ffi::OsStringExt;
 use std::ffi::OsString;
 use std::net::IpAddr;
@@ -53,8 +50,10 @@ impl Device {
 
             let mut adapter = buffer.as_mut_ptr() as PIP_ADAPTER_ADDRESSES_LH;
 
+            let mut devices = Vec::new();
+
             while !adapter.is_null() {
-                let uuid = CStr::from_ptr((*adapter).AdapterName).to_string_lossy();
+                //let uuid = CStr::from_ptr((*adapter).AdapterName).to_string_lossy();
 
                 let fname_ptr = (*adapter).FriendlyName;
                 let mut len = 0;
@@ -62,14 +61,20 @@ impl Device {
                     len += 1;
                 }
                 let fname_slice = slice::from_raw_parts(fname_ptr, len);
-                //let friendly_name = OsString::from_wide(fname_slice).to_string_lossy();
 
-                println!("{} → {}   {:?}", uuid, OsString::from_wide(fname_slice).to_string_lossy(), (*adapter));
+                devices.push(Self {
+                    name: OsString::from_wide(fname_slice).to_string_lossy().to_string(),
+                    address: None,
+                    index: (*adapter).IfIndex as i32,
+                    data_link_type: DataLinkTypes::Null,
+                    mac: EthernetAddress::new(0, 0, 0, 0, 0, 0),
+                    flags: InterfaceFlags::from_code((*adapter).Flags)
+                });
 
                 adapter = (*adapter).Next;
             }
 
-            todo!()
+            Ok(devices)
         }
     }
 
