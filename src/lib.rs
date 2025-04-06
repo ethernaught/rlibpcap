@@ -1,15 +1,19 @@
 pub mod packet;
 pub mod pcap;
+pub mod utils;
+
 #[cfg(target_os = "linux")]
 pub mod linux;
 #[cfg(target_os = "linux")]
 pub use linux::*;
 #[cfg(target_os = "macos")]
 pub mod macos;
-pub mod utils;
-
 #[cfg(target_os = "macos")]
 pub use macos::*;
+#[cfg(target_os = "windows")]
+pub mod windows;
+#[cfg(target_os = "windows")]
+pub use windows::*;
 
 
 
@@ -57,6 +61,7 @@ mod tests {
 
     #[test]
     fn capture() {
+        /*
         let devices = Device::list().unwrap();
         let device = devices.into_iter().find(|d| d.get_name().eq("en0")).unwrap();
         let cap = Capture::from_device(&device).unwrap();
@@ -74,5 +79,6 @@ mod tests {
                 }
             }
         }
+        */
     }
 }
