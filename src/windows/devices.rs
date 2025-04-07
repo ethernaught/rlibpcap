@@ -64,7 +64,7 @@ impl Device {
 
                 devices.push(Self {
                     name: OsString::from_wide(fname_slice).to_string_lossy().to_string(),
-                    address: None,
+                    address: None, //UNICAST ADDRESS...
                     index: (*adapter).IfIndex as i32,
                     data_link_type: DataLinkTypes::Null,
                     mac: EthernetAddress::new(0, 0, 0, 0, 0, 0),
