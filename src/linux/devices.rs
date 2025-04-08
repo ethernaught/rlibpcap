@@ -1,8 +1,8 @@
 use std::{io, mem};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use crate::utils::interface_flags::InterfaceFlags;
-use crate::linux::sys::{IfreqAddr, IfreqHwAddr, IfreqIndex, SockAddr, AF_INET, AF_INET6, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_DGRAM};
-use crate::linux::sys::{close, ioctl, parse_ip, socket, IfConf, IfreqFlags, SIOCGIFCONF, SIOCGIFFLAGS};
+use crate::linux::sys::{parse_ip, IfreqAddr, IfreqHwAddr, IfreqIndex, SockAddr, AF_INET, AF_INET6, IFNAMSIZ, SIOCGIFHWADDR, SIOCGIFINDEX, SOCK_DGRAM};
+use crate::linux::sys::{close, ioctl, socket, IfConf, IfreqFlags, SIOCGIFCONF, SIOCGIFFLAGS};
 use crate::utils::data_link_types::DataLinkTypes;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 
@@ -59,28 +59,7 @@ impl Device {
                 .trim_end_matches('\0')
                 .to_string();
 
-            if ifr.ifr_addr.len() < 5 {
-                return None;
-            }
-
-            let address = match ifr.ifr_addr[0] as i64 {
-                AF_INET => {
-                    if ifr.ifr_addr.len() < 8 {
-                        return None;
-                    }
-                    Some(IpAddr::V4(Ipv4Addr::new(ifr.ifr_addr[4], ifr.ifr_addr[5], ifr.ifr_addr[6], ifr.ifr_addr[7])))
-                }
-                AF_INET6 => {
-                    if ifr.ifr_addr.len() < 20 {
-                        return None;
-                    }
-                    Some(IpAddr::V6(Ipv6Addr::from([
-                        ifr.ifr_addr[4], ifr.ifr_addr[5], ifr.ifr_addr[6], ifr.ifr_addr[7], ifr.ifr_addr[8], ifr.ifr_addr[9], ifr.ifr_addr[10], ifr.ifr_addr[11],
-                        ifr.ifr_addr[12], ifr.ifr_addr[13], ifr.ifr_addr[14], ifr.ifr_addr[15], ifr.ifr_addr[16], ifr.ifr_addr[17], ifr.ifr_addr[18], ifr.ifr_addr[19]
-                    ])))
-                }
-                _ => None
-            };
+            let address = parse_ip(&ifr.ifr_addr);
 
             let mut ifr_index = IfreqIndex {
                 ifr_name: ifr.ifr_name,

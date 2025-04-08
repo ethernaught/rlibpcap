@@ -144,7 +144,6 @@ pub unsafe fn syscall(number: i64, a1: i64, a2: i64, a3: i64, a4: i64, a5: i64) 
     ret
 }
 
-/*
 pub fn parse_ip(buf: &[u8]) -> Option<IpAddr> {
     if buf.len() < 5 {
         return None;
@@ -169,4 +168,3 @@ pub fn parse_ip(buf: &[u8]) -> Option<IpAddr> {
         _ => None
     }
 }
-*/
