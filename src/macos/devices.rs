@@ -123,7 +123,7 @@ impl Device {
                             address: None,
                             index: hdr.ifm_index as i32,
                             data_link_type,
-                            mac: Some(EthernetAddress::new(0, 0, 0, 0, 0, 0)),
+                            mac: None,
                             flags: InterfaceFlags::from_code(hdr.ifm_flags)
                         });
                     }
