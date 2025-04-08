@@ -1,3 +1,5 @@
+use std::net::{Ipv4Addr, Ipv6Addr};
+
 pub const AF_UNSPEC: u32 = 0;
 pub const GAA_FLAG_SKIP_ANYCAST: u32 = 0x2;
 pub const GAA_FLAG_SKIP_MULTICAST: u32 = 0x4;
@@ -10,6 +12,32 @@ pub const SIO_RCVALL: u32 = 0x98000001;
 pub const RCVALL_ON: u32 = 1;
 
 
+
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct IpAdapterUnicastAddress {
+    pub length: u32, // Length of the structure
+    pub next: *mut IpAdapterUnicastAddress,
+    buf: [u8; 56]
+    //pub flags: u32,
+    //pub address: SockAddrIn,                         // The address (IPv4 or IPv6)
+    //pub prefix_length: u32,
+    //pub ipv4_address: Ipv4Addr,
+    //pub ipv6_address: Ipv6Addr,
+    //pub prefix_length: u32
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct SockAddrIn {
+    pub sin_family: u16,                           // Address family (AF_INET)
+    pub sin_port: u16,                             // Port number
+    pub sin_addr: u32,                             // IPv4 address in u32 form
+    pub sin_zero: [u8; 8],                         // Padding
+}
+
+
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct IpAdapterAddressedLh {
@@ -17,9 +45,9 @@ pub struct IpAdapterAddressedLh {
     pub if_index: u32,
     pub next: *mut Self,
     pub adapter_name: *mut u8,
-    pub first_unicast_address: *mut u32,
+    pub first_unicast_address: *mut IpAdapterUnicastAddress,
     pub first_anycast_address: *mut u32,
-    pub first_multicast_address: *mut u32,
+    pub first_multicast_address: *mut IpAdapterUnicastAddress,
     pub first_dns_server_address: *mut u32,
     pub dns_suffix: *mut u16,
     pub description: *mut u16,

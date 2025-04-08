@@ -1,10 +1,10 @@
 use std::ptr::{null_mut};
-use std::{io, slice};
-use std::net::IpAddr;
+use std::{io, mem, slice};
+use std::net::{IpAddr, Ipv4Addr};
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 use crate::utils::data_link_types::DataLinkTypes;
 use crate::utils::interface_flags::InterfaceFlags;
-use crate::windows::sys::{GetAdaptersAddresses, IpAdapterAddressedLh, AF_UNSPEC, GAA_FLAG_SKIP_ANYCAST, GAA_FLAG_SKIP_DNS_SERVER, GAA_FLAG_SKIP_MULTICAST};
+use crate::windows::sys::{GetAdaptersAddresses, IpAdapterAddressedLh, AF_INET, AF_UNSPEC, GAA_FLAG_SKIP_ANYCAST, GAA_FLAG_SKIP_DNS_SERVER, GAA_FLAG_SKIP_MULTICAST};
 
 #[derive(Clone, Debug)]
 pub struct Device {
@@ -45,6 +45,41 @@ impl Device {
 
         while !adapter.is_null() {
             let mut ar = unsafe { &mut *adapter };
+
+            /*
+            let offset = ar.length;
+            let address = SockAddrIn {
+                sin_family: u16::from_be_bytes([buffer[offset], buffer[offset + 1]]),
+                sin_port: u16::from_be_bytes([buffer[offset + 2], buffer[offset + 3]]),
+                sin_addr: u32::from_be_bytes([buffer[offset + 4], buffer[offset + 5], buffer[offset + 6], buffer[offset + 7]])
+            };
+
+            println!("{:?}", Ipv4Addr::from(address.sin_addr));*/
+
+
+
+
+            let mut unicast_address = ar.first_unicast_address;
+
+            while !unicast_address.is_null() {
+                let unicast = unsafe { &mut *unicast_address };
+
+                unsafe {
+                    println!("{:?}", unicast);
+                    //println!("{:?}", Ipv4Addr::from(unicast.address.ipv4.sin_addr));
+                }
+
+                // Move to the next address in the list
+                unicast_address = unicast.next;
+            }
+
+            println!("{:?}", ar);
+
+
+
+
+
+
 
             let fname_ptr = ar.friendly_name;
 
