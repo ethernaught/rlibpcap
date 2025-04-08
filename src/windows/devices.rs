@@ -1,12 +1,10 @@
 use std::ptr::{null_mut};
 use std::{io, slice};
-use std::os::windows::ffi::OsStringExt;
-use std::ffi::OsString;
 use std::net::IpAddr;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 use crate::utils::data_link_types::DataLinkTypes;
 use crate::utils::interface_flags::InterfaceFlags;
-use crate::windows::sys::{GetAdaptersAddresses, AF_UNSPEC, GAA_FLAG_SKIP_ANYCAST, GAA_FLAG_SKIP_DNS_SERVER, GAA_FLAG_SKIP_MULTICAST, PIP_ADAPTER_ADDRESSES_LH, ULONG};
+use crate::windows::sys::{GetAdaptersAddresses, IpAdapterAddressedLh, AF_UNSPEC, GAA_FLAG_SKIP_ANYCAST, GAA_FLAG_SKIP_DNS_SERVER, GAA_FLAG_SKIP_MULTICAST};
 
 #[derive(Clone, Debug)]
 pub struct Device {
@@ -32,22 +30,16 @@ impl Device {
     }
 
     pub fn list() -> io::Result<Vec<Self>> {
-        let mut buffer_len: ULONG = 15000;
+        let mut buffer_len: u32 = 15000;
         let mut buffer: Vec<u8> = vec![0u8; buffer_len as usize];
 
-        let result = unsafe { GetAdaptersAddresses(
-            AF_UNSPEC,
-            GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER,
-            null_mut(),
-            buffer.as_mut_ptr() as PIP_ADAPTER_ADDRESSES_LH,
-            &mut buffer_len,
-        ) };
+        let result = unsafe { GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER, null_mut(), buffer.as_mut_ptr() as *mut IpAdapterAddressedLh, &mut buffer_len) };
 
         if result != 0 {
             return Err(io::Error::last_os_error());
         }
 
-        let mut adapter = unsafe { buffer.as_mut_ptr() as PIP_ADAPTER_ADDRESSES_LH };
+        let mut adapter = unsafe { buffer.as_mut_ptr() as *mut IpAdapterAddressedLh };
 
         let mut devices = Vec::new();
 
@@ -55,17 +47,19 @@ impl Device {
             let mut ar = unsafe { &mut *adapter };
 
             let fname = unsafe {
-                let fname_ptr = (*adapter).FriendlyName;
+                let fname_ptr = (*adapter).friendly_name;
 
                 let mut len = 0;
                 while *fname_ptr.add(len) != 0 {
                     len += 1;
                 }
 
-                OsString::from_wide(slice::from_raw_parts(fname_ptr, len)).to_string_lossy().to_string()
+                String::from_utf16_lossy(slice::from_raw_parts(fname_ptr, len))
             };
 
-            let mac = match EthernetAddress::try_from(&ar.PhysicalAddress[..ar.PhysicalAddressLength as usize]) {
+
+
+            let mac = match EthernetAddress::try_from(&ar.physical_address[..ar.physical_address_length as usize]) {
                 Ok(mac) => Some(mac),
                 Err(_) => None
             };
@@ -73,13 +67,13 @@ impl Device {
             devices.push(Self {
                 name: fname,
                 address: None, //UNICAST ADDRESS...
-                index: ar.IfIndex as i32,
+                index: ar.if_index as i32,
                 data_link_type: DataLinkTypes::Null,
                 mac,
-                flags: InterfaceFlags::from_code(ar.Flags as u32)
+                flags: InterfaceFlags::from_code(ar.flags)
             });
 
-            adapter = unsafe { (*adapter).Next };
+            adapter = unsafe { (*adapter).next };
         }
 
         Ok(devices)
