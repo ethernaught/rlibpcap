@@ -79,7 +79,7 @@ pub struct SockAddr {
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct SockAddrLl {
+pub struct SockAddrIn {
     pub sll_family: u16,
     pub sll_protocol: u16,
     pub sll_ifindex: i32,
@@ -105,8 +105,8 @@ pub unsafe fn sendto(fd: RawFd, buffer: &mut [u8]) -> i64 {
     syscall(SYS_SENDTO, fd as i64, buffer.as_mut_ptr() as *mut _ as i64, buffer.len() as i64, 0, 0)
 }
 
-pub unsafe fn recvfrom(fd: RawFd, buffer: &mut [u8], flags: i64, sockaddr: &mut SockAddrLl) -> i64 {
-    let mut addr_len = mem::size_of::<SockAddrLl>() as u32;
+pub unsafe fn recvfrom(fd: RawFd, buffer: &mut [u8], flags: i64, sockaddr: &mut SockAddrIn) -> i64 {
+    let mut addr_len = mem::size_of::<SockAddrIn>() as u32;
     let ret: i64;
 
     asm!(

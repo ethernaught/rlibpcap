@@ -4,7 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::devices::Device;
 use crate::linux::sys::{bind, close, recvfrom, sendto, setsockopt, socket, syscall, IfreqName, MSG_DONTWAIT};
 use crate::packet::packet::Packet;
-use crate::linux::sys::{SockAddrLl, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
+use crate::linux::sys::{SockAddrIn, AF_PACKET, ETH_P_ALL, IFNAMSIZ, SOCK_RAW, SOL_SOCKET, SO_BINDTODEVICE, SYS_BIND, SYS_RECV_FROM, SYS_SENDTO, SYS_SET_SOCK_OPT, SYS_SOCKET};
 use crate::utils::data_link_types::DataLinkTypes;
 
 #[derive(Debug, Clone)]
@@ -60,7 +60,7 @@ impl Capture {
 
                 ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
 
-                let sockaddr = SockAddrLl {
+                let sockaddr = SockAddrIn {
                     sll_family: AF_PACKET as u16,
                     sll_protocol: ETH_P_ALL.to_be(),
                     sll_ifindex: device.get_index(),
@@ -70,7 +70,7 @@ impl Capture {
                     sll_addr: [0; 8]
                 };
 
-                if unsafe { bind(self.fd, &sockaddr as *const _ as i64, mem::size_of::<SockAddrLl>() as i64) } < 0 {
+                if unsafe { bind(self.fd, &sockaddr as *const _ as i64, mem::size_of::<SockAddrIn>() as i64) } < 0 {
                     unsafe { close(self.fd) };
                     return Err(io::Error::last_os_error());
                 }
@@ -108,17 +108,17 @@ impl Capture {
         }
     }
 
-    pub fn recv(&self) -> io::Result<(SockAddrLl, Packet)> {
+    pub fn recv(&self) -> io::Result<(SockAddrIn, Packet)> {
         self.recv_with_flags(0)
     }
 
-    pub fn try_recv(&self) -> io::Result<(SockAddrLl, Packet)> {
+    pub fn try_recv(&self) -> io::Result<(SockAddrIn, Packet)> {
         self.recv_with_flags(MSG_DONTWAIT)
     }
 
-    fn recv_with_flags(&self, flags: i64) -> io::Result<(SockAddrLl, Packet)> {
+    fn recv_with_flags(&self, flags: i64) -> io::Result<(SockAddrIn, Packet)> {
         let mut buffer = vec![0u8; 4096];
-        let mut sockaddr: SockAddrLl = SockAddrLl {
+        let mut sockaddr: SockAddrIn = SockAddrIn {
             sll_family: 0,
             sll_protocol: 0,
             sll_ifindex: 0,

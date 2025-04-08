@@ -13,36 +13,12 @@ pub const RCVALL_ON: u32 = 1;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct SockAddrLh {
-    pub length: u32,
-    pub next: *mut SockAddrLh,
-    pub unsure: [u8; 52],
-    pub address: Ipv4Addr
-}
-
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub struct SockAddrIn {
-    pub sa_family: u32,
-    pub sin_addr: [u8; 4],
-    pub sin_zero: [u8; 8]
-}
-
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub struct SockAddr {
-    pub sa_family: u16,
-    pub sa_data: [u8; 14]
-}
-
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
 pub struct IpAdapterAddressedLh {
     pub length: u32,
     pub if_index: u32,
     pub next: *mut Self,
     pub adapter_name: *mut u8,
-    pub first_unicast_address: *mut SockAddrLh,
+    pub first_unicast_address: *mut IpAdapterAddressLh,
     pub first_anycast_address: *mut u32,
     pub first_multicast_address: *mut u32,
     pub first_dns_server_address: *mut u32,
@@ -62,6 +38,15 @@ pub struct IpAdapterAddressedLh {
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
+pub struct IpAdapterAddressLh {
+    pub length: u32,
+    pub next: *mut IpAdapterAddressLh,
+    pub unsure: [u8; 52],
+    pub address: Ipv4Addr
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
 pub struct WsaData {
     pub w_version: u16,
     pub w_high_version: u16,
@@ -72,6 +57,21 @@ pub struct WsaData {
     pub lp_vendor_info: *mut i8
 }
 
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct SockAddr {
+    pub sa_family: u16,
+    pub sa_data: [u8; 14]
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct SockAddrIn {
+    pub sa_family: u32,
+    pub sin_addr: [u8; 4],
+    pub sin_zero: [u8; 8]
+}
+
 #[link(name = "iphlpapi")]
 extern "system" {
     pub fn GetAdaptersAddresses(family: u32, flags: u32, reserved: *mut u32, adapter_addresses: *mut IpAdapterAddressedLh, size_pointer: *mut u32) -> u32;
@@ -79,5 +79,5 @@ extern "system" {
     pub fn socket(af: i32, kind: i32, protocol: i32) -> usize;
     pub fn bind(s: usize, name: *const SockAddr, namelen: i32) -> i32;
     pub fn WSAIoctl(fd: usize, dw_io_control_code: u32, lpv_in_buffer: *mut u16, cb_in_buffer: u32, lpv_out_buffer: *mut u16, cb_out_buffer: u32, lpcb_bytes_returned: *mut u32, lp_overlapped: *mut u16, lp_completion_routine: Option<extern "system" fn()>) -> i32;
-    pub fn recvfrom(s: usize, buf: *mut i8, len: i32, flags: i32, from: *mut SockAddrLl, fromlen: *mut i32) -> i32;
+    pub fn recvfrom(s: usize, buf: *mut i8, len: i32, flags: i32, from: *mut SockAddrIn, fromlen: *mut i32) -> i32;
 }
