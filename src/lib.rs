@@ -25,7 +25,7 @@ pub use windows::*;
 //check parse_ip is even required....
 
 //GET MAC ADDRESS & IP ADDRESS - FOR LINUX AND MAC - PER DEVICE
-
+//ANY FOR MAC
 
 
 //cat /sys/class/net/wlp7s0/type
@@ -62,9 +62,8 @@ mod tests {
 
     #[test]
     fn capture() {
-        /*
         let devices = Device::list().unwrap();
-        let device = devices.into_iter().find(|d| d.get_name().eq("en0")).unwrap();
+        let device = devices.into_iter().find(|d| d.get_name().eq("Ethernet")).unwrap();
         let cap = Capture::from_device(&device).unwrap();
         cap.set_immediate_mode(true);
         cap.open().unwrap();
@@ -80,6 +79,5 @@ mod tests {
                 }
             }
         }
-        */
     }
 }

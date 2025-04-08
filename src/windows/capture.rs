@@ -1,6 +1,10 @@
-use std::{io, mem};
+use std::{io, mem, ptr};
+use std::ffi::{c_char, c_void};
+use std::io::Error;
+use std::net::Ipv4Addr;
 use crate::packet::packet::Packet;
 use crate::windows::devices::Device;
+use crate::windows::sys::{bind, recvfrom, SockAddr, socket, WsaData, WSAIoctl, WSAStartup, AF_INET, IPPROTO_IP, RCVALL_ON, SIO_RCVALL, SOCK_RAW};
 
 #[derive(Debug, Clone)]
 pub struct Capture {
@@ -10,23 +14,71 @@ pub struct Capture {
 
 impl Capture {
 
-
-    pub fn any() -> io::Result<Self> {
-
-        Ok(Self {
-            device: None
-        })
-    }
-
     pub fn from_device(device: &Device) -> io::Result<Self> {
-
         Ok(Self {
             device: Some(device.clone())
         })
     }
 
     pub fn open(&self) -> io::Result<()> {
+        unsafe {
+            let mut wsa_data: WsaData = unsafe { mem::zeroed() };
+            if unsafe { WSAStartup(0x202, &mut wsa_data) } != 0 {
+                panic!("WSAStartup failed");
+            }
 
+            let sock = socket(AF_INET, SOCK_RAW, IPPROTO_IP);
+            if sock == usize::MAX {
+                let err = Error::last_os_error();
+                panic!("Failed to create raw socket: {}", err);
+            }
+
+
+            // Replace with your local IP address
+            let local_ip = Ipv4Addr::new(192, 168, 0, 51);
+            let mut addr = SockAddr {
+                sa_family: AF_INET as u16,
+                sa_data: [0; 14],
+            };
+
+            // Fill sa_data with IP address bytes in the right offset
+            addr.sa_data[2..6].copy_from_slice(&local_ip.octets());
+
+            if bind(sock, &addr, mem::size_of::<SockAddr>() as i32) != 0 {
+                panic!("Failed to bind raw socket: {}", Error::last_os_error());
+            }
+
+
+
+
+            let mut bytes_returned: u32 = 0;
+            let mut enable: u32 = RCVALL_ON;
+
+            let result = WSAIoctl(sock, SIO_RCVALL, &mut enable as *mut _ as *mut c_void, mem::size_of::<u32>() as u32, ptr::null_mut(), 0, &mut bytes_returned, ptr::null_mut(), None);
+
+
+
+            if result != 0 {
+                panic!("WSAIoctl SIO_RCVALL failed: {}", Error::last_os_error());
+            }
+
+            println!("Listening for incoming IP packets...");
+
+            let mut buf = [0u8; 65535];
+            loop {
+                let mut from = SockAddr { sa_family: 0, sa_data: [0; 14] };
+                let mut fromlen = mem::size_of::<SockAddr>() as i32;
+
+                let len = recvfrom(sock, buf.as_mut_ptr() as *mut c_char, buf.len() as i32, 0, &mut from, &mut fromlen);
+
+                println!("{}", len);
+
+                if len > 0 {
+                    println!("Received {} bytes", len);
+                    println!("First 16 bytes: {:?}", &buf[..len as usize]);
+                }
+            }
+        }
         Ok(())
     }
 

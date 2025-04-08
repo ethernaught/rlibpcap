@@ -33,16 +33,13 @@ impl Device {
         let mib: [c_int; 6] = [CTL_NET, AF_ROUTE, 0, 0, NET_RT_IFLIST2, 0];
         let mut size: usize = 0;
 
-        let res = unsafe { sysctl(&mib, ptr::null_mut(), &mut size, ptr::null_mut(), 0) };
-
-        if res != 0 {
+        if unsafe { sysctl(&mib, ptr::null_mut(), &mut size, ptr::null_mut(), 0) } != 0 {
             return Err(io::Error::last_os_error());
         }
 
         let mut buf: Vec<u8> = vec![0u8; size];
 
-        let res = unsafe { sysctl(&mib, buf.as_mut_ptr(), &mut size, ptr::null_mut(), 0) };
-        if res != 0 {
+        if unsafe { sysctl(&mib, buf.as_mut_ptr(), &mut size, ptr::null_mut(), 0) } != 0 {
             return Err(io::Error::last_os_error());
         }
 

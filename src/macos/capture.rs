@@ -38,8 +38,7 @@ impl Capture {
         let fd = file.unwrap().into_raw_fd();
 
         let mut buf_len = 0;
-        let res = unsafe { ioctl(fd, BIOCGBLEN, &mut buf_len as *mut _ as i64) };
-        if res < 0 {
+        if unsafe { ioctl(fd, BIOCGBLEN, &mut buf_len as *mut _ as i64) } < 0 {
             return Err(io::Error::last_os_error());
         }
 
@@ -67,8 +66,7 @@ impl Capture {
 
                 ifreq.ifr_name[..if_name_bytes.len()].copy_from_slice(&if_name_bytes);
 
-                let res = unsafe { ioctl(self.fd, BIOCSETIF, &ifreq as *const _ as i64) };
-                if res < 0 {
+                if unsafe { ioctl(self.fd, BIOCSETIF, &ifreq as *const _ as i64) } < 0 {
                     return Err(io::Error::last_os_error());
                 }
 
