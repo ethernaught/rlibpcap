@@ -4,7 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::packet::packet::Packet;
 use crate::utils::data_link_types::DataLinkTypes;
 use crate::windows::devices::Device;
-use crate::windows::sys::{bind, recvfrom, SockAddr, socket, WsaData, wsaIoctl, wsaStartup, AF_INET, IPPROTO_IP, RCVALL_ON, SIO_RCVALL, SOCK_RAW};
+use crate::windows::sys::{bind, recvfrom, SockAddr, socket, WsaData, WSAIoctl, WSAStartup, AF_INET, IPPROTO_IP, RCVALL_ON, SIO_RCVALL, SOCK_RAW};
 
 #[derive(Debug, Clone)]
 pub struct Capture {
@@ -16,7 +16,7 @@ impl Capture {
 
     pub fn from_device(device: &Device) -> io::Result<Self> {
         let mut wsa_data: WsaData = unsafe { mem::zeroed() };
-        if unsafe { wsaStartup(0x202, &mut wsa_data) } != 0 {
+        if unsafe { WSAStartup(0x202, &mut wsa_data) } != 0 {
             return Err(io::Error::last_os_error());
         }
 
@@ -47,7 +47,7 @@ impl Capture {
         let mut bytes_returned: u32 = 0;
         let mut enable: u32 = RCVALL_ON;
 
-        let res = unsafe { wsaIoctl(self.fd, SIO_RCVALL, &mut enable as *mut _ as *mut u16, mem::size_of::<u32>() as u32, ptr::null_mut(), 0, &mut bytes_returned, ptr::null_mut(), None) };
+        let res = unsafe { WSAIoctl(self.fd, SIO_RCVALL, &mut enable as *mut _ as *mut u16, mem::size_of::<u32>() as u32, ptr::null_mut(), 0, &mut bytes_returned, ptr::null_mut(), None) };
 
         if res != 0 {
             return Err(io::Error::last_os_error());

@@ -56,10 +56,10 @@ pub struct SockAddr {
 
 #[link(name = "iphlpapi")]
 extern "system" {
-    pub fn getAdaptersAddresses(family: u32, flags: u32, reserved: *mut u32, adapter_addresses: *mut IpAdapterAddressedLh, size_pointer: *mut u32) -> u32;
-    pub fn wsaStartup(wVersionRequested: u16, lpWSAData: *mut WsaData) -> i32;
+    pub fn GetAdaptersAddresses(family: u32, flags: u32, reserved: *mut u32, adapter_addresses: *mut IpAdapterAddressedLh, size_pointer: *mut u32) -> u32;
+    pub fn WSAStartup(wVersionRequested: u16, lpWSAData: *mut WsaData) -> i32;
     pub fn socket(af: i32, kind: i32, protocol: i32) -> usize;
     pub fn bind(s: usize, name: *const SockAddr, namelen: i32) -> i32;
-    pub fn wsaIoctl(fd: usize, dw_io_control_code: u32, lpv_in_buffer: *mut u16, cb_in_buffer: u32, lpv_out_buffer: *mut u16, cb_out_buffer: u32, lpcb_bytes_returned: *mut u32, lp_overlapped: *mut u16, lp_completion_routine: Option<extern "system" fn()>) -> i32;
+    pub fn WSAIoctl(fd: usize, dw_io_control_code: u32, lpv_in_buffer: *mut u16, cb_in_buffer: u32, lpv_out_buffer: *mut u16, cb_out_buffer: u32, lpcb_bytes_returned: *mut u32, lp_overlapped: *mut u16, lp_completion_routine: Option<extern "system" fn()>) -> i32;
     pub fn recvfrom(s: usize, buf: *mut i8, len: i32, flags: i32, from: *mut SockAddr, fromlen: *mut i32) -> i32;
 }
