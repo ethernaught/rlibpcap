@@ -55,7 +55,7 @@ impl fmt::Debug for EthernetAddress {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "EthernetAddress {{ address: {:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X} }}",
+            "{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
             self.address[0],
             self.address[1],
             self.address[2],
