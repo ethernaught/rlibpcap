@@ -14,10 +14,25 @@ pub const RCVALL_ON: u32 = 1;
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct SockAddrLh {
-    pub length: u32, // Length of the structure
-    pub next: *mut SockAddrIn,
+    pub length: u32,
+    pub next: *mut SockAddrLh,
     pub unsure: [u8; 52],
     pub address: Ipv4Addr
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct SockAddrIn {
+    pub sa_family: u32,
+    pub sin_addr: [u8; 4],
+    pub sin_zero: [u8; 8]
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct SockAddr {
+    pub sa_family: u16,
+    pub sa_data: [u8; 14]
 }
 
 #[repr(C)]
@@ -54,14 +69,7 @@ pub struct WsaData {
     pub sz_system_status: [i8; 129],
     pub i_max_sockets: u16,
     pub i_max_udp_dg: u16,
-    pub lp_vendor_info: *mut i8,
-}
-
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub struct SockAddr {
-    pub sa_family: u16,
-    pub sa_data: [u8; 14],
+    pub lp_vendor_info: *mut i8
 }
 
 #[link(name = "iphlpapi")]
@@ -71,5 +79,5 @@ extern "system" {
     pub fn socket(af: i32, kind: i32, protocol: i32) -> usize;
     pub fn bind(s: usize, name: *const SockAddr, namelen: i32) -> i32;
     pub fn WSAIoctl(fd: usize, dw_io_control_code: u32, lpv_in_buffer: *mut u16, cb_in_buffer: u32, lpv_out_buffer: *mut u16, cb_out_buffer: u32, lpcb_bytes_returned: *mut u32, lp_overlapped: *mut u16, lp_completion_routine: Option<extern "system" fn()>) -> i32;
-    pub fn recvfrom(s: usize, buf: *mut i8, len: i32, flags: i32, from: *mut SockAddr, fromlen: *mut i32) -> i32;
+    pub fn recvfrom(s: usize, buf: *mut i8, len: i32, flags: i32, from: *mut SockAddrLl, fromlen: *mut i32) -> i32;
 }

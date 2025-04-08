@@ -63,7 +63,7 @@ impl Device {
 
             let mut ifr_index = IfreqIndex {
                 ifr_name: ifr.ifr_name,
-                ifr_ifindex: 0,
+                ifr_ifindex: 0
             };
 
             //CHECK INTERFACE INDEX
@@ -75,7 +75,10 @@ impl Device {
 
             let mut ifreq_hwaddr = IfreqHwAddr {
                 ifr_name: ifr.ifr_name,
-                ifr_hwaddr: SockAddr { sa_family: 0, sa_data: [0; 14] },
+                ifr_hwaddr: SockAddr {
+                    sa_family: 0,
+                    sa_data: [0; 14]
+                }
             };
 
             if unsafe { ioctl(fd, SIOCGIFHWADDR as i64, &mut ifreq_hwaddr as *mut _ as i64) } < 0 {
