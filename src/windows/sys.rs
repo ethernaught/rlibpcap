@@ -1,19 +1,11 @@
-
-use std::ptr;
-use std::mem;
-use std::net::Ipv4Addr;
-use std::ffi::c_void;
-use std::os::raw::{c_char, c_int};
-use std::io::Error;
-
 pub const AF_UNSPEC: u32 = 0;
 pub const GAA_FLAG_SKIP_ANYCAST: u32 = 0x2;
 pub const GAA_FLAG_SKIP_MULTICAST: u32 = 0x4;
 pub const GAA_FLAG_SKIP_DNS_SERVER: u32 = 0x8;
 pub const ERROR_BUFFER_OVERFLOW: u32 = 111;
-pub const AF_INET: c_int = 2;
-pub const SOCK_RAW: c_int = 3;
-pub const IPPROTO_IP: c_int = 0;
+pub const AF_INET: i32 = 2;
+pub const SOCK_RAW: i32 = 3;
+pub const IPPROTO_IP: i32 = 0;
 pub const SIO_RCVALL: u32 = 0x98000001;
 pub const RCVALL_ON: u32 = 1;
 
@@ -43,36 +35,16 @@ pub struct IpAdapterAddressedLh {
     pub first_prefix: *mut u32
 }
 
-#[link(name = "iphlpapi")]
-extern "system" {
-
-    pub fn GetAdaptersAddresses(family: u32, flags: u32, reserved: *mut u32, adapter_addresses: *mut IpAdapterAddressedLh, size_pointer: *mut u32) -> u32;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-pub type SOCKET = usize;
-pub type BYTE = u8;
-
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct WsaData {
-    pub wVersion: u16,
-    pub wHighVersion: u16,
-    pub szDescription: [c_char; 257],
-    pub szSystemStatus: [c_char; 129],
-    pub iMaxSockets: u16,
-    pub iMaxUdpDg: u16,
-    pub lpVendorInfo: *mut c_char,
+    pub w_version: u16,
+    pub w_high_version: u16,
+    pub sz_description: [i8; 257],
+    pub sz_system_status: [i8; 129],
+    pub i_max_sockets: u16,
+    pub i_max_udp_dg: u16,
+    pub lp_vendor_info: *mut i8,
 }
 
 #[repr(C)]
@@ -82,28 +54,12 @@ pub struct SockAddr {
     pub sa_data: [u8; 14],
 }
 
+#[link(name = "iphlpapi")]
 extern "system" {
-    pub fn WSAStartup(wVersionRequested: u16, lpWSAData: *mut WsaData) -> c_int;
-    pub fn socket(af: c_int, kind: c_int, protocol: c_int) -> SOCKET;
-    pub fn bind(s: SOCKET, name: *const SockAddr, namelen: c_int) -> c_int;
-    pub fn WSAIoctl(
-s: SOCKET,
-dwIoControlCode: u32,
-lpvInBuffer: *mut c_void,
-cbInBuffer: u32,
-lpvOutBuffer: *mut c_void,
-cbOutBuffer: u32,
-lpcbBytesReturned: *mut u32,
-lpOverlapped: *mut c_void,
-lpCompletionRoutine: Option<extern "system" fn()>
-    ) -> c_int;
-    pub fn recvfrom(s: SOCKET, buf: *mut c_char, len: c_int, flags: c_int, from: *mut SockAddr, fromlen: *mut c_int) -> c_int;
+    pub fn GetAdaptersAddresses(family: u32, flags: u32, reserved: *mut u32, adapter_addresses: *mut IpAdapterAddressedLh, size_pointer: *mut u32) -> u32;
+    pub fn WSAStartup(wVersionRequested: u16, lpWSAData: *mut WsaData) -> i32;
+    pub fn socket(af: i32, kind: i32, protocol: i32) -> usize;
+    pub fn bind(s: usize, name: *const SockAddr, namelen: i32) -> i32;
+    pub fn WSAIoctl(fd: usize, dw_io_control_code: u32, lpv_in_buffer: *mut u16, cb_in_buffer: u32, lpv_out_buffer: *mut u16, cb_out_buffer: u32, lpcb_bytes_returned: *mut u32, lp_overlapped: *mut u16, lp_completion_routine: Option<extern "system" fn()>) -> i32;
+    pub fn recvfrom(s: usize, buf: *mut i8, len: i32, flags: i32, from: *mut SockAddr, fromlen: *mut i32) -> i32;
 }
-
-
-
-
-
-
-
-

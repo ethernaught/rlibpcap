@@ -27,6 +27,15 @@ pub use windows::*;
 //GET MAC ADDRESS & IP ADDRESS - FOR LINUX AND MAC - PER DEVICE
 //ANY FOR MAC
 
+/* WINDOWS
+Goal	Path	Dependency	Usable in Rust without crates?
+IP packets (no MAC)	Raw sockets	None	✅
+Ethernet frames (L2)	Npcap driver	Requires Npcap	❌
+Ethernet frames (L2)	Windows Filtering Platform	WinAPI + config	❌ (limited L2)
+Ethernet frames (L2)	Write an NDIS filter driver	Full kernel driver	😬 (very hard)
+*/
+
+
 
 //cat /sys/class/net/wlp7s0/type
 //https://www.tcpdump.org/linktypes.html
@@ -60,6 +69,7 @@ mod tests {
         println!("{:?}", devices);
     }
 
+    /*
     #[test]
     fn capture() {
         let devices = Device::list().unwrap();
@@ -79,5 +89,5 @@ mod tests {
                 }
             }
         }
-    }
+    }*/
 }

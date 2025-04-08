@@ -1,5 +1,4 @@
 use std::{io, mem, ptr};
-use std::ffi::{c_char, c_void};
 use std::net::Ipv4Addr;
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::packet::packet::Packet;
@@ -9,7 +8,6 @@ use crate::windows::sys::{bind, recvfrom, SockAddr, socket, WsaData, WSAIoctl, W
 
 #[derive(Debug, Clone)]
 pub struct Capture {
-    //fd: RawFd,
     fd: usize,
     device: Option<Device>
 }
@@ -34,30 +32,25 @@ impl Capture {
     }
 
     pub fn open(&self) -> io::Result<()> {
-        //BIND TO IP ADDRESS...
         let local_ip = Ipv4Addr::new(192, 168, 0, 51);
         let mut addr = SockAddr {
             sa_family: AF_INET as u16,
             sa_data: [0; 14],
         };
 
-        // Fill sa_data with IP address bytes in the right offset
         addr.sa_data[2..6].copy_from_slice(&local_ip.octets());
 
         if unsafe { bind(self.fd, &addr, mem::size_of::<SockAddr>() as i32) } != 0 {
-            panic!("Failed to bind raw socket: {}", io::Error::last_os_error());
+            return Err(io::Error::last_os_error());
         }
-
-
-
 
         let mut bytes_returned: u32 = 0;
         let mut enable: u32 = RCVALL_ON;
 
-        let res = unsafe { WSAIoctl(self.fd, SIO_RCVALL, &mut enable as *mut _ as *mut c_void, mem::size_of::<u32>() as u32, ptr::null_mut(), 0, &mut bytes_returned, ptr::null_mut(), None) };
+        let res = unsafe { WSAIoctl(self.fd, SIO_RCVALL, &mut enable as *mut _ as *mut u16, mem::size_of::<u32>() as u32, ptr::null_mut(), 0, &mut bytes_returned, ptr::null_mut(), None) };
 
         if res != 0 {
-            panic!("WSAIoctl SIO_RCVALL failed: {}", io::Error::last_os_error());
+            return Err(io::Error::last_os_error());
         }
         Ok(())
     }
@@ -84,7 +77,7 @@ impl Capture {
         let mut from = SockAddr { sa_family: 0, sa_data: [0; 14] };
         let mut fromlen = mem::size_of::<SockAddr>() as i32;
 
-        let len = unsafe { recvfrom(self.fd, buffer.as_mut_ptr() as *mut c_char, buffer.len() as i32, 0, &mut from, &mut fromlen) };
+        let len = unsafe { recvfrom(self.fd, buffer.as_mut_ptr() as *mut i8, buffer.len() as i32, 0, &mut from, &mut fromlen) };
 
         if len > 0 {
             let now = SystemTime::now()

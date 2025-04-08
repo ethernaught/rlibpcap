@@ -57,7 +57,30 @@ impl Device {
                 String::from_utf16_lossy(slice::from_raw_parts(fname_ptr, len))
             };
 
+            /*
+            let mut unicast_ptr = ar.first_unicast_address;
+            while !unicast_ptr.is_null() {
+                let unicast = unsafe { &*unicast_ptr };
+                let sockaddr = unsafe { &*unicast.address.lp_sockaddr };
 
+                match sockaddr.sa_family as i32 {
+                    2 => { // AF_INET
+                        let sockaddr_in = unsafe { *(sockaddr as *const _ as *const libc::sockaddr_in) };
+                        let ip = IpAddr::V4(std::net::Ipv4Addr::from(u32::from_be(sockaddr_in.sin_addr.s_addr)));
+                        ip_address = Some(ip);
+                        break;
+                    }
+                    23 => { // AF_INET6
+                        let sockaddr_in6 = unsafe { *(sockaddr as *const _ as *const libc::sockaddr_in6) };
+                        let ip = IpAddr::V6(std::net::Ipv6Addr::from(sockaddr_in6.sin6_addr.s6_addr));
+                        ip_address = Some(ip);
+                        break;
+                    }
+                    _ => {}
+                }
+
+                unicast_ptr = unicast.next;
+            }*/
 
             let mac = match EthernetAddress::try_from(&ar.physical_address[..ar.physical_address_length as usize]) {
                 Ok(mac) => Some(mac),
