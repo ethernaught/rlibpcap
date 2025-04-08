@@ -39,7 +39,7 @@ impl Capture {
                     Some(address) => {
                         let mut addr = SockAddr {
                             sa_family: AF_INET as u16,
-                            sa_data: [0; 14],
+                            sa_data: [0; 14]
                         };
 
                         match address {

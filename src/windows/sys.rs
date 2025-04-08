@@ -13,7 +13,7 @@ pub const RCVALL_ON: u32 = 1;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct SockAddrIn {
+pub struct SockAddrLh {
     pub length: u32, // Length of the structure
     pub next: *mut SockAddrIn,
     pub unsure: [u8; 52],
@@ -27,7 +27,7 @@ pub struct IpAdapterAddressedLh {
     pub if_index: u32,
     pub next: *mut Self,
     pub adapter_name: *mut u8,
-    pub first_unicast_address: *mut SockAddrIn,
+    pub first_unicast_address: *mut SockAddrLh,
     pub first_anycast_address: *mut u32,
     pub first_multicast_address: *mut u32,
     pub first_dns_server_address: *mut u32,

@@ -67,7 +67,7 @@ impl Capture {
                     sll_hatype: 0,
                     sll_pkttype: 0,
                     sll_halen: 0,
-                    sll_addr: [0; 8],
+                    sll_addr: [0; 8]
                 };
 
                 if unsafe { bind(self.fd, &sockaddr as *const _ as i64, mem::size_of::<SockAddrLl>() as i64) } < 0 {
@@ -118,7 +118,15 @@ impl Capture {
 
     fn recv_with_flags(&self, flags: i64) -> io::Result<(SockAddrLl, Packet)> {
         let mut buffer = vec![0u8; 4096];
-        let mut sockaddr: SockAddrLl = unsafe { mem::zeroed() };
+        let mut sockaddr: SockAddrLl = SockAddrLl {
+            sll_family: 0,
+            sll_protocol: 0,
+            sll_ifindex: 0,
+            sll_hatype: 0,
+            sll_pkttype: 0,
+            sll_halen: 0,
+            sll_addr: [0; 8]
+        };
 
         let len = unsafe { recvfrom(self.fd, &mut buffer, flags, &mut sockaddr) };
 
