@@ -12,13 +12,13 @@ pub struct Device {
     address: Option<IpAddr>,
     index: i32,
     data_link_type: DataLinkTypes,
-    mac: EthernetAddress,
+    mac: Option<EthernetAddress>,
     flags: Vec<InterfaceFlags>
 }
 
 impl Device {
 
-    pub fn new(name: String, address: Option<IpAddr>, index: i32, data_link_type: DataLinkTypes, mac: EthernetAddress, flags: Vec<InterfaceFlags>) -> Self {
+    pub fn new(name: String, address: Option<IpAddr>, index: i32, data_link_type: DataLinkTypes, mac: Option<EthernetAddress>, flags: Vec<InterfaceFlags>) -> Self {
         Self {
             name,
             address,
@@ -123,7 +123,7 @@ impl Device {
                             address: None,
                             index: hdr.ifm_index as i32,
                             data_link_type,
-                            mac: EthernetAddress::new(0, 0, 0, 0, 0, 0),
+                            mac: Some(EthernetAddress::new(0, 0, 0, 0, 0, 0)),
                             flags: InterfaceFlags::from_code(hdr.ifm_flags)
                         });
                     }
@@ -165,7 +165,7 @@ impl Device {
         self.data_link_type
     }
 
-    pub fn get_mac(&self) -> EthernetAddress {
+    pub fn get_mac(&self) -> Option<EthernetAddress> {
         self.mac
     }
 

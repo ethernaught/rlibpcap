@@ -1,4 +1,6 @@
-#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+use std::{fmt, io};
+
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub struct EthernetAddress {
     address: [u8; 6]
 }
@@ -20,9 +22,46 @@ impl EthernetAddress {
     }
 
     pub fn to_string(&self) -> String {
-        self.address.iter()
-            .map(|byte| format!("{:02X}", byte))
-            .collect::<Vec<String>>()
-            .join(":")
+        format!("{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
+            self.address[0],
+            self.address[1],
+            self.address[2],
+            self.address[3],
+            self.address[4],
+            self.address[5]
+        )
+    }
+}
+
+impl TryFrom<&[u8]> for EthernetAddress {
+
+    type Error = io::Error;
+
+    fn try_from(value: &[u8]) -> io::Result<Self> {
+        if value.len() != 6 {
+            return Err(io::Error::new(io::ErrorKind::InvalidInput, "MAC address must be 6 bytes"));
+        }
+
+        let mut address = [0u8; 6];
+        address.copy_from_slice(&value[0..6]);
+        Ok(Self {
+            address
+        })
+    }
+}
+
+impl fmt::Debug for EthernetAddress {
+
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "EthernetAddress {{ address: {:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X} }}",
+            self.address[0],
+            self.address[1],
+            self.address[2],
+            self.address[3],
+            self.address[4],
+            self.address[5]
+        )
     }
 }

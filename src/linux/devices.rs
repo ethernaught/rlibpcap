@@ -12,13 +12,13 @@ pub struct Device {
     address: Option<IpAddr>,
     index: i32,
     data_link_type: DataLinkTypes,
-    mac: EthernetAddress,
+    mac: Option<EthernetAddress>,
     flags: Vec<InterfaceFlags>
 }
 
 impl Device {
 
-    pub fn new(name: String, address: Option<IpAddr>, index: i32, data_link_type: DataLinkTypes, mac: EthernetAddress, flags: Vec<InterfaceFlags>) -> Self {
+    pub fn new(name: String, address: Option<IpAddr>, index: i32, data_link_type: DataLinkTypes, mac: Option<EthernetAddress>, flags: Vec<InterfaceFlags>) -> Self {
         Self {
             name,
             address,
@@ -87,7 +87,7 @@ impl Device {
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))? }).unwrap();
 
             let mac_bytes = unsafe { ifreq_hwaddr.ifr_hwaddr.sa_data };
-            let mac = EthernetAddress::new(mac_bytes[0], mac_bytes[1], mac_bytes[2], mac_bytes[3], mac_bytes[4], mac_bytes[5]);
+            let mac = Some(EthernetAddress::new(mac_bytes[0], mac_bytes[1], mac_bytes[2], mac_bytes[3], mac_bytes[4], mac_bytes[5]));
 
             let mut ifr_flags = IfreqFlags {
                 ifr_name: ifr.ifr_name,
@@ -130,7 +130,7 @@ impl Device {
         self.data_link_type
     }
 
-    pub fn get_mac(&self) -> EthernetAddress {
+    pub fn get_mac(&self) -> Option<EthernetAddress> {
         self.mac
     }
 
