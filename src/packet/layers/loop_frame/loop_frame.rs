@@ -59,15 +59,9 @@ impl Layer for LoopFrame {
         let _type = LoopTypes::from_code(u32::from_ne_bytes([buf[0], buf[1], buf[2], buf[3]])).unwrap();
 
         let data = match _type {
-            LoopTypes::Ipv4 => {
-                Some(Ipv4Layer::from_bytes(&buf[4..]).unwrap().upcast())
-            }
-            LoopTypes::Ipv6 | LoopTypes::Ipv6e2 | LoopTypes::Ipv6e3 => {
-                Some(Ipv6Layer::from_bytes(&buf[4..]).unwrap().upcast())
-            }
-            _ => {
-                None
-            }
+            LoopTypes::Ipv4 => Some(Ipv4Layer::from_bytes(&buf[4..]).unwrap().upcast()),
+            LoopTypes::Ipv6 | LoopTypes::Ipv6e2 | LoopTypes::Ipv6e3 => Some(Ipv6Layer::from_bytes(&buf[4..]).unwrap().upcast()),
+            _ => None
         };
 
         Some(Self {
@@ -98,12 +92,8 @@ impl Layer for LoopFrame {
 
     fn compute_length(&mut self) -> usize {
         self.length = match &self.data {
-            Some(layer) => {
-                layer.len() + LOOP_FRAME_LENGTH
-            }
-            None => {
-                LOOP_FRAME_LENGTH
-            }
+            Some(layer) => layer.len() + LOOP_FRAME_LENGTH,
+            None => LOOP_FRAME_LENGTH
         };
 
         self.length

@@ -193,36 +193,16 @@ impl Layer for Ipv4Layer {
         let protocol = IpProtocols::from_code(buf[9]).unwrap();
 
         let data = match protocol {
-            IpProtocols::HopByHop => {
-                None
-            }
-            IpProtocols::Icmp => {
-                Some(IcmpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.upcast())
-            }
-            IpProtocols::Igmp => {
-                None
-            }
-            IpProtocols::Tcp => {
-                Some(TcpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.upcast())
-            }
-            IpProtocols::Udp => {
-                Some(UdpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.upcast())
-            }
-            IpProtocols::Ipv6 => {
-                None
-            }
-            IpProtocols::Gre => {
-                None
-            }
-            IpProtocols::Icmpv6 => {
-                None
-            }
-            IpProtocols::Ospf => {
-                None
-            }
-            IpProtocols::Sps => {
-                None
-            }
+            IpProtocols::HopByHop => None,
+            IpProtocols::Icmp => Some(IcmpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.upcast()),
+            IpProtocols::Igmp => None,
+            IpProtocols::Tcp => Some(TcpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.upcast()),
+            IpProtocols::Udp => Some(UdpLayer::from_bytes(&buf[IPV4_HEADER_LEN..])?.upcast()),
+            IpProtocols::Ipv6 => None,
+            IpProtocols::Gre => None,
+            IpProtocols::Icmpv6 => None,
+            IpProtocols::Ospf => None,
+            IpProtocols::Sps => None
         };
 
         Some(Self {
@@ -273,12 +253,8 @@ impl Layer for Ipv4Layer {
 
     fn compute_length(&mut self) -> usize {
         self.total_length = match &self.data {
-            Some(layer) => {
-                layer.len() + IPV4_HEADER_LEN
-            }
-            None => {
-                IPV4_HEADER_LEN
-            }
+            Some(layer) => layer.len() + IPV4_HEADER_LEN,
+            None => IPV4_HEADER_LEN
         } as u16;
 
         self.total_length as usize

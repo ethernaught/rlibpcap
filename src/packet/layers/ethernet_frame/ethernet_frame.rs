@@ -77,21 +77,11 @@ impl Layer for EthernetFrame {
 
         let _type = EthernetTypes::from_code(u16::from_be_bytes([buf[12], buf[13]])).expect("Unsupported Ethernet Type");
         let data = match _type {
-            EthernetTypes::Ipv4 => {
-                Some(Ipv4Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
-            }
-            EthernetTypes::Arp => {
-                Some(ArpExtension::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
-            }
-            EthernetTypes::Ipv6 => {
-                Some(Ipv6Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
-            }
-            EthernetTypes::Broadcast => {
-                None
-            }
-            EthernetTypes::Length(_) => {
-                Some(LlcExtension::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
-            }
+            EthernetTypes::Ipv4 => Some(Ipv4Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast()),
+            EthernetTypes::Arp => Some(ArpExtension::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast()),
+            EthernetTypes::Ipv6 => Some(Ipv6Layer::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast()),
+            EthernetTypes::Broadcast => None,
+            EthernetTypes::Length(_) => Some(LlcExtension::from_bytes(&buf[ETHERNET_FRAME_LEN..])?.upcast())
         };
 
         Some(Self {
@@ -126,12 +116,8 @@ impl Layer for EthernetFrame {
 
     fn compute_length(&mut self) -> usize {
         self.length = match &self.data {
-            Some(layer) => {
-                layer.len() + ETHERNET_FRAME_LEN
-            }
-            None => {
-                ETHERNET_FRAME_LEN
-            }
+            Some(layer) => layer.len() + ETHERNET_FRAME_LEN,
+            None => ETHERNET_FRAME_LEN
         };
 
         self.length

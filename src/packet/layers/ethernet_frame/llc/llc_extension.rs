@@ -55,8 +55,6 @@ impl Layer for LlcExtension {
             return None;
         }
 
-        println!("{:?}", buf);
-
         Some(Self {
             dsap: buf[0],
             ssap: buf[1],

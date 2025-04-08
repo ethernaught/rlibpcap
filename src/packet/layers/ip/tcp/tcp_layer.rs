@@ -119,12 +119,8 @@ impl Layer for TcpLayer {
 
     fn compute_length(&mut self) -> usize {
         self.length = match &self.payload {
-            Some(payload) => {
-                payload.len() + TCP_HEADER_LEN
-            }
-            None => {
-                TCP_HEADER_LEN
-            }
+            Some(payload) => payload.len() + TCP_HEADER_LEN,
+            None => TCP_HEADER_LEN
         };
 
         self.length

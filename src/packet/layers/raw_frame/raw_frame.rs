@@ -53,12 +53,8 @@ impl Layer for RawFrame {
         let version = IpVersions::from_code((buf[0] >> 4) & 0x0F).unwrap();
 
         let data = match version {
-            IpVersions::Ipv4 => {
-                Some(Ipv4Layer::from_bytes(buf).unwrap().upcast())
-            }
-            IpVersions::Ipv6 => {
-                Some(Ipv6Layer::from_bytes(buf).unwrap().upcast())
-            }
+            IpVersions::Ipv4 => Some(Ipv4Layer::from_bytes(buf).unwrap().upcast()),
+            IpVersions::Ipv6 => Some(Ipv6Layer::from_bytes(buf).unwrap().upcast())
         };
 
         Some(Self {
@@ -70,12 +66,8 @@ impl Layer for RawFrame {
 
     fn to_bytes(&self) -> Vec<u8> {
         match &self.data {
-            Some(data) => {
-                data.to_bytes()
-            }
-            None => {
-                Vec::new()
-            }
+            Some(data) => data.to_bytes(),
+            None => Vec::new()
         }
     }
 
@@ -85,12 +77,8 @@ impl Layer for RawFrame {
 
     fn compute_length(&mut self) -> usize {
         self.length = match &self.data {
-            Some(layer) => {
-                layer.len()
-            }
-            None => {
-                0
-            }
+            Some(layer) => layer.len(),
+            None => 0
         };
 
         self.length

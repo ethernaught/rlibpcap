@@ -75,36 +75,16 @@ impl Layer for Ipv6Layer {
         let next_header = IpProtocols::from_code(buf[6]).unwrap();
 
         let data = match next_header {
-            IpProtocols::HopByHop => {
-                None
-            }
-            IpProtocols::Icmp => {
-                None
-            }
-            IpProtocols::Igmp => {
-                None
-            }
-            IpProtocols::Tcp => {
-                Some(TcpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.upcast())
-            }
-            IpProtocols::Udp => {
-                Some(UdpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.upcast())
-            }
-            IpProtocols::Ipv6 => {
-                None
-            }
-            IpProtocols::Gre => {
-                None
-            }
-            IpProtocols::Icmpv6 => {
-                Some(Icmpv6Layer::from_bytes(&buf[IPV6_HEADER_LEN..])?.upcast())
-            }
-            IpProtocols::Ospf => {
-                None
-            }
-            IpProtocols::Sps => {
-                None
-            }
+            IpProtocols::HopByHop => None,
+            IpProtocols::Icmp => None,
+            IpProtocols::Igmp => None,
+            IpProtocols::Tcp => Some(TcpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.upcast()),
+            IpProtocols::Udp => Some(UdpLayer::from_bytes(&buf[IPV6_HEADER_LEN..])?.upcast()),
+            IpProtocols::Ipv6 => None,
+            IpProtocols::Gre => None,
+            IpProtocols::Icmpv6 => Some(Icmpv6Layer::from_bytes(&buf[IPV6_HEADER_LEN..])?.upcast()),
+            IpProtocols::Ospf => None,
+            IpProtocols::Sps => None
         };
 
         Some(Self {
@@ -149,12 +129,8 @@ impl Layer for Ipv6Layer {
 
     fn compute_length(&mut self) -> usize {
         let payload_length = match &self.data {
-            Some(layer) => {
-                layer.len()
-            }
-            None => {
-                0
-            }
+            Some(layer) => layer.len(),
+            None => 0
         };
 
         self.payload_length = payload_length as u16;

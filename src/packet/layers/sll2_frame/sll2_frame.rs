@@ -109,15 +109,9 @@ impl Layer for Sll2Frame {
         let protocol = EthernetTypes::from_code(u16::from_be_bytes(buf[0..2].try_into().unwrap())).unwrap();
 
         let data = match protocol {
-            EthernetTypes::Ipv4 => {
-                Some(Ipv4Layer::from_bytes(&buf[SLL2_FRAME_LEN..])?.upcast())
-            }
-            EthernetTypes::Ipv6 => {
-                Some(Ipv6Layer::from_bytes(&buf[SLL2_FRAME_LEN..])?.upcast())
-            }
-            _ => {
-                None
-            }
+            EthernetTypes::Ipv4 => Some(Ipv4Layer::from_bytes(&buf[SLL2_FRAME_LEN..])?.upcast()),
+            EthernetTypes::Ipv6 => Some(Ipv6Layer::from_bytes(&buf[SLL2_FRAME_LEN..])?.upcast()),
+            _ => None
         };
 
         Some(Self {
@@ -159,12 +153,8 @@ impl Layer for Sll2Frame {
 
     fn compute_length(&mut self) -> usize {
         self.length = match &self.data {
-            Some(layer) => {
-                layer.len() + SLL2_FRAME_LEN
-            }
-            None => {
-                SLL2_FRAME_LEN
-            }
+            Some(layer) => layer.len() + SLL2_FRAME_LEN,
+            None => SLL2_FRAME_LEN
         };
 
         self.length
