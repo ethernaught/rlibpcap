@@ -104,9 +104,7 @@ impl Layer for TcpLayer {
         buf.splice(18..20, self.urgent_pointer.to_be_bytes());
 
         match &self.payload {
-            Some(payload) => {
-                buf.extend(payload);
-            }
+            Some(payload) => buf.extend(payload),
             None => {}
         }
 

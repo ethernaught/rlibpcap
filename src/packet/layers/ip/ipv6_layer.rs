@@ -114,9 +114,7 @@ impl Layer for Ipv6Layer {
         buf.splice(24..40, self.destination_address.octets());
 
         match &self.data {
-            Some(data) => {
-                buf.extend(data.to_bytes());
-            }
+            Some(data) => buf.extend(data.to_bytes()),
             None => {}
         }
 

@@ -138,9 +138,7 @@ impl Layer for Sll2Frame {
         buf.splice(12..20, self.address);
 
         match &self.data {
-            Some(data) => {
-                buf.extend(data.to_bytes());
-            }
+            Some(data) => buf.extend(data.to_bytes()),
             None => {}
         }
 

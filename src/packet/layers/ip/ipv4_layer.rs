@@ -238,9 +238,7 @@ impl Layer for Ipv4Layer {
         buf.splice(16..20, self.destination_address.octets());
 
         match &self.data {
-            Some(data) => {
-                buf.extend(data.to_bytes());
-            }
+            Some(data) => buf.extend(data.to_bytes()),
             None => {}
         }
 

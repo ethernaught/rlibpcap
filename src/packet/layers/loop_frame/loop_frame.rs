@@ -77,9 +77,7 @@ impl Layer for LoopFrame {
         buf.splice(0..4, self._type.get_code().to_be_bytes());
 
         match &self.data {
-            Some(data) => {
-                buf.extend(data.to_bytes());
-            }
+            Some(data) => buf.extend(data.to_bytes()),
             None => {}
         }
 

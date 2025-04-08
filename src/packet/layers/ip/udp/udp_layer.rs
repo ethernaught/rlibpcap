@@ -160,12 +160,8 @@ impl Layer for UdpLayer {
         buf.splice(6..8, self.checksum.to_be_bytes());
 
         match &self.payload {
-            UdpPayloads::Known(_, payload) => {
-                buf.extend(payload.to_bytes());
-            }
-            UdpPayloads::Unknown(payload) => {
-                buf.extend(payload);
-            }
+            UdpPayloads::Known(_, payload) => buf.extend(payload.to_bytes()),
+            UdpPayloads::Unknown(payload) => buf.extend(payload),
             _ => {}
         }
 
