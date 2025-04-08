@@ -1,5 +1,5 @@
 use std::{io, mem, ptr};
-use std::net::Ipv4Addr;
+use std::net::{IpAddr, Ipv4Addr};
 use std::time::{SystemTime, UNIX_EPOCH};
 use crate::packet::packet::Packet;
 use crate::utils::data_link_types::DataLinkTypes;
@@ -32,27 +32,44 @@ impl Capture {
     }
 
     pub fn open(&self) -> io::Result<()> {
-        let local_ip = Ipv4Addr::new(192, 168, 0, 51);
-        let mut addr = SockAddr {
-            sa_family: AF_INET as u16,
-            sa_data: [0; 14],
-        };
 
-        addr.sa_data[2..6].copy_from_slice(&local_ip.octets());
+        match self.device {
+            Some(ref device) => {
+                match device.get_address() {
+                    Some(address) => {
+                        let mut addr = SockAddr {
+                            sa_family: AF_INET as u16,
+                            sa_data: [0; 14],
+                        };
 
-        if unsafe { bind(self.fd, &addr, mem::size_of::<SockAddr>() as i32) } != 0 {
-            return Err(io::Error::last_os_error());
+                        match address {
+                            IpAddr::V4(address) => {
+                                addr.sa_data[2..6].copy_from_slice(&address.octets())
+                            }
+                            IpAddr::V6(_) => {
+                                return Err(io::Error::new(io::ErrorKind::Other, "IPv6 is not supported"));
+                            }
+                        }
+
+                        if unsafe { bind(self.fd, &addr, mem::size_of::<SockAddr>() as i32) } != 0 {
+                            return Err(io::Error::last_os_error());
+                        }
+
+                        let mut bytes_returned: u32 = 0;
+                        let mut enable: u32 = RCVALL_ON;
+
+                        let res = unsafe { WSAIoctl(self.fd, SIO_RCVALL, &mut enable as *mut _ as *mut u16, mem::size_of::<u32>() as u32, ptr::null_mut(), 0, &mut bytes_returned, ptr::null_mut(), None) };
+
+                        if res != 0 {
+                            return Err(io::Error::last_os_error());
+                        }
+                        Ok(())
+                    }
+                    None => Err(io::Error::new(io::ErrorKind::Other, "Device address was not found"))
+                }
+            }
+            None => Err(io::Error::new(io::ErrorKind::Other, "Failed to open device"))
         }
-
-        let mut bytes_returned: u32 = 0;
-        let mut enable: u32 = RCVALL_ON;
-
-        let res = unsafe { WSAIoctl(self.fd, SIO_RCVALL, &mut enable as *mut _ as *mut u16, mem::size_of::<u32>() as u32, ptr::null_mut(), 0, &mut bytes_returned, ptr::null_mut(), None) };
-
-        if res != 0 {
-            return Err(io::Error::last_os_error());
-        }
-        Ok(())
     }
 
     pub fn set_immediate_mode(&self, immediate: bool) ->  io::Result<()> {

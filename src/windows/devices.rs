@@ -46,41 +46,6 @@ impl Device {
         while !adapter.is_null() {
             let mut ar = unsafe { &mut *adapter };
 
-            /*
-            let offset = ar.length;
-            let address = SockAddrIn {
-                sin_family: u16::from_be_bytes([buffer[offset], buffer[offset + 1]]),
-                sin_port: u16::from_be_bytes([buffer[offset + 2], buffer[offset + 3]]),
-                sin_addr: u32::from_be_bytes([buffer[offset + 4], buffer[offset + 5], buffer[offset + 6], buffer[offset + 7]])
-            };
-
-            println!("{:?}", Ipv4Addr::from(address.sin_addr));*/
-
-
-
-
-            let mut unicast_address = ar.first_unicast_address;
-
-            while !unicast_address.is_null() {
-                let unicast = unsafe { &mut *unicast_address };
-
-                unsafe {
-                    println!("{:?}", unicast);
-                    //println!("{:?}", Ipv4Addr::from(unicast.address.ipv4.sin_addr));
-                }
-
-                // Move to the next address in the list
-                unicast_address = unicast.next;
-            }
-
-            println!("{:?}", ar);
-
-
-
-
-
-
-
             let fname_ptr = ar.friendly_name;
 
             let mut len = 0;
@@ -90,6 +55,15 @@ impl Device {
 
             let fname = unsafe { String::from_utf16_lossy(slice::from_raw_parts(fname_ptr, len)) };
 
+            let mut unicast_address = ar.first_unicast_address;
+            let mut address = None;
+
+            while !unicast_address.is_null() {
+                let unicast = unsafe { &mut *unicast_address };
+                address = unsafe { Some(IpAddr::V4((*unicast_address).address)) };
+                unicast_address = unicast.next;
+            }
+
             let mac = match EthernetAddress::try_from(&ar.physical_address[..ar.physical_address_length as usize]) {
                 Ok(mac) => Some(mac),
                 Err(_) => None
@@ -97,7 +71,7 @@ impl Device {
 
             devices.push(Self {
                 name: fname,
-                address: None, //UNICAST ADDRESS...
+                address,
                 index: ar.if_index as i32,
                 data_link_type: DataLinkTypes::Null,
                 mac,

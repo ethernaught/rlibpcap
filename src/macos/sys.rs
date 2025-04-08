@@ -265,7 +265,7 @@ pub unsafe fn sysctl(name: &[i32], oldp: *mut u8, oldlenp: *mut usize, newp: *co
     );
     ret
 }
-
+/*
 pub fn parse_ip(buf: &[u8]) -> Option<IpAddr> {
     if buf.len() < 5 {
         return None;
@@ -290,3 +290,4 @@ pub fn parse_ip(buf: &[u8]) -> Option<IpAddr> {
         _ => None
     }
 }
+*/
