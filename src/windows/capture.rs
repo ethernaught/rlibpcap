@@ -91,7 +91,10 @@ impl Capture {
     fn recv_with_flags(&self, flags: i64) -> io::Result<(i32, Packet)> {
         let mut buffer = [0u8; 65535];
 
-        let mut from = SockAddr { sa_family: 0, sa_data: [0; 14] };
+        let mut from = SockAddr {
+            sa_family: 0,
+            sa_data: [0; 14]
+        };
         let mut fromlen = mem::size_of::<SockAddr>() as i32;
 
         let len = unsafe { recvfrom(self.fd, buffer.as_mut_ptr() as *mut i8, buffer.len() as i32, 0, &mut from, &mut fromlen) };
