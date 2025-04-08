@@ -2,19 +2,16 @@ use crate::utils::data_link_types::DataLinkTypes;
 
 impl DataLinkTypes {
 
-    pub fn from_sdl_code(code: u8) -> Result<Self, String> {
+    pub fn from_wni_code(code: u32) -> Result<Self, String> {
         let known_types = [
             (1, Self::Null),
             (6, Self::En10mb),
-            (18, Self::Slip),
-            (28, Self::Ppp),
+            //(9, "Token Ring"), //TOKEN RING
+            (23, Self::Ppp),
             (24, Self::Loop),
-            (55, Self::Raw), //IPSec VPN
-            (57, Self::Raw), //IP TUNNEL
-            (108, Self::Ieee802), //WiFi
-            //(114, Self::Vlan), //VLAN
-            //(131, "Bridge"), //BRIDGE
-            (135, Self::Raw) //Tunnel
+            (28, Self::Slip),
+            (71, Self::Ieee802_11),
+            (131, Self::Raw) //Tunnel
         ];
 
         for (c, _type) in known_types {

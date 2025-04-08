@@ -73,7 +73,7 @@ impl Device {
                 name: fname,
                 address,
                 index: ar.if_index as i32,
-                data_link_type: DataLinkTypes::Null,
+                data_link_type: DataLinkTypes::from_wni_code(ar.if_type).unwrap(),
                 mac,
                 flags: InterfaceFlags::from_code(ar.flags)
             });
