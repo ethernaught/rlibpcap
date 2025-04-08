@@ -94,34 +94,6 @@ impl Capture {
     }
 
     pub fn recv(&self) -> io::Result<(i32, Packet)> { //i32 should be the socket address
-        self.recv_with_flags(0)
-    }
-
-    pub fn try_recv(&self) -> io::Result<(i32, Packet)> { //i32 should be the socket address
-        if !self.packet_buffer.borrow().is_empty() {
-            return Ok((0, self.packet_buffer.borrow_mut().remove(0)));
-        }
-
-        let mut readfds: i32 = 0;
-        readfds |= 1 << self.fd;
-
-        let mut timeout = TimeVal {
-            tv_sec: 0,
-            tv_usec: 0
-        };
-
-        if unsafe { select(self.fd+1, &mut readfds, ptr::null_mut(), ptr::null_mut(), &mut timeout as *mut TimeVal) } < 0 {
-            return Err(io::Error::last_os_error());
-        }
-
-        if (readfds & (1 << self.fd)) != 0 {
-            return self.recv_with_flags(0);
-        }
-
-        Err(io::Error::new(io::ErrorKind::WouldBlock, "No data available"))
-    }
-
-    fn recv_with_flags(&self, flags: i64) -> io::Result<(i32, Packet)> {
         if !self.packet_buffer.borrow().is_empty() {
             return Ok((0, self.packet_buffer.borrow_mut().remove(0)));
         }
@@ -169,6 +141,30 @@ impl Capture {
         }
 
         Err(io::Error::last_os_error())
+    }
+
+    pub fn try_recv(&self) -> io::Result<(i32, Packet)> { //i32 should be the socket address
+        if !self.packet_buffer.borrow().is_empty() {
+            return Ok((0, self.packet_buffer.borrow_mut().remove(0)));
+        }
+
+        let mut readfds: i32 = 0;
+        readfds |= 1 << self.fd;
+
+        let mut timeout = TimeVal {
+            tv_sec: 0,
+            tv_usec: 0
+        };
+
+        if unsafe { select(self.fd+1, &mut readfds, ptr::null_mut(), ptr::null_mut(), &mut timeout as *mut TimeVal) } < 0 {
+            return Err(io::Error::last_os_error());
+        }
+
+        if (readfds & (1 << self.fd)) != 0 {
+            return self.recv();
+        }
+
+        Err(io::Error::new(io::ErrorKind::WouldBlock, "No data available"))
     }
 
     pub fn close(&self) {

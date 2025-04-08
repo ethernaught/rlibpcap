@@ -80,32 +80,6 @@ impl Capture {
     }
 
     pub fn recv(&self) -> io::Result<(i32, Packet)> {
-        self.recv_with_flags(0)
-    }
-
-    pub fn try_recv(&self) -> io::Result<(i32, Packet)> {
-        let mut fds = FdSet {
-            fd_count: 1,
-            fd_array: [0; 64]
-        };
-        fds.fd_array[0] = self.fd;
-
-        //let mut readfds: i32 = 0;
-        //readfds |= 1 << self.fd;
-
-        let mut timeout = TimeVal {
-            tv_sec: 0,
-            tv_usec: 0
-        };
-
-        if unsafe { select(1, &mut fds, ptr::null_mut(), ptr::null_mut(), &mut timeout) } < 0 {
-            return Err(io::Error::last_os_error());
-        }
-
-        self.recv_with_flags(0x40)
-    }
-
-    fn recv_with_flags(&self, flags: i64) -> io::Result<(i32, Packet)> {
         let mut buffer = [0u8; 4096];
 
         let mut from = SockAddrIn {
@@ -129,6 +103,25 @@ impl Capture {
         }
 
         Err(io::Error::new(io::ErrorKind::WouldBlock, "No data available"))
+    }
+
+    pub fn try_recv(&self) -> io::Result<(i32, Packet)> {
+        let mut fds = FdSet {
+            fd_count: 1,
+            fd_array: [0; 64]
+        };
+        fds.fd_array[0] = self.fd;
+
+        let mut timeout = TimeVal {
+            tv_sec: 0,
+            tv_usec: 0
+        };
+
+        if unsafe { select(1, &mut fds, ptr::null_mut(), ptr::null_mut(), &mut timeout) } < 0 {
+            return Err(io::Error::last_os_error());
+        }
+
+        self.recv()
     }
 
     pub fn close(&self) {
