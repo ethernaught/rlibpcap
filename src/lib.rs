@@ -24,7 +24,7 @@ pub use windows::*;
 
 //check parse_ip is even required....
 
-//GET MAC ADDRESS & IP ADDRESS - FOR LINUX AND MAC - PER DEVICE
+//GET MAC ADDRESS & IP ADDRESS FOR MAC
 //ANY FOR MAC
 
 /* WINDOWS
