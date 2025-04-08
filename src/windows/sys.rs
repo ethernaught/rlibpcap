@@ -11,6 +11,31 @@ pub const IPPROTO_IP: i32 = 0;
 pub const SIO_RCVALL: u32 = 0x98000001;
 pub const RCVALL_ON: u32 = 1;
 
+
+
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct TimeVal {
+    pub tv_sec: i64,
+    pub tv_usec: i64,
+}
+
+#[repr(C)]
+pub struct FdSet {
+    pub fd_count: u64,
+    pub fd_array: [usize; 64], // max 64 sockets — adjust if needed
+}
+
+
+
+
+
+
+
+
+
+
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct IpAdapterAddressedLh {
@@ -80,4 +105,5 @@ extern "system" {
     pub fn bind(s: usize, name: *const SockAddr, namelen: i32) -> i32;
     pub fn WSAIoctl(fd: usize, dw_io_control_code: u32, lpv_in_buffer: *mut u16, cb_in_buffer: u32, lpv_out_buffer: *mut u16, cb_out_buffer: u32, lpcb_bytes_returned: *mut u32, lp_overlapped: *mut u16, lp_completion_routine: Option<extern "system" fn()>) -> i32;
     pub fn recvfrom(s: usize, buf: *mut i8, len: i32, flags: i32, from: *mut SockAddrIn, fromlen: *mut i32) -> i32;
+    pub fn select(nfds: i32, readfds: *mut FdSet, writefds: *mut FdSet, exceptfds: *mut FdSet, timeout: *mut TimeVal) -> i32;
 }

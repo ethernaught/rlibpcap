@@ -110,9 +110,7 @@ impl Capture {
             tv_usec: 0
         };
 
-        let result = unsafe { select(self.fd+1, &mut readfds, ptr::null_mut(), ptr::null_mut(), &mut timeout as *mut TimeVal) };
-
-        if result == -1 {
+        if unsafe { select(self.fd+1, &mut readfds, ptr::null_mut(), ptr::null_mut(), &mut timeout as *mut TimeVal) } < 0 {
             return Err(io::Error::last_os_error());
         }
 

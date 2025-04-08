@@ -27,6 +27,8 @@ pub use windows::*;
 //GET MAC ADDRESS & IP ADDRESS FOR MAC
 //ANY FOR MAC
 
+//CLEANUP READING ADDRESSES - WITHIN CAPTURE AND DEVICES - WINDOWS
+
 /* WINDOWS
 Goal	Path	Dependency	Usable in Rust without crates?
 IP packets (no MAC)	Raw sockets	None	✅

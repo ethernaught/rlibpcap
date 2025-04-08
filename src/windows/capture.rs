@@ -4,7 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::packet::packet::Packet;
 use crate::utils::data_link_types::DataLinkTypes;
 use crate::windows::devices::Device;
-use crate::windows::sys::{bind, recvfrom, SockAddr, socket, WsaData, WSAIoctl, WSAStartup, AF_INET, IPPROTO_IP, RCVALL_ON, SIO_RCVALL, SOCK_RAW, SockAddrIn};
+use crate::windows::sys::{bind, recvfrom, SockAddr, socket, WsaData, WSAIoctl, WSAStartup, AF_INET, IPPROTO_IP, RCVALL_ON, SIO_RCVALL, SOCK_RAW, SockAddrIn, FdSet, TimeVal, select};
 
 #[derive(Debug, Clone)]
 pub struct Capture {
@@ -84,20 +84,37 @@ impl Capture {
     }
 
     pub fn try_recv(&self) -> io::Result<(i32, Packet)> {
-        self.recv_with_flags(0)
+        let mut fds = FdSet {
+            fd_count: 1,
+            fd_array: [0; 64]
+        };
+        fds.fd_array[0] = self.fd;
+
+        //let mut readfds: i32 = 0;
+        //readfds |= 1 << self.fd;
+
+        let mut timeout = TimeVal {
+            tv_sec: 0,
+            tv_usec: 0
+        };
+
+        if unsafe { select(1, &mut fds, ptr::null_mut(), ptr::null_mut(), &mut timeout) } < 0 {
+            return Err(io::Error::last_os_error());
+        }
+
+        self.recv_with_flags(0x40)
     }
 
     fn recv_with_flags(&self, flags: i64) -> io::Result<(i32, Packet)> {
-        let mut buffer = [0u8; 65535];
+        let mut buffer = [0u8; 4096];
 
         let mut from = SockAddrIn {
             sa_family: 0,
             sin_addr: [0u8; 4],
             sin_zero: [0u8; 8]
         };
-        let mut fromlen = mem::size_of::<SockAddrIn>() as i32;
 
-        let len = unsafe { recvfrom(self.fd, buffer.as_mut_ptr() as *mut i8, buffer.len() as i32, 0, &mut from, &mut fromlen) };
+        let len = unsafe { recvfrom(self.fd, buffer.as_mut_ptr() as *mut i8, buffer.len() as i32, 0, &mut from, &mut (mem::size_of::<SockAddrIn>() as i32)) };
 
         if len > 0 {
             let now = SystemTime::now()
