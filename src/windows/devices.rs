@@ -4,7 +4,7 @@ use std::net::IpAddr;
 use crate::packet::layers::ethernet_frame::inter::ethernet_address::EthernetAddress;
 use crate::utils::data_link_types::DataLinkTypes;
 use crate::utils::interface_flags::InterfaceFlags;
-use crate::windows::sys::{GetAdaptersAddresses, IpAdapterAddressedLh, AF_UNSPEC, GAA_FLAG_SKIP_ANYCAST, GAA_FLAG_SKIP_DNS_SERVER, GAA_FLAG_SKIP_MULTICAST};
+use crate::windows::sys::{getAdaptersAddresses, IpAdapterAddressedLh, AF_UNSPEC, GAA_FLAG_SKIP_ANYCAST, GAA_FLAG_SKIP_DNS_SERVER, GAA_FLAG_SKIP_MULTICAST};
 
 #[derive(Clone, Debug)]
 pub struct Device {
@@ -33,7 +33,7 @@ impl Device {
         let mut buffer_len: u32 = 15000;
         let mut buffer: Vec<u8> = vec![0u8; buffer_len as usize];
 
-        let result = unsafe { GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER, null_mut(), buffer.as_mut_ptr() as *mut IpAdapterAddressedLh, &mut buffer_len) };
+        let result = unsafe { getAdaptersAddresses(AF_UNSPEC, GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER, null_mut(), buffer.as_mut_ptr() as *mut IpAdapterAddressedLh, &mut buffer_len) };
 
         if result != 0 {
             return Err(io::Error::last_os_error());
