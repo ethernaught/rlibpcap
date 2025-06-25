@@ -35,8 +35,8 @@ Supported Packets
 
 OS Support
 -----
-| OS | Supported |
-| --- | --- |
-| Linux | COMPLETE |
-| MacOS | Partial |
-| Windows | Partial |
+| OS      | Supported |
+|---------|-----------|
+| Linux   | COMPLETE  |
+| MacOS   | COMPLETE  |
+| Windows | COMPLETE  |
