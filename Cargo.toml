@@ -2,6 +2,13 @@
 name = "rlibpcap"
 version = "0.1.0"
 edition = "2021"
+authors = ["DrBrad <brad@bradeagle.com>"]
+description = "PCAP library for rust"
+license = "MIT"
+repository = "https://github.com/ethernaught/rlibpcap"
+readme = "README.md"
+keywords = ["pcap", "packet", "capture"]
+categories = ["network-programming", "command-line-utilities"]
 
 [dependencies]
 #[cfg(target_os = "windows")]
